@@ -1,0 +1,19 @@
+{
+  "name": "aep-sdk-target-test-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AEP Web SDK (alloy) Target personalization smoke test — Dev only",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@adobe/alloy": "^2.27.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
+  }
+}

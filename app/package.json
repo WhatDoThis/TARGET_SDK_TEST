@@ -1,0 +1,26 @@
+{
+  "name": "aep-sdk-target-test-app",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "description": "AEP Mobile SDK (Edge + Optimize) Target personalization smoke test — Dev only",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios"
+  },
+  "dependencies": {
+    "@adobe/react-native-aepcore": "^7.0.0",
+    "@adobe/react-native-aepedge": "^7.0.0",
+    "@adobe/react-native-aepedgeidentity": "^7.0.0",
+    "@adobe/react-native-aepoptimize": "^7.0.0",
+    "@adobe/react-native-aepassurance": "^7.0.0",
+    "expo": "~52.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.5"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.12",
+    "typescript": "^5.8.2"
+  }
+}
