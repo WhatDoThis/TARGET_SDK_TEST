@@ -1,28 +1,22 @@
 /**
  * app.init.app_init (AEP Mobile SDK 초기화)
  * ========================================
- * MobileCore + Edge / EdgeIdentity / Optimize 확장을 1회 등록·초기화한다.
- * 클래식 AEPTarget(retrieveLocationContent)는 사용하지 않는다.
+ * AEP RN 7.x: MobileCore.initializeWithAppId로 번들 확장을 자동 등록한다.
+ * 클래식 AEPTarget / registerExtensions+configureWithAppId 패턴은 사용하지 않는다.
  *
  * [Main Functions]
  * ===========
- * - 1. initMobileSdk — 확장 등록 + MobileCore.configureWithAppId
+ * - 1. initMobileSdk — initializeWithAppId (+ 선택 edge.domain)
  *
  * [Dependencies]
  * =========
  * - @adobe/react-native-aepcore
- * - @adobe/react-native-aepedge
- * - @adobe/react-native-aepedgeidentity
- * - @adobe/react-native-aepoptimize
  * - @adobe/react-native-aepassurance (선택)
  * - config/app_config
  * - shared/app_shared_utils
  */
 
 import { MobileCore, LogLevel } from "@adobe/react-native-aepcore";
-import { Edge } from "@adobe/react-native-aepedge";
-import { Identity as EdgeIdentity } from "@adobe/react-native-aepedgeidentity";
-import { Optimize } from "@adobe/react-native-aepoptimize";
 import { Assurance } from "@adobe/react-native-aepassurance";
 import type { AppConfig } from "../config/app_config";
 import { isBlank, safeErrorMessage } from "../shared/app_shared_utils";
@@ -38,39 +32,23 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
   try {
     MobileCore.setLogLevel(LogLevel.DEBUG);
 
-    await registerExtensions();
+    // 7.x: npm에 설치된 Edge / EdgeIdentity / Optimize 등을 자동 등록 + Tags 설정 다운로드
+    await MobileCore.initializeWithAppId(config.adobeMobile.adobeMobileAppId);
 
     if (!isBlank(config.adobeMobile.edgeDomain)) {
-      MobileCore.updateConfiguration({
+      await MobileCore.updateConfiguration({
         "edge.domain": config.adobeMobile.edgeDomain.trim(),
       });
     }
-
-    MobileCore.configureWithAppId(config.adobeMobile.adobeMobileAppId);
 
     if (!isBlank(config.assurance.assuranceSessionUrl)) {
       Assurance.startSession(config.assurance.assuranceSessionUrl.trim());
     }
 
     initialized = true;
-    console.info("[initMobileSdk] MobileCore configure success");
+    console.info("[initMobileSdk] MobileCore.initializeWithAppId success");
   } catch (error) {
     initialized = false;
     throw new Error(safeErrorMessage(error, "initMobileSdk"));
   }
-}
-
-function registerExtensions(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    try {
-      MobileCore.registerExtensions(
-        [Edge, EdgeIdentity, Optimize, Assurance],
-        () => {
-          resolve();
-        }
-      );
-    } catch (error) {
-      reject(error);
-    }
-  });
 }

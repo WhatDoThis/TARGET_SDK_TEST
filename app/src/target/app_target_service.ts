@@ -31,6 +31,8 @@ import { safeErrorMessage } from "../shared/app_shared_utils";
 
 const ALLOWED_TEST_NUMS: TestNum[] = ["1", "2", "3"];
 const EVENT_POPUP_TYPE = "event-popup";
+/** Optimize Tags 기본 타임아웃(10s)보다 여유 있게 대기 */
+const UPDATE_WAIT_MS = 20000;
 
 // 3.
 export function decodeOfferContent(content: unknown): unknown {
@@ -121,7 +123,6 @@ export async function fetchTargetOffers(
 
   try {
     const scopes = [new DecisionScope(decisionScope)];
-    // mbox성 파라미터 — profile./entity. 접두사 없음
     const data = {
       __adobe: {
         target: {
@@ -130,49 +131,95 @@ export async function fetchTargetOffers(
       },
     };
 
-    await new Promise<void>((resolve, reject) => {
-      let settled = false;
-      const finish = (fn: () => void): void => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        fn();
-      };
-
-      try {
-        Optimize.updatePropositions(
-          scopes,
-          undefined,
-          data,
-          () => finish(resolve),
-          (error: unknown) =>
-            finish(() =>
-              reject(
-                new Error(
-                  `[fetchTargetOffers] updatePropositions failed: ${String(error)}`
-                )
-              )
-            )
-        );
-      } catch (error) {
-        console.warn(
-          "[fetchTargetOffers] updatePropositions callback unavailable",
-          error
-        );
-      }
-
-      setTimeout(() => finish(resolve), 3000);
-    });
-
+    const updateError = await waitForUpdatePropositions(scopes, data);
     const propositions = await Optimize.getPropositions(scopes);
+    const offers = parsePropositionMap(propositions);
+    const rawPropositions = serializePropositions(propositions);
+
+    if (updateError && offers.length === 0) {
+      throw new Error(
+        `[fetchTargetOffers] updatePropositions failed: ${updateError}`
+      );
+    }
 
     return {
-      offers: parsePropositionMap(propositions),
-      rawPropositions: serializePropositions(propositions),
+      offers,
+      rawPropositions: updateError
+        ? { warning: updateError, response: rawPropositions }
+        : rawPropositions,
     };
   } catch (error) {
     throw new Error(safeErrorMessage(error, "fetchTargetOffers"));
+  }
+}
+
+function waitForUpdatePropositions(
+  scopes: DecisionScope[],
+  data: Record<string, unknown>
+): Promise<string | null> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (errorMessage: string | null): void => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve(errorMessage);
+    };
+
+    const timer = setTimeout(() => {
+      finish(
+        "client wait exceeded before Optimize callback (check Edge domain / Tags Dev publish / datastream)"
+      );
+    }, UPDATE_WAIT_MS);
+
+    try {
+      Optimize.updatePropositions(
+        scopes,
+        undefined,
+        data,
+        () => {
+          clearTimeout(timer);
+          finish(null);
+        },
+        (error: unknown) => {
+          clearTimeout(timer);
+          finish(formatOptimizeError(error));
+        }
+      );
+    } catch (error) {
+      clearTimeout(timer);
+      finish(formatOptimizeError(error));
+    }
+  });
+}
+
+function formatOptimizeError(error: unknown): string {
+  if (error == null) {
+    return "unknown Optimize error";
+  }
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  try {
+    const record = error as {
+      type?: string;
+      title?: string;
+      detail?: string;
+      message?: string;
+    };
+    const parts = [record.type, record.title, record.detail, record.message]
+      .filter((part) => typeof part === "string" && part.trim().length > 0)
+      .join(" · ");
+    if (parts.length > 0) {
+      return parts;
+    }
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
   }
 }
 

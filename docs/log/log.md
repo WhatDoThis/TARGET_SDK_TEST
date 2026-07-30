@@ -2,6 +2,7 @@
 
 ## Log Index
 
+10. 2026-07-30 App Optimize timeout — AEP 7.x init/fetch 수정
 9. 2026-07-30 App EAS Kotlin 1.9.25 고정 (Compose 호환)
 8. 2026-07-30 App EAS용 config를 example+EXPO_PUBLIC로 전환
 7. 2026-07-30 App EAS 빌드용 expo-asset 등 의존성 보완
@@ -13,6 +14,22 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+10. 2026-07-30 App Optimize timeout — AEP 7.x init/fetch 수정
+
+Purpose: general.callback.timeout 원인(구식 init + fetch 레이스) 제거
+
+Changes:
+
+- registerExtensions+configureWithAppId → MobileCore.initializeWithAppId
+- updatePropositions 완료 대기 후 getPropositions (3초 강제 resolve 제거)
+- 타임아웃/에러 메시지 상세화
+
+Changed files:
+
+- app/src/init/app_init.ts
+- app/src/target/app_target_service.ts
+- docs/log/log.md
 
 9. 2026-07-30 App EAS Kotlin 1.9.25 고정 (Compose 호환)
 
