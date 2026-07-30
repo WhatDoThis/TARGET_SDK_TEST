@@ -2,6 +2,7 @@
 
 ## Log Index
 
+8. 2026-07-30 App EAS용 config를 example+EXPO_PUBLIC로 전환
 7. 2026-07-30 App EAS 빌드용 expo-asset 등 의존성 보완
 6. 2026-07-30 App testNum·event-popup 네이티브 동일 기능 추가
 5. 2026-07-30 Web event-popup JSON 오퍼 모달 렌더 추가
@@ -11,6 +12,24 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+8. 2026-07-30 App EAS용 config를 example+EXPO_PUBLIC로 전환
+
+Purpose: gitignore된 config.dev.json이 EAS 업로드에 없어 번들 실패하던 문제 수정
+
+Changes:
+
+- app_config가 config.dev.example.json + EXPO_PUBLIC_* 병합
+- eas.json preview/development env에 File ID·scope 주입
+- app/.env.example 추가, .env gitignore
+
+Changed files:
+
+- app/src/config/app_config.ts
+- app/eas.json
+- app/.env.example
+- .gitignore
+- docs/log/log.md
 
 7. 2026-07-30 App EAS 빌드용 expo-asset 등 의존성 보완
 

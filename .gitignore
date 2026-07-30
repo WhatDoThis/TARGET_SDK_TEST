@@ -11,3 +11,5 @@ app/.expo/
 # Adobe Dev 실설정 (example만 커밋)
 web/env/config.dev.json
 app/env/config.dev.json
+app/.env
+.env

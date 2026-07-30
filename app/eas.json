@@ -9,12 +9,20 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_ADOBE_MOBILE_APP_ID": "<org>/<property>/launch-xxxx-development",
+        "EXPO_PUBLIC_DECISION_SCOPE": "aep-app-test-scope"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_ADOBE_MOBILE_APP_ID": "<org>/<property>/launch-xxxx-development",
+        "EXPO_PUBLIC_DECISION_SCOPE": "aep-app-test-scope"
       }
     },
     "production": {
