@@ -2,6 +2,7 @@
 
 ## Log Index
 
+6. 2026-07-30 App testNum·event-popup 네이티브 동일 기능 추가
 5. 2026-07-30 Web event-popup JSON 오퍼 모달 렌더 추가
 4. 2026-07-30 Web sendEvent testNum(mbox) 파라미터·셀렉트 추가
 3. 2026-07-30 web/app config.dev.json gitignore 추가
@@ -9,6 +10,26 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+6. 2026-07-30 App testNum·event-popup 네이티브 동일 기능 추가
+
+Purpose: Mobile Optimize 경로에 웹과 동일한 testNum 전달·event-popup 모달·UI 제공
+
+Changes:
+
+- updatePropositions data.__adobe.target.testNum 전달
+- testNum 칩 UI(1/2/3) + event-popup Modal
+- content 이중 JSON/배열 디코드, parseEventPopup
+- expo run:android/ios 스크립트 (네이티브 빌드, Expo Go 아님)
+
+Changed files:
+
+- app/src/target/app_target_types.ts
+- app/src/target/app_target_service.ts
+- app/src/ui/AppScreen.tsx
+- app/App.tsx
+- app/package.json
+- docs/log/log.md
 
 5. 2026-07-30 Web event-popup JSON 오퍼 모달 렌더 추가
 

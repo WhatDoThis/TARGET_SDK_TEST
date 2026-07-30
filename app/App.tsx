@@ -1,11 +1,12 @@
 /**
  * app.App (App 루트 오케스트레이션)
  * ================================
- * config → init → AppScreen. Edge+Optimize 경로만 사용 (백엔드 없음).
+ * config → init → testNum 선택 → Optimize fetch → event-popup.
+ * 네이티브 모듈 경로(WebView 아님). 백엔드 없음.
  *
  * [Main Functions]
  * ===========
- * - 1. App — 초기화·Fetch/ECID 핸들러
+ * - 1. App — 초기화·Fetch/ECID/팝업 핸들러
  *
  * [Dependencies]
  * =========
@@ -19,8 +20,15 @@
 import React, { useEffect, useState } from "react";
 import { loadAppConfig } from "./src/config/app_config";
 import { initMobileSdk } from "./src/init/app_init";
-import { fetchTargetOffers } from "./src/target/app_target_service";
-import type { ParsedOffer } from "./src/target/app_target_types";
+import {
+  fetchTargetOffers,
+  parseEventPopup,
+} from "./src/target/app_target_service";
+import type {
+  EventPopupOffer,
+  ParsedOffer,
+  TestNum,
+} from "./src/target/app_target_types";
 import { fetchEcid } from "./src/identity/app_identity_service";
 import { AppScreen } from "./src/ui/AppScreen";
 import { safeErrorMessage } from "./src/shared/app_shared_utils";
@@ -32,8 +40,10 @@ export default function App(): React.JSX.Element {
   const [status, setStatus] = useState("Initializing Mobile SDK…");
   const [statusKind, setStatusKind] = useState<"ok" | "err" | "info">("info");
   const [busy, setBusy] = useState(true);
+  const [testNum, setTestNum] = useState<TestNum>("3");
   const [offers, setOffers] = useState<ParsedOffer[]>([]);
   const [debugPayload, setDebugPayload] = useState<unknown>({});
+  const [eventPopup, setEventPopup] = useState<EventPopupOffer | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,7 +54,7 @@ export default function App(): React.JSX.Element {
         if (cancelled) {
           return;
         }
-        setStatus("SDK configured. Tap Fetch offers.");
+        setStatus("SDK configured. Select testNum and Fetch offers.");
         setStatusKind("ok");
       } catch (error) {
         if (cancelled) {
@@ -67,26 +77,48 @@ export default function App(): React.JSX.Element {
 
   const onFetch = async (): Promise<void> => {
     setBusy(true);
-    setStatus("updatePropositions → getPropositions…");
+    setStatus(`updatePropositions… testNum=${testNum}`);
     setStatusKind("info");
 
     try {
-      const result = await fetchTargetOffers(config.target.decisionScope);
+      const result = await fetchTargetOffers(
+        config.target.decisionScope,
+        testNum
+      );
+      const popup = parseEventPopup(result.offers);
       setOffers(result.offers);
-      setDebugPayload(result.rawPropositions);
+      setEventPopup(popup);
+      setDebugPayload({
+        request: {
+          decisionScope: config.target.decisionScope,
+          testNum,
+          data: { __adobe: { target: { testNum } } },
+        },
+        eventPopup: popup,
+        response: result.rawPropositions,
+      });
 
-      const first = result.offers[0]?.payload;
-      if (first?.title || first?.body) {
-        setStatus(`Offer received: ${first.title ?? "(title)"}`);
+      if (popup) {
+        setStatus(`event-popup (testNum=${testNum}): ${popup.title ?? "이벤트 대상"}`);
         setStatusKind("ok");
       } else {
-        setStatus(`Optimize OK · offers=${result.offers.length}`);
+        const first = result.offers[0]?.payload;
+        if (first?.title || first?.body) {
+          setStatus(
+            `Offer received (testNum=${testNum}): ${first.title ?? "(title)"}`
+          );
+        } else {
+          setStatus(
+            `Optimize OK · testNum=${testNum} · offers=${result.offers.length}`
+          );
+        }
         setStatusKind("ok");
       }
     } catch (error) {
       setStatus(safeErrorMessage(error, "App.onFetch"));
       setStatusKind("err");
       setDebugPayload({ error: String(error) });
+      setEventPopup(null);
     } finally {
       setBusy(false);
     }
@@ -109,8 +141,12 @@ export default function App(): React.JSX.Element {
       status={status}
       statusKind={statusKind}
       busy={busy}
+      testNum={testNum}
+      onTestNumChange={setTestNum}
       offers={offers}
       debugPayload={debugPayload}
+      eventPopup={eventPopup}
+      onClosePopup={() => setEventPopup(null)}
       onFetch={() => {
         void onFetch();
       }}

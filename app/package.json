@@ -6,8 +6,9 @@
   "description": "AEP Mobile SDK (Edge + Optimize) Target personalization smoke test — Dev only",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios"
+    "prebuild": "expo prebuild",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@adobe/react-native-aepcore": "^7.0.0",
