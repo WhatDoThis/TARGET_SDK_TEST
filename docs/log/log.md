@@ -2,6 +2,7 @@
 
 ## Log Index
 
+9. 2026-07-30 App EAS Kotlin 1.9.25 고정 (Compose 호환)
 8. 2026-07-30 App EAS용 config를 example+EXPO_PUBLIC로 전환
 7. 2026-07-30 App EAS 빌드용 expo-asset 등 의존성 보완
 6. 2026-07-30 App testNum·event-popup 네이티브 동일 기능 추가
@@ -12,6 +13,22 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+9. 2026-07-30 App EAS Kotlin 1.9.25 고정 (Compose 호환)
+
+Purpose: expo-modules-core Compose Compiler와 Kotlin 버전 불일치(1.9.24 vs 1.9.25) 해소
+
+Changes:
+
+- expo-build-properties로 android.kotlinVersion=1.9.25
+- newArchEnabled=false (AEP/Expo 안정성)
+- iOS useFrameworks static 슬롯
+
+Changed files:
+
+- app/app.json
+- app/package.json
+- docs/log/log.md
 
 8. 2026-07-30 App EAS용 config를 example+EXPO_PUBLIC로 전환
 

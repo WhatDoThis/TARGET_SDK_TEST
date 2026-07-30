@@ -18,6 +18,7 @@
     "@adobe/react-native-aepoptimize": "^7.0.0",
     "expo": "~52.0.0",
     "expo-asset": "~11.0.5",
+    "expo-build-properties": "~0.13.3",
     "expo-constants": "~17.0.8",
     "expo-font": "~13.0.4",
     "react": "18.3.1",
