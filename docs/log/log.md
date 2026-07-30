@@ -2,6 +2,7 @@
 
 ## Log Index
 
+7. 2026-07-30 App EAS 빌드용 expo-asset 등 의존성 보완
 6. 2026-07-30 App testNum·event-popup 네이티브 동일 기능 추가
 5. 2026-07-30 Web event-popup JSON 오퍼 모달 렌더 추가
 4. 2026-07-30 Web sendEvent testNum(mbox) 파라미터·셀렉트 추가
@@ -10,6 +11,24 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+7. 2026-07-30 App EAS 빌드용 expo-asset 등 의존성 보완
+
+Purpose: EAS Bundle JS 단계에서 실패한 expo-asset 누락 수정
+
+Changes:
+
+- expo-asset / expo-font / expo-constants / babel-preset-expo 추가
+- babel.config.js, eas.json(APK preview) 추가
+- app.json에 EAS projectId 연결
+
+Changed files:
+
+- app/package.json
+- app/babel.config.js
+- app/eas.json
+- app/app.json
+- docs/log/log.md
 
 6. 2026-07-30 App testNum·event-popup 네이티브 동일 기능 추가
 

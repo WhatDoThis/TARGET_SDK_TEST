@@ -10,6 +10,12 @@
     },
     "ios": {
       "bundleIdentifier": "com.hiwoo.aepsdktargettest"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "86e39a1b-43b7-42b1-b7de-502f6e143697"
+      }
+    },
+    "owner": "whatdothis"
   }
 }

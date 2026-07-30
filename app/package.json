@@ -11,17 +11,21 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
+    "@adobe/react-native-aepassurance": "^7.0.0",
     "@adobe/react-native-aepcore": "^7.0.0",
     "@adobe/react-native-aepedge": "^7.0.0",
     "@adobe/react-native-aepedgeidentity": "^7.0.0",
     "@adobe/react-native-aepoptimize": "^7.0.0",
-    "@adobe/react-native-aepassurance": "^7.0.0",
     "expo": "~52.0.0",
+    "expo-asset": "~11.0.5",
+    "expo-constants": "~17.0.8",
+    "expo-font": "~13.0.4",
     "react": "18.3.1",
     "react-native": "0.76.5"
   },
   "devDependencies": {
     "@types/react": "~18.3.12",
+    "babel-preset-expo": "~12.0.0",
     "typescript": "^5.8.2"
   }
 }
