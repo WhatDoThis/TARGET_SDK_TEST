@@ -2,6 +2,10 @@
 
 ## Log Index
 
+22. 2026-07-31 App Optimize 실패 원인 분석·Edge ready·Fetch 정리
+21. 2026-07-31 Customer Guide Edge domain 샌드박스 기본값 정정
+20. 2026-07-31 공식 골든 패스 재정립 (가이드·App 단순화)
+19. 2026-07-31 App init org 오탐 제거 — ECID 기준 준비 판정
 18. 2026-07-31 App Optimize general.unexpected — plain data·무파라미터 재시도
 17. 2026-07-31 App Assurance org 대기 후 연결
 16. 2026-07-31 App Assurance 세션 URL 하드코딩
@@ -22,6 +26,82 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+22. 2026-07-31 App Optimize 실패 원인 분석·Edge ready·Fetch 정리
+
+Purpose: Datastream/Tags/빌드 이후 Fetch 실패 구간을 분리하고, config 레이스·에러 진단을 코드에 반영
+
+Changes:
+
+- init 후 waitForEdgeReady(ECID) — Tags edge.configId 다운로드 전 Fetch 방지
+- Fetch: no-data → testNum 재시도, unexpected/empty 원인 문구 분리
+- `03_Sdk_Test_Root_Cause.md` 추가
+
+Changed files:
+
+- app/src/init/app_init.ts
+- app/src/target/app_target_service.ts
+- app/App.tsx
+- docs/report/03_Sdk_Test_Root_Cause.md
+- docs/report/00_ReportIndex.md
+- docs/log/log.md
+
+21. 2026-07-31 Customer Guide Edge domain 샌드박스 기본값 정정
+
+Purpose: Edge Network domain 디폴트를 '비움'으로 잘못 기술한 내용 수정
+
+Changes:
+
+- 콘솔 기본값 = 샌드박스 기준 생성 도메인이 사전 입력됨을 명시
+- Troubleshooting 문구를 샌드박스 도메인 유지 기준으로 맞춤
+
+Changed files:
+
+- docs/report/02_Customer_Config_Guide.md
+- docs/log/log.md
+
+20. 2026-07-31 공식 골든 패스 재정립 (가이드·App 단순화)
+
+Purpose: 고객 가이드용 Adobe 공식 최소 경로로 기준선 고정, 디버깅 우회를 본선에서 분리
+
+Changes:
+
+- `docs/report/02_Customer_Config_Guide.md` — 아키텍처·콘솔 체크리스트·수락 기준·Troubleshooting 부록
+- App init: `initializeWithAppId` 본선, edge 강제는 DEBUG env만
+- Fetch: sample형 updatePropositions 콜백 → getPropositions
+- eas 본선 env: appId + decisionScope만; Assurance 하드코딩 제거
+
+Changed files:
+
+- docs/report/00_ReportIndex.md
+- docs/report/02_Customer_Config_Guide.md
+- docs/report/01_Architecture.md
+- app/src/init/app_init.ts
+- app/src/config/app_config.ts
+- app/src/target/app_target_service.ts
+- app/src/assurance/app_assurance_service.ts
+- app/App.tsx
+- app/src/ui/AppScreen.tsx
+- app/eas.json
+- app/env/config.dev.example.json
+- app/.env.example
+- docs/log/log.md
+
+19. 2026-07-31 App init org 오탐 제거 — ECID 기준 준비 판정
+
+Purpose: Edge-only에서 getSdkIdentities org 부재를 init 실패로 처리하던 오탐 제거
+
+Changes:
+
+- waitForSdkReady: EdgeIdentity ECID 우선, org 없어도 ECID면 통과
+- org unavailable로 App.init 전체 실패하지 않음
+- identities raw를 debugPayload에 노출
+
+Changed files:
+
+- app/src/init/app_init.ts
+- app/App.tsx
+- docs/log/log.md
 
 18. 2026-07-31 App Optimize general.unexpected — plain data·무파라미터 재시도
 

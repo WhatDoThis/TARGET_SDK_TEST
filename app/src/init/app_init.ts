@@ -1,13 +1,13 @@
 /**
- * app.init.app_init (AEP Mobile SDK 초기화)
- * ========================================
- * initializeWithAppId 후 privacy OPT_IN + edge.configId/domain.
- * Assurance는 orgId가 SDK에 로드된 뒤에만 연결 (조기 startSession → 무한 대기 방지).
+ * app.init.app_init (AEP Mobile SDK 초기화 — 공식 골든 패스)
+ * ========================================================
+ * initializeWithAppId 후 Tags 원격 설정(edge.configId) 다운로드를 ECID로 확인한다.
+ * Fetch를 init 직후 호출하면 config 미수신으로 general.unexpected가 날 수 있다.
  *
  * [Main Functions]
  * ===========
- * - 1. initMobileSdk — initializeWithAppId + Edge 설정 + 확장 버전 점검
- * - 2. waitForExperienceCloudOrg — Assurance 전 org 준비 대기
+ * - 1. initMobileSdk — setLogLevel + initializeWithAppId (+ 선택 debug edge override)
+ * - 2. waitForEdgeReady — Edge Identity ECID 수신까지 대기(설정·네트워크 준비)
  *
  * [Dependencies]
  * =========
@@ -26,11 +26,14 @@ import { Optimize } from "@adobe/react-native-aepoptimize";
 import type { AppConfig } from "../config/app_config";
 import { isBlank, safeErrorMessage } from "../shared/app_shared_utils";
 
-const DEFAULT_EDGE_DOMAIN = "edge.adobedc.net";
-const ORG_WAIT_MS = 15000;
-const ORG_POLL_MS = 500;
+const EDGE_READY_WAIT_MS = 20000;
+const EDGE_READY_POLL_MS = 400;
 
 let initialized = false;
+
+export interface EdgeReadyInfo {
+  ecid: string;
+}
 
 // 1.
 export async function initMobileSdk(config: AppConfig): Promise<void> {
@@ -46,45 +49,22 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
     void Optimize;
 
     await MobileCore.initializeWithAppId(config.adobeMobile.adobeMobileAppId);
-
     MobileCore.setPrivacyStatus(PrivacyStatus.OPT_IN);
 
-    const edgeDomain = !isBlank(config.adobeMobile.edgeDomain)
-      ? config.adobeMobile.edgeDomain.trim()
-      : DEFAULT_EDGE_DOMAIN;
-
-    const runtimeConfig: Record<string, string> = {
-      "edge.domain": edgeDomain,
-    };
-
-    if (!isBlank(config.adobeMobile.edgeConfigId)) {
-      runtimeConfig["edge.configId"] = config.adobeMobile.edgeConfigId.trim();
+    const debugOverrides: Record<string, string> = {};
+    if (!isBlank(config.debug.edgeConfigId)) {
+      debugOverrides["edge.configId"] = config.debug.edgeConfigId.trim();
     }
-
-    await MobileCore.updateConfiguration(runtimeConfig);
-    console.info("[initMobileSdk] runtime config", runtimeConfig);
-
-    await sleep(2000);
-
-    const versions = await readExtensionVersions();
-    console.info("[initMobileSdk] extension versions", versions);
-
-    if (isBlank(versions.optimize) || versions.optimize === "unavailable") {
-      throw new Error(
-        "[initMobileSdk] Optimize extension unavailable after initializeWithAppId."
-      );
+    if (!isBlank(config.debug.edgeDomain)) {
+      debugOverrides["edge.domain"] = config.debug.edgeDomain.trim();
     }
-    if (isBlank(versions.edge) || versions.edge === "unavailable") {
-      throw new Error(
-        "[initMobileSdk] Edge extension unavailable after initializeWithAppId."
-      );
+    if (Object.keys(debugOverrides).length > 0) {
+      await MobileCore.updateConfiguration(debugOverrides);
+      console.warn("[initMobileSdk] DEBUG edge overrides", debugOverrides);
     }
-
-    // Assurance는 App에서 org 확인 후 버튼/자동 연결 — 여기서 startSession 하지 않음
-    // (org 미수신 상태에서 startSession → Invalid Configuration / 웹 무한로딩)
 
     initialized = true;
-    console.info("[initMobileSdk] success", versions);
+    console.info("[initMobileSdk] initializeWithAppId done");
   } catch (error) {
     initialized = false;
     throw new Error(safeErrorMessage(error, "initMobileSdk"));
@@ -92,67 +72,30 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
 }
 
 // 2.
-export async function waitForExperienceCloudOrg(): Promise<string> {
-  const deadline = Date.now() + ORG_WAIT_MS;
+export async function waitForEdgeReady(): Promise<EdgeReadyInfo> {
+  if (!initialized) {
+    throw new Error("[waitForEdgeReady] call initMobileSdk first");
+  }
+
+  const deadline = Date.now() + EDGE_READY_WAIT_MS;
 
   while (Date.now() < deadline) {
     try {
-      const identities = await MobileCore.getSdkIdentities();
-      const org = extractOrgId(identities);
-      if (!isBlank(org)) {
-        console.info("[waitForExperienceCloudOrg] org=", org);
-        return org;
+      const ecid = await EdgeIdentity.getExperienceCloudId();
+      if (!isBlank(ecid)) {
+        console.info("[waitForEdgeReady] ecid=", ecid);
+        return { ecid: ecid.trim() };
       }
-      console.info("[waitForExperienceCloudOrg] waiting…", identities);
     } catch (error) {
-      console.warn("[waitForExperienceCloudOrg] getSdkIdentities failed", error);
+      console.warn("[waitForEdgeReady] getExperienceCloudId", error);
     }
-    await sleep(ORG_POLL_MS);
+    await sleep(EDGE_READY_POLL_MS);
   }
 
   throw new Error(
-    "[waitForExperienceCloudOrg] experienceCloud.org unavailable — Tags Dev Publish / appId / 네트워크 확인. Assurance는 org 없이 연결 불가."
+    "[waitForEdgeReady] Edge Identity ECID unavailable within timeout. " +
+      "Tags Dev Publish·appId·기기 네트워크·Edge Datastream(Dev)을 확인하세요."
   );
-}
-
-function extractOrgId(identities: string): string | null {
-  if (isBlank(identities)) {
-    return null;
-  }
-  try {
-    const parsed = JSON.parse(identities) as {
-      companyContexts?: Array<{ namespace?: string; value?: string }>;
-    };
-    const ctx = parsed.companyContexts?.find(
-      (c) => c.namespace === "imsOrgId" || c.namespace === "orgId"
-    );
-    if (ctx?.value) {
-      return ctx.value;
-    }
-  } catch {
-    // fall through — string scan
-  }
-  const match = identities.match(
-    /[0-9A-F]{24}@AdobeOrg|[0-9A-Za-z]+@[Aa]dobe[Oo]rg/
-  );
-  return match?.[0] ?? null;
-}
-
-async function readExtensionVersions(): Promise<Record<string, string>> {
-  const [optimize, edge, edgeIdentity] = await Promise.all([
-    safeVersion(() => Optimize.extensionVersion()),
-    safeVersion(() => Edge.extensionVersion()),
-    safeVersion(() => EdgeIdentity.extensionVersion()),
-  ]);
-  return { optimize, edge, edgeIdentity };
-}
-
-async function safeVersion(fn: () => Promise<string>): Promise<string> {
-  try {
-    return await fn();
-  } catch {
-    return "unavailable";
-  }
 }
 
 function sleep(ms: number): Promise<void> {

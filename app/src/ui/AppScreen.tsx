@@ -1,7 +1,7 @@
 /**
  * app.ui.AppScreen (App 테스트 화면)
  * =================================
- * 1화면: Assurance Deep link·Quick Connect / testNum / Fetch / ECID / 오퍼 / 모달.
+ * 1화면: testNum / Fetch / ECID / 오퍼(KPI) / Assurance(디버그) / raw JSON.
  *
  * [Main Functions]
  * ===========
@@ -79,44 +79,7 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
       <ScrollView contentContainerStyle={styles.page}>
         <Text style={styles.title}>AEP Mobile SDK · Target Test</Text>
         <Text style={styles.sub}>
-          scope: {decisionScope} · Edge Network · headless JSON
-        </Text>
-
-        <Text style={styles.fieldLabel}>
-          Assurance (Base URL = aepsdktargettest://)
-        </Text>
-        <TextInput
-          style={styles.input}
-          value={assuranceUrl}
-          onChangeText={onAssuranceUrlChange}
-          placeholder="aepsdktargettest://...?adb_validation_sessionid=..."
-          placeholderTextColor="#5a6a7e"
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!busy}
-        />
-        <View style={styles.row}>
-          <Pressable
-            style={[styles.button, busy && styles.buttonDisabled]}
-            disabled={busy}
-            onPress={onAssuranceConnect}
-          >
-            <Text style={styles.buttonText}>Connect Deep link URL</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
-            disabled={busy}
-            onPress={onAssuranceQuickConnect}
-          >
-            <Text style={styles.buttonSecondaryText}>
-              Quick Connect (debug only)
-            </Text>
-          </Pressable>
-        </View>
-        <Text style={styles.hint}>
-          https://ajo… 웹 링크 금지. Assurance에서 Base URL을
-          aepsdktargettest:// 로 만든 세션 링크만 사용. preview APK는 Deep
-          link 경로.
+          scope: {decisionScope} · Edge + Optimize (official path)
         </Text>
 
         <Text style={styles.fieldLabel}>testNum</Text>
@@ -197,6 +160,37 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
             </View>
           ))
         )}
+
+        <Text style={styles.label}>Debug · Assurance (not acceptance criteria)</Text>
+        <TextInput
+          style={styles.input}
+          value={assuranceUrl}
+          onChangeText={onAssuranceUrlChange}
+          placeholder="aepsdktargettest://...?adb_validation_sessionid=..."
+          placeholderTextColor="#5a6a7e"
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!busy}
+        />
+        <View style={styles.row}>
+          <Pressable
+            style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
+            disabled={busy}
+            onPress={onAssuranceConnect}
+          >
+            <Text style={styles.buttonSecondaryText}>Connect Deep link</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
+            disabled={busy}
+            onPress={onAssuranceQuickConnect}
+          >
+            <Text style={styles.buttonSecondaryText}>Quick Connect</Text>
+          </Pressable>
+        </View>
+        <Text style={styles.hint}>
+          KPI는 Fetch 오퍼. Assurance는 디버그만. Base URL=aepsdktargettest://
+        </Text>
 
         <Text style={styles.label}>Raw propositions</Text>
         <Text style={styles.debug}>{prettyJson(debugPayload)}</Text>

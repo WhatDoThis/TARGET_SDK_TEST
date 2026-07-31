@@ -43,9 +43,12 @@ Datastream(Target ON) ← Edge ← web(alloy) / app(Edge+Optimize) → JSON 오�
 | `web/env/config.dev.json` | `adobeEdge` | `orgId`, `datastreamId`, `edgeDomain` |
 | | `target` | `decisionScope` |
 | | `debug` | `debugEnabled` |
-| `app/env/config.dev.json` | `adobeMobile` | `adobeMobileAppId`, `edgeDomain` |
+| `app/env/config.dev.example.json` | `adobeMobile` | `adobeMobileAppId` (Tags Dev File ID) |
 | | `target` | `decisionScope` |
-| | `assurance` | `assuranceSessionUrl` |
+| | `debug` | `edgeConfigId`, `edgeDomain` (Troubleshooting 부록만) |
+| | `assurance` | `assuranceSessionUrl` (디버그 수동) |
+| `eas.json` 본선 env | | `EXPO_PUBLIC_ADOBE_MOBILE_APP_ID`, `EXPO_PUBLIC_DECISION_SCOPE` |
+| 고객 가이드 | `docs/report/02_Customer_Config_Guide.md` | 골든 패스·체크리스트·수락 기준 |
 
 예시 템플릿: 각 채널 `env/config.dev.example.json` (동일 스키마).
 
@@ -60,4 +63,5 @@ Datastream(Target ON) ← Edge ← web(alloy) / app(Edge+Optimize) → JSON 오�
 
 1. Datastream Dev + Target 서비스 ON → `datastreamId` / Tags Edge `edge.configId`
 2. Form-based JSON 활동 — Web/App scope 문자열을 env와 동일하게
-3. App: Mobile Tags(Core·EdgeIdentity·Edge·Optimize) Dev Publish → `adobeMobileAppId`
+3. App: Mobile Tags(Core·EdgeIdentity·Edge·Optimize) Dev Publish → `adobeMobileAppId`  
+   — 클래식 Adobe Target 확장 금지. 상세: `02_Customer_Config_Guide.md`

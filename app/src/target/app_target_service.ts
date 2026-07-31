@@ -1,9 +1,8 @@
 /**
- * app.target.app_target_service (App Optimize Target)
- * ==================================================
- * updatePropositions → getPropositions.
- * data는 plain nested object (RN 브릿지). Map으로 general.unexpected 나는 경우 회피.
- * 1차: data 없이 요청 → 2차: testNum 포함 재시도.
+ * app.target.app_target_service (App Optimize Target — 공식 골든 패스)
+ * ==================================================================
+ * updatePropositions(완료 콜백) → getPropositions.
+ * 1차: data 없이 요청(통신·Target 매칭 검증) → 2차: testNum plain object.
  *
  * [Main Functions]
  * ===========
@@ -31,8 +30,7 @@ import { safeErrorMessage } from "../shared/app_shared_utils";
 
 const ALLOWED_TEST_NUMS: TestNum[] = ["1", "2", "3"];
 const EVENT_POPUP_TYPE = "event-popup";
-const UPDATE_WAIT_MS = 25000;
-const POLL_INTERVAL_MS = 800;
+const UPDATE_WAIT_MS = 15000;
 
 // 3.
 export function decodeOfferContent(content: unknown): unknown {
@@ -125,12 +123,11 @@ export async function fetchTargetOffers(
     const optimizeVersion = await safeOptimizeVersion();
     if (optimizeVersion === "unavailable") {
       throw new Error(
-        "[fetchTargetOffers] Optimize.extensionVersion unavailable — native module not linked"
+        "[fetchTargetOffers] Optimize unavailable — native module not linked"
       );
     }
 
     const scopes = [new DecisionScope(decisionScope)];
-    // Android/RN 샘플과 동일: plain nested object (Map 중첩은 브릿지에서 unexpected 유발 가능)
     const dataWithTestNum = {
       __adobe: {
         target: {
@@ -139,51 +136,36 @@ export async function fetchTargetOffers(
       },
     };
 
+    // 1차: 파라미터 없이 — Edge/Target 경로만 검증 (공식 sample과 동일)
     Optimize.clearCachedPropositions();
+    let updateResult = await updatePropositionsOnce(scopes, undefined);
+    let attempt: "no-data" | "with-testNum" = "no-data";
 
-    // 1차: 파라미터 없이 (통신·Target 매칭만 검증)
-    let updateResult = await runUpdatePropositions(scopes, undefined);
-    let attempt = "no-data";
-
-    // 2차: general.unexpected 등 실패 시 testNum plain object로 재시도
-    if (updateResult.path === "onError" || updateResult.path === "timeout") {
+    // 실패 시 testNum 포함 1회 재시도 (활동이 mbox 파라미터 조건일 수 있음)
+    if (updateResult.error) {
+      await sleep(500);
       Optimize.clearCachedPropositions();
-      updateResult = await runUpdatePropositions(scopes, dataWithTestNum);
+      updateResult = await updatePropositionsOnce(scopes, dataWithTestNum);
       attempt = "with-testNum";
-    } else if (
-      !hasAnyProposition(updateResult.propositions) &&
-      updateResult.path !== "timeout"
-    ) {
-      // 빈 성공이면 testNum 넣어 재요청 (오퍼가 파라미터 기반일 수 있음)
-      Optimize.clearCachedPropositions();
-      const withData = await runUpdatePropositions(scopes, dataWithTestNum);
-      if (
-        withData.path !== "onError" &&
-        withData.path !== "timeout" &&
-        hasAnyProposition(withData.propositions)
-      ) {
-        updateResult = withData;
-        attempt = "with-testNum-after-empty";
-      }
+    }
+
+    if (updateResult.error) {
+      throw new Error(
+        [
+          `[fetchTargetOffers] ${updateResult.error}`,
+          `optimize=${optimizeVersion}`,
+          `scope=${decisionScope}`,
+          `testNum=${testNum}`,
+          `attempt=${attempt}`,
+          classifyOptimizeFailure(updateResult.error),
+        ].join(" · ")
+      );
     }
 
     const propositions =
       updateResult.propositions ?? (await Optimize.getPropositions(scopes));
     const offers = parsePropositionMap(propositions);
-
-    if (updateResult.path === "onError" || updateResult.path === "timeout") {
-      throw new Error(
-        [
-          `[fetchTargetOffers] ${updateResult.error ?? "Optimize failed"}`,
-          `optimize=${optimizeVersion}`,
-          `scope=${decisionScope}`,
-          `testNum=${testNum}`,
-          `attempt=${attempt}`,
-          "general.unexpected = Edge/Optimize가 응답했으나 실패(timeout 아님).",
-          "Assurance에서 personalization 응답 오류·Target Location Live·클래식 Target 확장 잔존 여부 확인",
-        ].join(" · ")
-      );
-    }
+    const hasPayload = offers.some((o) => o.payload != null);
 
     return {
       offers,
@@ -193,10 +175,9 @@ export async function fetchTargetOffers(
         testNum,
         attempt,
         updatePath: updateResult.path,
-        warning:
-          offers.length === 0 || offers.every((o) => o.payload == null)
-            ? "Optimize OK but empty — Target Location/audience/testNum/Live 확인"
-            : updateResult.error,
+        warning: hasPayload
+          ? null
+          : "Edge/Optimize OK but empty offers — Target Location must be exactly aep-app-test-scope, activity Live, audience matches",
         response: serializePropositions(propositions),
       },
     };
@@ -211,13 +192,12 @@ interface UpdateResult {
   path: string;
 }
 
-function runUpdatePropositions(
+function updatePropositionsOnce(
   scopes: DecisionScope[],
   data: Record<string, unknown> | undefined
 ): Promise<UpdateResult> {
   return new Promise((resolve) => {
     let settled = false;
-    let latestFromEvent: unknown | null = null;
 
     const finish = (result: UpdateResult): void => {
       if (settled) {
@@ -225,14 +205,21 @@ function runUpdatePropositions(
       }
       settled = true;
       clearTimeout(timer);
-      clearInterval(pollTimer);
       resolve(result);
     };
+
+    const timer = setTimeout(() => {
+      finish({
+        propositions: null,
+        error:
+          "updatePropositions timeout — Edge 요청 미완료. Tags Dev Publish / edge.configId / 네트워크",
+        path: "timeout",
+      });
+    }, UPDATE_WAIT_MS);
 
     try {
       Optimize.onPropositionUpdate({
         call: (propositions: unknown) => {
-          latestFromEvent = propositions;
           finish({
             propositions,
             error: null,
@@ -241,7 +228,7 @@ function runUpdatePropositions(
         },
       });
     } catch (error) {
-      console.warn("[fetchTargetOffers] onPropositionUpdate failed", error);
+      console.warn("[fetchTargetOffers] onPropositionUpdate", error);
     }
 
     try {
@@ -265,57 +252,31 @@ function runUpdatePropositions(
         }
       );
     } catch (error) {
-      try {
-        Optimize.updatePropositions(scopes, undefined, data);
-      } catch (inner) {
-        finish({
-          propositions: null,
-          error: formatOptimizeError(inner ?? error),
-          path: "updatePropositions-throw",
-        });
-        return;
-      }
-    }
-
-    const pollTimer = setInterval(() => {
-      void (async () => {
-        try {
-          const cached = await Optimize.getPropositions(scopes);
-          if (hasAnyProposition(cached) || latestFromEvent != null) {
-            finish({
-              propositions: latestFromEvent ?? cached,
-              error: null,
-              path:
-                latestFromEvent != null
-                  ? "onPropositionUpdate"
-                  : "poll-getPropositions",
-            });
-          }
-        } catch {
-          // ignore
-        }
-      })();
-    }, POLL_INTERVAL_MS);
-
-    const timer = setTimeout(() => {
       finish({
-        propositions: latestFromEvent,
-        error:
-          "no Optimize/Edge response (timeout). Edge 요청이 Assurance에 없으면 privacy·edge.configId·edge.domain·Tags Dev publish 문제",
-        path: "timeout",
+        propositions: null,
+        error: formatOptimizeError(error),
+        path: "updatePropositions-throw",
       });
-    }, UPDATE_WAIT_MS);
+    }
   });
 }
 
-function hasAnyProposition(propositions: unknown): boolean {
-  if (propositions instanceof Map) {
-    return propositions.size > 0;
+/**
+ * general.unexpected = Edge/Optimize가 응답했으나 실패(SDK 미연결 아님).
+ * timeout = 요청 자체가 끝나지 않음.
+ */
+function classifyOptimizeFailure(errorText: string): string {
+  if (/general\.unexpected|Unexpected Error/i.test(errorText)) {
+    return (
+      "CAUSE:Edge/Target personalization failed (not a missing native module). " +
+      "Check: (1) Installed에 클래식 Adobe Target 없음 (2) Target Location=aep-app-test-scope Live " +
+      "(3) Datastream Target Environment 일치 (4) Tags Dev 재Publish"
+    );
   }
-  if (propositions != null && typeof propositions === "object") {
-    return Object.keys(propositions as object).length > 0;
+  if (/timeout/i.test(errorText)) {
+    return "CAUSE:no Edge completion — network / edge.configId from Tags / privacy";
   }
-  return false;
+  return "CAUSE:see Optimize error detail";
 }
 
 async function safeOptimizeVersion(): Promise<string> {
@@ -350,11 +311,9 @@ function toEntries(propositions: unknown): Array<[string, unknown]> {
       value,
     ]);
   }
-
   if (propositions != null && typeof propositions === "object") {
     return Object.entries(propositions as Record<string, unknown>);
   }
-
   return [];
 }
 
@@ -362,17 +321,14 @@ function extractItems(proposition: unknown): unknown[] {
   if (proposition == null || typeof proposition !== "object") {
     return [];
   }
-
   const prop = proposition as {
     items?: unknown[];
     getItems?: () => unknown[];
   };
-
   if (typeof prop.getItems === "function") {
     const items = prop.getItems();
     return Array.isArray(items) ? items : [];
   }
-
   return Array.isArray(prop.items) ? prop.items : [];
 }
 
@@ -380,13 +336,11 @@ function extractRawContent(item: unknown): unknown {
   if (item == null || typeof item !== "object") {
     return null;
   }
-
   const offer = item as {
     content?: unknown;
     getContent?: () => unknown;
     data?: { content?: unknown };
   };
-
   if (typeof offer.getContent === "function") {
     return offer.getContent();
   }
@@ -416,4 +370,10 @@ function trimOrUndefined(value: unknown): string | undefined {
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

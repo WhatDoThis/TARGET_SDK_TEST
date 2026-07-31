@@ -1,16 +1,15 @@
 /**
- * app.App (App 루트 오케스트레이션)
- * ================================
- * config → init → Assurance(딥링크/Quick Connect) → Optimize fetch → event-popup.
- * 네이티브 모듈 경로(WebView 아님). 백엔드 없음.
+ * app.App (App 루트 — 공식 골든 패스)
+ * ==================================
+ * init → Edge ready(ECID) → Fetch(Optimize) → 오퍼 표시.
+ * Assurance는 디버그 수동만.
  *
  * [Main Functions]
  * ===========
- * - 1. App — 초기화·Assurance/Fetch/ECID/팝업 핸들러
+ * - 1. App — 초기화·Fetch/ECID/Assurance 핸들러
  *
  * [Dependencies]
  * =========
- * - react / react-native
  * - config/app_config
  * - init/app_init
  * - assurance/app_assurance_service
@@ -22,7 +21,7 @@
 import React, { useEffect, useState } from "react";
 import { Linking } from "react-native";
 import { loadAppConfig } from "./src/config/app_config";
-import { initMobileSdk, waitForExperienceCloudOrg } from "./src/init/app_init";
+import { initMobileSdk, waitForEdgeReady } from "./src/init/app_init";
 import {
   ASSURANCE_APP_SCHEME,
   connectAssuranceSession,
@@ -67,25 +66,23 @@ export default function App(): React.JSX.Element {
         if (cancelled) {
           return;
         }
-        setSdkReady(true);
-
-        // orgId 없으면 Assurance 핸드셰이크가 웹에서 무한로딩처럼 보임
-        const org = await waitForExperienceCloudOrg();
+        setStatus("Waiting Edge Identity (Tags config download)…");
+        const ready = await waitForEdgeReady();
         if (cancelled) {
           return;
         }
-
-        if (isAssuranceSessionUrl(config.assurance.assuranceSessionUrl)) {
-          connectAssuranceSession(config.assurance.assuranceSessionUrl);
-          setStatus(
-            `SDK OK · org=${org} · Assurance PIN 입력 (세션 만료 시 새 sessionid 필요)`
-          );
-        } else {
-          setStatus(
-            `SDK OK · org=${org} · Base URL=${ASSURANCE_APP_SCHEME}://`
-          );
-        }
+        setSdkReady(true);
+        setStatus(
+          `SDK ready · ecid=${ready.ecid} · scope=${config.target.decisionScope} · Fetch`
+        );
         setStatusKind("ok");
+        setDebugPayload({
+          path: "official-golden-path",
+          appId: config.adobeMobile.adobeMobileAppId,
+          decisionScope: config.target.decisionScope,
+          ecid: ready.ecid,
+          debugOverrides: config.debug,
+        });
       } catch (error) {
         if (cancelled) {
           return;
@@ -105,7 +102,6 @@ export default function App(): React.JSX.Element {
     };
   }, []);
 
-  // 앱 스킴 딥링크로 열린 경우 startSession(url)
   useEffect(() => {
     if (!sdkReady) {
       return;
@@ -118,7 +114,7 @@ export default function App(): React.JSX.Element {
       try {
         setAssuranceUrl(url);
         connectAssuranceSession(url);
-        setStatus("Assurance deeplink → PIN 입력 후 Connect");
+        setStatus("Assurance deeplink → PIN (debug)");
         setStatusKind("info");
       } catch (error) {
         setStatus(safeErrorMessage(error, "App.Linking"));
@@ -152,7 +148,6 @@ export default function App(): React.JSX.Element {
         request: {
           decisionScope: config.target.decisionScope,
           testNum,
-          data: { __adobe: { target: { testNum } } },
         },
         eventPopup: popup,
         response: result.rawPropositions,
@@ -169,12 +164,13 @@ export default function App(): React.JSX.Element {
           setStatus(
             `Offer received (testNum=${testNum}): ${first.title ?? "(title)"}`
           );
+          setStatusKind("ok");
         } else {
           setStatus(
-            `Optimize OK · testNum=${testNum} · offers=${result.offers.length}`
+            `Optimize responded · empty offers · check Target Location=aep-app-test-scope Live`
           );
+          setStatusKind("info");
         }
-        setStatusKind("ok");
       }
     } catch (error) {
       setStatus(safeErrorMessage(error, "App.onFetch"));
@@ -198,30 +194,22 @@ export default function App(): React.JSX.Element {
   };
 
   const onAssuranceConnect = (): void => {
-    void (async () => {
-      setBusy(true);
-      try {
-        const org = await waitForExperienceCloudOrg();
-        connectAssuranceSession(assuranceUrl);
-        setStatus(
-          `Assurance startSession · org=${org} — 앱에 PIN 오버레이가 뜨는지 확인`
-        );
-        setStatusKind("info");
-      } catch (error) {
-        setStatus(safeErrorMessage(error, "App.onAssuranceConnect"));
-        setStatusKind("err");
-      } finally {
-        setBusy(false);
-      }
-    })();
+    try {
+      connectAssuranceSession(assuranceUrl);
+      setStatus(
+        `Assurance (debug) · Base=${ASSURANCE_APP_SCHEME}:// · enter PIN`
+      );
+      setStatusKind("info");
+    } catch (error) {
+      setStatus(safeErrorMessage(error, "App.onAssuranceConnect"));
+      setStatusKind("err");
+    }
   };
 
   const onAssuranceQuickConnect = (): void => {
     try {
       startAssuranceQuickConnect();
-      setStatus(
-        "Quick Connect 호출됨 (debug APK만 동작). 웹 Available Devices에서 기기 선택"
-      );
+      setStatus("Quick Connect (debug APK only)");
       setStatusKind("info");
     } catch (error) {
       setStatus(safeErrorMessage(error, "App.onAssuranceQuickConnect"));
