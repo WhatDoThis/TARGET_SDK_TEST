@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "platforms": ["ios", "android"],
+    "scheme": "aepsdktargettest",
     "newArchEnabled": false,
     "android": {
       "package": "com.hiwoo.aepsdktargettest"

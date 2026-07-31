@@ -1,7 +1,7 @@
 /**
  * app.ui.AppScreen (App 테스트 화면)
  * =================================
- * 1화면: testNum / Fetch / ECID / Assurance URL 연결 / 오퍼 / event-popup / raw JSON.
+ * 1화면: Assurance Deep link·Quick Connect / testNum / Fetch / ECID / 오퍼 / 모달.
  *
  * [Main Functions]
  * ===========
@@ -44,6 +44,7 @@ export interface AppScreenProps {
   assuranceUrl: string;
   onAssuranceUrlChange: (value: string) => void;
   onAssuranceConnect: () => void;
+  onAssuranceQuickConnect: () => void;
   offers: ParsedOffer[];
   debugPayload: unknown;
   eventPopup: EventPopupOffer | null;
@@ -64,6 +65,7 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
     assuranceUrl,
     onAssuranceUrlChange,
     onAssuranceConnect,
+    onAssuranceQuickConnect,
     offers,
     debugPayload,
     eventPopup,
@@ -80,29 +82,41 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
           scope: {decisionScope} · Edge Network · headless JSON
         </Text>
 
-        <Text style={styles.fieldLabel}>Assurance Session URL</Text>
+        <Text style={styles.fieldLabel}>
+          Assurance (Base URL = aepsdktargettest://)
+        </Text>
         <TextInput
           style={styles.input}
           value={assuranceUrl}
           onChangeText={onAssuranceUrlChange}
-          placeholder="https://assurance.adobe.com/...adb_validation_sessionid=..."
+          placeholder="aepsdktargettest://...?adb_validation_sessionid=..."
           placeholderTextColor="#5a6a7e"
           autoCapitalize="none"
           autoCorrect={false}
           editable={!busy}
         />
-        <Pressable
-          style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
-          disabled={busy}
-          onPress={onAssuranceConnect}
-        >
-          <Text style={styles.buttonSecondaryText}>
-            Connect Assurance (startSession)
-          </Text>
-        </Pressable>
+        <View style={styles.row}>
+          <Pressable
+            style={[styles.button, busy && styles.buttonDisabled]}
+            disabled={busy}
+            onPress={onAssuranceConnect}
+          >
+            <Text style={styles.buttonText}>Connect Deep link URL</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
+            disabled={busy}
+            onPress={onAssuranceQuickConnect}
+          >
+            <Text style={styles.buttonSecondaryText}>
+              Quick Connect (debug only)
+            </Text>
+          </Pressable>
+        </View>
         <Text style={styles.hint}>
-          Available Devices가 비면 = 앱에서 startSession 전. Connect 후 웹에서
-          기기 선택·PIN 입력.
+          https://ajo… 웹 링크 금지. Assurance에서 Base URL을
+          aepsdktargettest:// 로 만든 세션 링크만 사용. preview APK는 Deep
+          link 경로.
         </Text>
 
         <Text style={styles.fieldLabel}>testNum</Text>

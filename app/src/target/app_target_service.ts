@@ -1,8 +1,8 @@
 /**
  * app.target.app_target_service (App Optimize Target)
  * ==================================================
- * Adobe 샘플앱과 동일: onPropositionUpdate + updatePropositions → getPropositions.
- * testNum은 data.__adobe.target (plain object — RN 브릿지 호환).
+ * 공식 순서: updatePropositions(완료 콜백) → getPropositions.
+ * data.__adobe.target.testNum (Map) — Target mbox 파라미터.
  *
  * [Main Functions]
  * ===========
@@ -30,8 +30,8 @@ import { safeErrorMessage } from "../shared/app_shared_utils";
 
 const ALLOWED_TEST_NUMS: TestNum[] = ["1", "2", "3"];
 const EVENT_POPUP_TYPE = "event-popup";
-const UPDATE_WAIT_MS = 20000;
-const POLL_INTERVAL_MS = 1000;
+const UPDATE_WAIT_MS = 25000;
+const POLL_INTERVAL_MS = 800;
 
 // 3.
 export function decodeOfferContent(content: unknown): unknown {
@@ -129,24 +129,49 @@ export async function fetchTargetOffers(
     }
 
     const scopes = [new DecisionScope(decisionScope)];
-    // Adobe 샘플: onPropositionUpdate 등록 → updatePropositions(콜백 없이) → getPropositions
-    const data = {
-      __adobe: {
-        target: {
-          testNum: String(testNum),
-        },
-      },
-    };
+    // Adobe Target Parameters: nested Map for RN → Android HashMap bridge
+    const data = new Map<string, unknown>([
+      [
+        "__adobe",
+        new Map<string, unknown>([
+          ["target", new Map<string, unknown>([["testNum", String(testNum)]])],
+        ]),
+      ],
+    ]);
+
+    Optimize.clearCachedPropositions();
 
     const updateResult = await runUpdatePropositions(scopes, data);
     const propositions =
       updateResult.propositions ?? (await Optimize.getPropositions(scopes));
     const offers = parsePropositionMap(propositions);
 
-    if (offers.length === 0 && updateResult.error) {
+    if (updateResult.path === "onError" || updateResult.path === "timeout") {
       throw new Error(
-        `[fetchTargetOffers] ${updateResult.error} · optimize=${optimizeVersion} · scope=${decisionScope} · testNum=${testNum}`
+        [
+          `[fetchTargetOffers] ${updateResult.error ?? "Optimize failed"}`,
+          `optimize=${optimizeVersion}`,
+          `scope=${decisionScope}`,
+          `testNum=${testNum}`,
+          "점검: privacy OPT_IN·edge.configId·Tags Dev publish·Target Location=aep-app-test-scope·활동 Live",
+        ].join(" · ")
       );
+    }
+
+    if (offers.length === 0 || offers.every((o) => o.payload == null)) {
+      // Edge/Optimize는 응답했는데 Target 매칭 오퍼 없음
+      return {
+        offers,
+        rawPropositions: {
+          optimizeVersion,
+          decisionScope,
+          testNum,
+          updatePath: updateResult.path,
+          warning:
+            "Optimize responded but no offer payload — Target activity Location/audience/testNum 확인",
+          response: serializePropositions(propositions),
+        },
+      };
     }
 
     return {
@@ -173,7 +198,7 @@ interface UpdateResult {
 
 function runUpdatePropositions(
   scopes: DecisionScope[],
-  data: Record<string, unknown>
+  data: Map<string, unknown>
 ): Promise<UpdateResult> {
   return new Promise((resolve) => {
     let settled = false;
@@ -189,7 +214,6 @@ function runUpdatePropositions(
       resolve(result);
     };
 
-    // 1) Adobe 샘플 권장: proposition 업데이트 이벤트
     try {
       Optimize.onPropositionUpdate({
         call: (propositions: unknown) => {
@@ -205,19 +229,41 @@ function runUpdatePropositions(
       console.warn("[fetchTargetOffers] onPropositionUpdate failed", error);
     }
 
-    // 2) 샘플처럼 콜백 없는 update 호출 (5-arg 콜백이 브릿지에서 먹통인 경우 회피)
+    // 공식: completion handler (성공/에러 콜백)
     try {
-      Optimize.updatePropositions(scopes, undefined, data);
+      Optimize.updatePropositions(
+        scopes,
+        undefined,
+        data,
+        (propositions: unknown) => {
+          finish({
+            propositions,
+            error: null,
+            path: "updatePropositions-onSuccess",
+          });
+        },
+        (error: unknown) => {
+          finish({
+            propositions: null,
+            error: formatOptimizeError(error),
+            path: "onError",
+          });
+        }
+      );
     } catch (error) {
-      finish({
-        propositions: null,
-        error: formatOptimizeError(error),
-        path: "updatePropositions-throw",
-      });
-      return;
+      // 콜백 시그니처 미지원 빌드 → 무콜백 폴백
+      try {
+        Optimize.updatePropositions(scopes, undefined, data);
+      } catch (inner) {
+        finish({
+          propositions: null,
+          error: formatOptimizeError(inner ?? error),
+          path: "updatePropositions-throw",
+        });
+        return;
+      }
     }
 
-    // 3) 폴링: 캐시에 들어오면 성공 처리
     const pollTimer = setInterval(() => {
       void (async () => {
         try {
@@ -226,11 +272,14 @@ function runUpdatePropositions(
             finish({
               propositions: latestFromEvent ?? cached,
               error: null,
-              path: latestFromEvent != null ? "onPropositionUpdate" : "poll-getPropositions",
+              path:
+                latestFromEvent != null
+                  ? "onPropositionUpdate"
+                  : "poll-getPropositions",
             });
           }
         } catch {
-          // pending update 중 get이 실패할 수 있음 — 무시하고 다음 폴링
+          // ignore transient get errors while Edge in flight
         }
       })();
     }, POLL_INTERVAL_MS);
@@ -238,12 +287,8 @@ function runUpdatePropositions(
     const timer = setTimeout(() => {
       finish({
         propositions: latestFromEvent,
-        error: [
-          "no Optimize response within timeout",
-          "Tags Optimize v1.1.2 + Edge Dev datastream OK여도 edge.domain DNS가 막히면 동일 증상",
-          "앱은 edge.adobedc.net 강제 적용본으로 재빌드 필요",
-          "Assurance로 Edge 요청 여부 확인 권장",
-        ].join(" · "),
+        error:
+          "no Optimize/Edge response (timeout). Edge 요청이 Assurance에 없으면 privacy·edge.configId·edge.domain·Tags Dev publish 문제",
         path: "timeout",
       });
     }, UPDATE_WAIT_MS);

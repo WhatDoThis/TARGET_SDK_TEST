@@ -1,7 +1,7 @@
 /**
  * app.App (App 루트 오케스트레이션)
  * ================================
- * config → init → Assurance 연결 → testNum → Optimize fetch → event-popup.
+ * config → init → Assurance(딥링크/Quick Connect) → Optimize fetch → event-popup.
  * 네이티브 모듈 경로(WebView 아님). 백엔드 없음.
  *
  * [Main Functions]
@@ -10,6 +10,7 @@
  *
  * [Dependencies]
  * =========
+ * - react / react-native
  * - config/app_config
  * - init/app_init
  * - assurance/app_assurance_service
@@ -19,9 +20,15 @@
  */
 
 import React, { useEffect, useState } from "react";
+import { Linking } from "react-native";
 import { loadAppConfig } from "./src/config/app_config";
 import { initMobileSdk } from "./src/init/app_init";
-import { connectAssuranceSession } from "./src/assurance/app_assurance_service";
+import {
+  ASSURANCE_APP_SCHEME,
+  connectAssuranceSession,
+  isAssuranceSessionUrl,
+  startAssuranceQuickConnect,
+} from "./src/assurance/app_assurance_service";
 import {
   fetchTargetOffers,
   parseEventPopup,
@@ -42,6 +49,7 @@ export default function App(): React.JSX.Element {
   const [status, setStatus] = useState("Initializing Mobile SDK…");
   const [statusKind, setStatusKind] = useState<"ok" | "err" | "info">("info");
   const [busy, setBusy] = useState(true);
+  const [sdkReady, setSdkReady] = useState(false);
   const [testNum, setTestNum] = useState<TestNum>("3");
   const [assuranceUrl, setAssuranceUrl] = useState(
     config.assurance.assuranceSessionUrl
@@ -59,7 +67,10 @@ export default function App(): React.JSX.Element {
         if (cancelled) {
           return;
         }
-        setStatus("SDK configured. Select testNum and Fetch offers.");
+        setSdkReady(true);
+        setStatus(
+          `SDK configured. Assurance Base URL = ${ASSURANCE_APP_SCHEME}://`
+        );
         setStatusKind("ok");
       } catch (error) {
         if (cancelled) {
@@ -79,6 +90,36 @@ export default function App(): React.JSX.Element {
       cancelled = true;
     };
   }, []);
+
+  // 앱 스킴 딥링크로 열린 경우 startSession(url)
+  useEffect(() => {
+    if (!sdkReady) {
+      return;
+    }
+
+    const handleUrl = (url: string | null): void => {
+      if (!url || !isAssuranceSessionUrl(url)) {
+        return;
+      }
+      try {
+        setAssuranceUrl(url);
+        connectAssuranceSession(url);
+        setStatus("Assurance deeplink → PIN 입력 후 Connect");
+        setStatusKind("info");
+      } catch (error) {
+        setStatus(safeErrorMessage(error, "App.Linking"));
+        setStatusKind("err");
+      }
+    };
+
+    void Linking.getInitialURL().then(handleUrl);
+    const sub = Linking.addEventListener("url", (event) => {
+      handleUrl(event.url);
+    });
+    return () => {
+      sub.remove();
+    };
+  }, [sdkReady]);
 
   const onFetch = async (): Promise<void> => {
     setBusy(true);
@@ -104,7 +145,9 @@ export default function App(): React.JSX.Element {
       });
 
       if (popup) {
-        setStatus(`event-popup (testNum=${testNum}): ${popup.title ?? "이벤트 대상"}`);
+        setStatus(
+          `event-popup (testNum=${testNum}): ${popup.title ?? "이벤트 대상"}`
+        );
         setStatusKind("ok");
       } else {
         const first = result.offers[0]?.payload;
@@ -143,12 +186,23 @@ export default function App(): React.JSX.Element {
   const onAssuranceConnect = (): void => {
     try {
       connectAssuranceSession(assuranceUrl);
-      setStatus(
-        "Assurance startSession called — 웹 Available Devices에서 기기 선택 후 Connect / PIN"
-      );
+      setStatus("Assurance startSession(url) — 앱 PIN 입력 후 웹 Connect");
       setStatusKind("info");
     } catch (error) {
       setStatus(safeErrorMessage(error, "App.onAssuranceConnect"));
+      setStatusKind("err");
+    }
+  };
+
+  const onAssuranceQuickConnect = (): void => {
+    try {
+      startAssuranceQuickConnect();
+      setStatus(
+        "Quick Connect 호출됨 (debug APK만 동작). 웹 Available Devices에서 기기 선택"
+      );
+      setStatusKind("info");
+    } catch (error) {
+      setStatus(safeErrorMessage(error, "App.onAssuranceQuickConnect"));
       setStatusKind("err");
     }
   };
@@ -164,6 +218,7 @@ export default function App(): React.JSX.Element {
       assuranceUrl={assuranceUrl}
       onAssuranceUrlChange={setAssuranceUrl}
       onAssuranceConnect={onAssuranceConnect}
+      onAssuranceQuickConnect={onAssuranceQuickConnect}
       offers={offers}
       debugPayload={debugPayload}
       eventPopup={eventPopup}

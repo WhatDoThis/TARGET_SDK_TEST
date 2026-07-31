@@ -1,12 +1,12 @@
 /**
  * app.init.app_init (AEP Mobile SDK 초기화)
  * ========================================
- * AEP RN 7.x: MobileCore.initializeWithAppId로 번들 확장을 자동 등록한다.
- * Tags FPC domain이 불안정할 수 있어 Dev 스모크 시 edge.adobedc.net으로 덮어쓸 수 있다.
+ * initializeWithAppId 후 privacy OPT_IN + edge.configId/domain을 강제한다.
+ * Consent pending / Tags datastream 미주입이면 Optimize가 영구 대기한다.
  *
  * [Main Functions]
  * ===========
- * - 1. initMobileSdk — initializeWithAppId + edge.domain + 확장 버전 점검
+ * - 1. initMobileSdk — initializeWithAppId + Edge 설정 + 확장 버전 점검
  *
  * [Dependencies]
  * =========
@@ -19,7 +19,7 @@
  * - shared/app_shared_utils
  */
 
-import { MobileCore, LogLevel } from "@adobe/react-native-aepcore";
+import { MobileCore, LogLevel, PrivacyStatus } from "@adobe/react-native-aepcore";
 import { Edge } from "@adobe/react-native-aepedge";
 import { Identity as EdgeIdentity } from "@adobe/react-native-aepedgeidentity";
 import { Optimize } from "@adobe/react-native-aepoptimize";
@@ -27,7 +27,6 @@ import { Assurance } from "@adobe/react-native-aepassurance";
 import type { AppConfig } from "../config/app_config";
 import { isBlank, safeErrorMessage } from "../shared/app_shared_utils";
 
-/** Adobe 기본 Edge 호스트 — Tags FPC 도메인 장애 시 Dev 우회용 */
 const DEFAULT_EDGE_DOMAIN = "edge.adobedc.net";
 
 let initialized = false;
@@ -47,15 +46,24 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
 
     await MobileCore.initializeWithAppId(config.adobeMobile.adobeMobileAppId);
 
-    // Tags에 설정된 FPC domain이 폰에서 안 열리면 Optimize 콜백이 영구히 안 옴.
-    // env edgeDomain가 있으면 그걸 쓰고, 없으면 Adobe 기본 호스트로 강제.
+    // Edge 요청 차단의 가장 흔한 원인: privacy / Consent collect=n
+    MobileCore.setPrivacyStatus(PrivacyStatus.OPT_IN);
+
     const edgeDomain = !isBlank(config.adobeMobile.edgeDomain)
       ? config.adobeMobile.edgeDomain.trim()
       : DEFAULT_EDGE_DOMAIN;
-    await MobileCore.updateConfiguration({
+
+    const runtimeConfig: Record<string, string> = {
       "edge.domain": edgeDomain,
-    });
-    console.info("[initMobileSdk] edge.domain=", edgeDomain);
+    };
+
+    // Tags Edge datastream이 Dev에 안 붙었을 때 코드로 보정
+    if (!isBlank(config.adobeMobile.edgeConfigId)) {
+      runtimeConfig["edge.configId"] = config.adobeMobile.edgeConfigId.trim();
+    }
+
+    await MobileCore.updateConfiguration(runtimeConfig);
+    console.info("[initMobileSdk] runtime config", runtimeConfig);
 
     await sleep(2000);
 

@@ -1,12 +1,13 @@
 {
   "adobeMobile": {
     "adobeMobileAppId": "<org>/<property>/launch-xxxx-development",
+    "edgeConfigId": "",
     "edgeDomain": ""
   },
   "target": {
     "decisionScope": "aep-app-test-scope"
   },
   "assurance": {
-    "assuranceSessionUrl": ""
+    "assuranceSessionUrl": "aepsdktargettest://?adb_validation_sessionid=<ASSURANCE_SESSION_ID>"
   }
 }

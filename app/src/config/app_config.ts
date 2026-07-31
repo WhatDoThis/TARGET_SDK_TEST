@@ -11,17 +11,20 @@
  * [Dependencies]
  * =========
  * - app/env/config.dev.example.json
- * - EXPO_PUBLIC_ADOBE_MOBILE_APP_ID (EAS/로컬 .env)
+ * - EXPO_PUBLIC_ADOBE_MOBILE_APP_ID / EDGE_CONFIG_ID / EDGE_DOMAIN / DECISION_SCOPE
  * - shared/app_shared_utils
  */
 
 import configExample from "../../env/config.dev.example.json";
+import { HARDCODED_ASSURANCE_SESSION_URL } from "../assurance/app_assurance_service";
 import { isBlank } from "../shared/app_shared_utils";
 
 export interface AppAdobeMobileConfig {
   /** Tags Mobile Dev Environment File ID */
   adobeMobileAppId: string;
-  /** 빈 문자열이면 Tags/SDK 기본 도메인. 있으면 edge.domain 주입 */
+  /** Datastream UUID → edge.configId (Tags 주입 실패 시 코드로 강제) */
+  edgeConfigId: string;
+  /** 빈 문자열이면 edge.adobedc.net 강제. 있으면 그 값 */
   edgeDomain: string;
 }
 
@@ -47,6 +50,10 @@ export function loadAppConfig(): AppConfig {
       adobeMobileAppId:
         readEnv("EXPO_PUBLIC_ADOBE_MOBILE_APP_ID") ||
         base.adobeMobile.adobeMobileAppId,
+      edgeConfigId:
+        readEnv("EXPO_PUBLIC_EDGE_CONFIG_ID") ??
+        base.adobeMobile.edgeConfigId ??
+        "",
       edgeDomain:
         readEnv("EXPO_PUBLIC_EDGE_DOMAIN") ?? base.adobeMobile.edgeDomain,
     },
@@ -56,8 +63,9 @@ export function loadAppConfig(): AppConfig {
     },
     assurance: {
       assuranceSessionUrl:
-        readEnv("EXPO_PUBLIC_ASSURANCE_SESSION_URL") ??
-        base.assurance.assuranceSessionUrl,
+        readEnv("EXPO_PUBLIC_ASSURANCE_SESSION_URL") ||
+        base.assurance.assuranceSessionUrl ||
+        HARDCODED_ASSURANCE_SESSION_URL,
     },
   };
 

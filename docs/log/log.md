@@ -2,6 +2,9 @@
 
 ## Log Index
 
+16. 2026-07-31 App Assurance 세션 URL 하드코딩
+15. 2026-07-31 App offer용 privacy OPT_IN·edge.configId 강제
+14. 2026-07-31 App Assurance 앱스킴 Deep link 연결 경로
 13. 2026-07-31 App Assurance Session URL 런타임 연결 UI
 12. 2026-07-31 App Optimize 샘플 패턴·edge.adobedc.net 강제
 11. 2026-07-31 App Optimize 콜백 미수신 — Map data·확장 진단
@@ -17,6 +20,61 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+16. 2026-07-31 App Assurance 세션 URL 하드코딩
+
+Purpose: 앱에서 URL 붙여넣기 없이 Assurance Deep link 세션 자동 연결
+
+Changes:
+
+- `HARDCODED_ASSURANCE_SESSION_URL` 상수 + config/EAS에 동일 URL 주입
+- init 시 startSession 자동 호출(기존 로직)
+
+Changed files:
+
+- app/src/assurance/app_assurance_service.ts
+- app/src/config/app_config.ts
+- app/eas.json
+- app/env/config.dev.json
+- app/env/config.dev.example.json
+- docs/log/log.md
+
+15. 2026-07-31 App offer용 privacy OPT_IN·edge.configId 강제
+
+Purpose: Optimize timeout(오퍼 미수신)의 Edge 차단 원인 — privacy/datastream 미주입 — 제거
+
+Changes:
+
+- MobileCore.setPrivacyStatus(OPT_IN)
+- EXPO_PUBLIC_EDGE_CONFIG_ID(=Test Woo Native datastream) + edge.adobedc.net EAS 주입
+- updatePropositions 성공/에러 콜백 + timeout 메시지에 Target Location 점검 안내
+
+Changed files:
+
+- app/src/init/app_init.ts
+- app/src/config/app_config.ts
+- app/src/target/app_target_service.ts
+- app/env/config.dev.example.json
+- app/eas.json
+- docs/log/log.md
+
+14. 2026-07-31 App Assurance 앱스킴 Deep link 연결 경로
+
+Purpose: 웹 https Assurance 링크로는 Mobile 연결 불가 — 앱 스킴 Deep link로 공식 경로 고정
+
+Changes:
+
+- app.json `scheme: aepsdktargettest`
+- 웹 https URL 거부 + Deep link / Quick Connect(debug) API 분리
+- Linking으로 앱 스킴 진입 시 startSession(url)
+
+Changed files:
+
+- app/app.json
+- app/src/assurance/app_assurance_service.ts
+- app/App.tsx
+- app/src/ui/AppScreen.tsx
+- docs/log/log.md
 
 13. 2026-07-31 App Assurance Session URL 런타임 연결 UI
 
