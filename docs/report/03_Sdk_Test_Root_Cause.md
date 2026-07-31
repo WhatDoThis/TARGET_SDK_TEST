@@ -44,7 +44,32 @@
 | `updatePropositions timeout` | Edge 완료 신호 없음 | Publish / 네트워크 / config 미수신 |
 | `aepError: general.unexpected` | **Edge/Optimize가 응답했으나 실패** (HTTP 5xx급·파싱 실패 등) | 아래 §3 |
 | Optimize OK · empty offers | 통신 성공, **Target 매칭 0건** | Location·Live·audience |
-| ECID unavailable at init | Tags 설정/네트워크 실패 | Dev Publish·appId·망 |
+| ECID unavailable at init | Tags 설정/네트워크 실패 | §2.1 |
+
+### 2.1 ECID timeout (= Fetch 이전 실패)
+
+스크린에 `waitForEdgeReady` / `Edge Identity ECID unavailable` 이 보이면  
+**Optimize·Target까지 가지 못한 상태**다. (Fetch 버튼이 비활성인 이유)
+
+Adobe RN에서도 `getExperienceCloudId`는 원격 설정에 `experienceCloud.org`가 오기 전에는  
+`general.callback.timeout` 을 반복한다.  
+→ **Tags Environment File을 기기가 못 받거나, Edge/Identity 설정이 비어 있음.**
+
+| 점검 | 확인 |
+|------|------|
+| Tags Dev **Publish** | Enabled만으로는 부족 — Development 라이브러리 Publish 완료 |
+| File ID = 앱 `appId` | `…/launch-xxxx-development` 문자 일치 (EAS `EXPO_PUBLIC_ADOBE_MOBILE_APP_ID`) |
+| Edge 확장 Dev Datastream | Target **ON**인 Datastream ID |
+| 클래식 Adobe Target 확장 | Installed에 있으면 **제거** 후 재Publish |
+| 기기 네트워크 | `assets.adobedtm.com` / Edge 도메인 차단 여부 (법인망·VPN) |
+| logcat | `waiting for configuration with valid 'experienceCloud.org'` 문구 여부 |
+
+**임시 우회 (Troubleshooting 부록, 골든 패스 아님):**  
+EAS `env`에 `EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID=<Datastream UUID>` (+ 필요 시 `EXPO_PUBLIC_DEBUG_EDGE_DOMAIN`) 넣고 **재빌드**.  
+→ ECID가 뜨면 Tags 원격 다운로드가 원인 확정.  
+→ ECID는 뜨고 Fetch가 `general.unexpected`면 §3으로.
+
+앱 Raw JSON의 `diagnostics.appId` / `lastEcidAttemptError` 로 File ID·타임아웃 원인을 교차 확인한다.
 
 ---
 
@@ -71,7 +96,8 @@
 
 ## 4. 코드 측 보완 (이번 반영)
 
-- init 후 **ECID 수신까지 대기** — Tags `edge.configId` 다운로드 전에 Fetch하면 unexpected 가능  
+- init 후 **ECID 수신까지 대기**(기본 45s) — Tags `edge.configId` 다운로드 전에 Fetch하면 unexpected 가능  
+- ECID 실패 시 **appId · lastError · empty count** 를 Raw JSON `diagnostics`에 노출  
 - Fetch **1차 data 없음 → 2차 testNum** — 파라미터 조건 활동과 단순 활동 모두 커버  
 - 에러 문자열에 **CAUSE 힌트** 포함  
 - empty offers는 throw하지 않고 경고로 표시 (통신 성공 vs Target 미스 분리)

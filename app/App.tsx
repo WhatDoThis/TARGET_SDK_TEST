@@ -2,7 +2,7 @@
  * app.App (App 루트 — 공식 골든 패스)
  * ==================================
  * init → Edge ready(ECID) → Fetch(Optimize) → 오퍼 표시.
- * Assurance는 디버그 수동만.
+ * ECID 실패 시 diagnostics(appId·lastError)를 Raw JSON에 노출. Assurance는 디버그 수동만.
  *
  * [Main Functions]
  * ===========
@@ -21,7 +21,11 @@
 import React, { useEffect, useState } from "react";
 import { Linking } from "react-native";
 import { loadAppConfig } from "./src/config/app_config";
-import { initMobileSdk, waitForEdgeReady } from "./src/init/app_init";
+import {
+  getLastInitDiagnostics,
+  initMobileSdk,
+  waitForEdgeReady,
+} from "./src/init/app_init";
 import {
   ASSURANCE_APP_SCHEME,
   connectAssuranceSession,
@@ -89,7 +93,15 @@ export default function App(): React.JSX.Element {
         }
         setStatus(safeErrorMessage(error, "App.init"));
         setStatusKind("err");
-        setDebugPayload({ error: String(error) });
+        setDebugPayload({
+          error: String(error),
+          path: "official-golden-path",
+          diagnostics: getLastInitDiagnostics(),
+          hint:
+            "ECID timeout = Tags config not on device yet (not Target). " +
+            "Check Dev Publish / appId / Edge Datastream. " +
+            "Temp: EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID + rebuild.",
+        });
       } finally {
         if (!cancelled) {
           setBusy(false);

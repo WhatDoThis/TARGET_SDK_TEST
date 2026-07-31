@@ -2,6 +2,8 @@
 
 ## Log Index
 
+24. 2026-07-31 EAS debug edge.configId·샌드박스 domain 임시 주입
+23. 2026-07-31 App ECID timeout 진단 보강 (Tags 원격설정 미수신)
 22. 2026-07-31 App Optimize 실패 원인 분석·Edge ready·Fetch 정리
 21. 2026-07-31 Customer Guide Edge domain 샌드박스 기본값 정정
 20. 2026-07-31 공식 골든 패스 재정립 (가이드·App 단순화)
@@ -26,6 +28,39 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+24. 2026-07-31 EAS debug edge.configId·샌드박스 domain 임시 주입
+
+Purpose: ECID timeout 원인 가르기용으로 Tags Edge와 동일한 Datastream/domain을 DEBUG env로 EAS 빌드에 주입 (골든 패스 아님)
+
+Changes:
+
+- development/preview env에 EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID·DEBUG_EDGE_DOMAIN 추가
+- ECID 진단 보강(app_init/App/Root Cause) 함께 커밋
+
+Changed files:
+
+- app/eas.json
+- app/src/init/app_init.ts
+- app/App.tsx
+- docs/report/03_Sdk_Test_Root_Cause.md
+- docs/log/log.md
+
+23. 2026-07-31 App ECID timeout 진단 보강 (Tags 원격설정 미수신)
+
+Purpose: 스크린의 waitForEdgeReady ECID timeout이 Fetch/Target 문제가 아님을 명확히 하고, Tags 원격설정 미수신을 판정할 진단 정보를 노출
+
+Changes:
+
+- waitForEdgeReady 대기 45s, appId·lastError·empty count를 에러/diagnostics에 포함
+- Root Cause §2.1 ECID timeout 체크리스트·DEBUG_EDGE_CONFIG_ID 임시 우회 안내
+
+Changed files:
+
+- app/src/init/app_init.ts
+- app/App.tsx
+- docs/report/03_Sdk_Test_Root_Cause.md
+- docs/log/log.md
 
 22. 2026-07-31 App Optimize 실패 원인 분석·Edge ready·Fetch 정리
 
