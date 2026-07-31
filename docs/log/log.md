@@ -2,6 +2,7 @@
 
 ## Log Index
 
+25. 2026-07-31 ECID 실패 시 debugOverrides 노출·smoke 폴백·edge.adobedc.net
 24. 2026-07-31 EAS debug edge.configId·샌드박스 domain 임시 주입
 23. 2026-07-31 App ECID timeout 진단 보강 (Tags 원격설정 미수신)
 22. 2026-07-31 App Optimize 실패 원인 분석·Edge ready·Fetch 정리
@@ -28,6 +29,23 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+25. 2026-07-31 ECID 실패 시 debugOverrides 노출·smoke 폴백·edge.adobedc.net
+
+Purpose: Raw에 debugOverrides 안 보이던 UX/env 누락 보완, domain을 edge.adobedc.net으로 검증
+
+Changes:
+
+- config: EAS env 없을 때 smoke fallback(configId + edge.adobedc.net)
+- App: 실패 시에도 최상위 debugOverrides·edgeSource 항상 표시
+- eas DEBUG_EDGE_DOMAIN → edge.adobedc.net
+
+Changed files:
+
+- app/src/config/app_config.ts
+- app/App.tsx
+- app/eas.json
+- docs/log/log.md
 
 24. 2026-07-31 EAS debug edge.configId·샌드박스 domain 임시 주입
 

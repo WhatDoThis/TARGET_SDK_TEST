@@ -2,7 +2,7 @@
  * app.App (App 루트 — 공식 골든 패스)
  * ==================================
  * init → Edge ready(ECID) → Fetch(Optimize) → 오퍼 표시.
- * ECID 실패 시 diagnostics(appId·lastError)를 Raw JSON에 노출. Assurance는 디버그 수동만.
+ * Raw 최상단에 debugOverrides(edgeConfigId·domain·source)를 항상 노출. Assurance는 디버그 수동만.
  *
  * [Main Functions]
  * ===========
@@ -47,9 +47,26 @@ import { safeErrorMessage } from "./src/shared/app_shared_utils";
 
 const config = loadAppConfig();
 
+function buildDebugSnapshot(extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    path: "official-golden-path",
+    appId: config.adobeMobile.adobeMobileAppId,
+    decisionScope: config.target.decisionScope,
+    // 최상위 키 — 실패 시에도 Raw에서 바로 보이게
+    debugOverrides: {
+      edgeConfigId: config.debug.edgeConfigId,
+      edgeDomain: config.debug.edgeDomain,
+      edgeSource: config.debug.edgeSource,
+    },
+    ...extra,
+  };
+}
+
 // 1.
 export default function App(): React.JSX.Element {
-  const [status, setStatus] = useState("Initializing Mobile SDK…");
+  const [status, setStatus] = useState(
+    `Init… debug edge=${config.debug.edgeConfigId.slice(0, 8)}… / ${config.debug.edgeDomain} (${config.debug.edgeSource})`
+  );
   const [statusKind, setStatusKind] = useState<"ok" | "err" | "info">("info");
   const [busy, setBusy] = useState(true);
   const [sdkReady, setSdkReady] = useState(false);
@@ -58,7 +75,9 @@ export default function App(): React.JSX.Element {
     config.assurance.assuranceSessionUrl
   );
   const [offers, setOffers] = useState<ParsedOffer[]>([]);
-  const [debugPayload, setDebugPayload] = useState<unknown>({});
+  const [debugPayload, setDebugPayload] = useState<unknown>(() =>
+    buildDebugSnapshot({ phase: "boot" })
+  );
   const [eventPopup, setEventPopup] = useState<EventPopupOffer | null>(null);
 
   useEffect(() => {
@@ -66,11 +85,20 @@ export default function App(): React.JSX.Element {
 
     (async () => {
       try {
+        setDebugPayload(buildDebugSnapshot({ phase: "initMobileSdk" }));
         await initMobileSdk(config);
         if (cancelled) {
           return;
         }
-        setStatus("Waiting Edge Identity (Tags config download)…");
+        setStatus(
+          `Waiting ECID… overrides applied · ${config.debug.edgeDomain} · src=${config.debug.edgeSource}`
+        );
+        setDebugPayload(
+          buildDebugSnapshot({
+            phase: "waitForEdgeReady",
+            diagnostics: getLastInitDiagnostics(),
+          })
+        );
         const ready = await waitForEdgeReady();
         if (cancelled) {
           return;
@@ -80,28 +108,30 @@ export default function App(): React.JSX.Element {
           `SDK ready · ecid=${ready.ecid} · scope=${config.target.decisionScope} · Fetch`
         );
         setStatusKind("ok");
-        setDebugPayload({
-          path: "official-golden-path",
-          appId: config.adobeMobile.adobeMobileAppId,
-          decisionScope: config.target.decisionScope,
-          ecid: ready.ecid,
-          debugOverrides: config.debug,
-        });
+        setDebugPayload(
+          buildDebugSnapshot({
+            phase: "ready",
+            ecid: ready.ecid,
+            diagnostics: getLastInitDiagnostics(),
+          })
+        );
       } catch (error) {
         if (cancelled) {
           return;
         }
         setStatus(safeErrorMessage(error, "App.init"));
         setStatusKind("err");
-        setDebugPayload({
-          error: String(error),
-          path: "official-golden-path",
-          diagnostics: getLastInitDiagnostics(),
-          hint:
-            "ECID timeout = Tags config not on device yet (not Target). " +
-            "Check Dev Publish / appId / Edge Datastream. " +
-            "Temp: EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID + rebuild.",
-        });
+        setDebugPayload(
+          buildDebugSnapshot({
+            phase: "failed",
+            error: String(error),
+            diagnostics: getLastInitDiagnostics(),
+            hint:
+              "Raw.debugOverrides가 비면 옛 APK. " +
+              "edgeSource=smoke-fallback이면 EAS env 미주입·소스 폴백 사용 중. " +
+              "그래도 ECID 실패면 기기→Adobe 망/Identity 링크 문제.",
+          })
+        );
       } finally {
         if (!cancelled) {
           setBusy(false);
