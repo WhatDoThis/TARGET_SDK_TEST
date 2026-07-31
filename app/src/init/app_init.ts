@@ -1,12 +1,13 @@
 /**
  * app.init.app_init (AEP Mobile SDK 초기화)
  * ========================================
- * initializeWithAppId 후 privacy OPT_IN + edge.configId/domain을 강제한다.
- * Consent pending / Tags datastream 미주입이면 Optimize가 영구 대기한다.
+ * initializeWithAppId 후 privacy OPT_IN + edge.configId/domain.
+ * Assurance는 orgId가 SDK에 로드된 뒤에만 연결 (조기 startSession → 무한 대기 방지).
  *
  * [Main Functions]
  * ===========
  * - 1. initMobileSdk — initializeWithAppId + Edge 설정 + 확장 버전 점검
+ * - 2. waitForExperienceCloudOrg — Assurance 전 org 준비 대기
  *
  * [Dependencies]
  * =========
@@ -14,7 +15,6 @@
  * - @adobe/react-native-aepedge
  * - @adobe/react-native-aepedgeidentity
  * - @adobe/react-native-aepoptimize
- * - @adobe/react-native-aepassurance (선택)
  * - config/app_config
  * - shared/app_shared_utils
  */
@@ -23,11 +23,12 @@ import { MobileCore, LogLevel, PrivacyStatus } from "@adobe/react-native-aepcore
 import { Edge } from "@adobe/react-native-aepedge";
 import { Identity as EdgeIdentity } from "@adobe/react-native-aepedgeidentity";
 import { Optimize } from "@adobe/react-native-aepoptimize";
-import { Assurance } from "@adobe/react-native-aepassurance";
 import type { AppConfig } from "../config/app_config";
 import { isBlank, safeErrorMessage } from "../shared/app_shared_utils";
 
 const DEFAULT_EDGE_DOMAIN = "edge.adobedc.net";
+const ORG_WAIT_MS = 15000;
+const ORG_POLL_MS = 500;
 
 let initialized = false;
 
@@ -46,7 +47,6 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
 
     await MobileCore.initializeWithAppId(config.adobeMobile.adobeMobileAppId);
 
-    // Edge 요청 차단의 가장 흔한 원인: privacy / Consent collect=n
     MobileCore.setPrivacyStatus(PrivacyStatus.OPT_IN);
 
     const edgeDomain = !isBlank(config.adobeMobile.edgeDomain)
@@ -57,7 +57,6 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
       "edge.domain": edgeDomain,
     };
 
-    // Tags Edge datastream이 Dev에 안 붙었을 때 코드로 보정
     if (!isBlank(config.adobeMobile.edgeConfigId)) {
       runtimeConfig["edge.configId"] = config.adobeMobile.edgeConfigId.trim();
     }
@@ -81,9 +80,8 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
       );
     }
 
-    if (!isBlank(config.assurance.assuranceSessionUrl)) {
-      Assurance.startSession(config.assurance.assuranceSessionUrl.trim());
-    }
+    // Assurance는 App에서 org 확인 후 버튼/자동 연결 — 여기서 startSession 하지 않음
+    // (org 미수신 상태에서 startSession → Invalid Configuration / 웹 무한로딩)
 
     initialized = true;
     console.info("[initMobileSdk] success", versions);
@@ -91,6 +89,53 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
     initialized = false;
     throw new Error(safeErrorMessage(error, "initMobileSdk"));
   }
+}
+
+// 2.
+export async function waitForExperienceCloudOrg(): Promise<string> {
+  const deadline = Date.now() + ORG_WAIT_MS;
+
+  while (Date.now() < deadline) {
+    try {
+      const identities = await MobileCore.getSdkIdentities();
+      const org = extractOrgId(identities);
+      if (!isBlank(org)) {
+        console.info("[waitForExperienceCloudOrg] org=", org);
+        return org;
+      }
+      console.info("[waitForExperienceCloudOrg] waiting…", identities);
+    } catch (error) {
+      console.warn("[waitForExperienceCloudOrg] getSdkIdentities failed", error);
+    }
+    await sleep(ORG_POLL_MS);
+  }
+
+  throw new Error(
+    "[waitForExperienceCloudOrg] experienceCloud.org unavailable — Tags Dev Publish / appId / 네트워크 확인. Assurance는 org 없이 연결 불가."
+  );
+}
+
+function extractOrgId(identities: string): string | null {
+  if (isBlank(identities)) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(identities) as {
+      companyContexts?: Array<{ namespace?: string; value?: string }>;
+    };
+    const ctx = parsed.companyContexts?.find(
+      (c) => c.namespace === "imsOrgId" || c.namespace === "orgId"
+    );
+    if (ctx?.value) {
+      return ctx.value;
+    }
+  } catch {
+    // fall through — string scan
+  }
+  const match = identities.match(
+    /[0-9A-F]{24}@AdobeOrg|[0-9A-Za-z]+@[Aa]dobe[Oo]rg/
+  );
+  return match?.[0] ?? null;
 }
 
 async function readExtensionVersions(): Promise<Record<string, string>> {

@@ -2,6 +2,8 @@
 
 ## Log Index
 
+18. 2026-07-31 App Optimize general.unexpected — plain data·무파라미터 재시도
+17. 2026-07-31 App Assurance org 대기 후 연결
 16. 2026-07-31 App Assurance 세션 URL 하드코딩
 15. 2026-07-31 App offer용 privacy OPT_IN·edge.configId 강제
 14. 2026-07-31 App Assurance 앱스킴 Deep link 연결 경로
@@ -20,6 +22,37 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+18. 2026-07-31 App Optimize general.unexpected — plain data·무파라미터 재시도
+
+Purpose: timeout→general.unexpected로 진전 — nested Map data/Edge 오류 완화 및 진단 메시지 보강
+
+Changes:
+
+- Target data를 Map → plain `__adobe.target` object
+- 1차 data 없이 updatePropositions, 실패/빈 응답 시 testNum 재시도
+- 에러 문구에 Assurance personalization 응답 확인 안내
+
+Changed files:
+
+- app/src/target/app_target_service.ts
+- docs/log/log.md
+
+17. 2026-07-31 App Assurance org 대기 후 연결
+
+Purpose: 동일 sessionid여도 만료·org 미수신 시 웹 무한로딩 — org 확인 후 startSession
+
+Changes:
+
+- init에서 즉시 startSession 제거
+- waitForExperienceCloudOrg 후 Assurance 연결
+- 만료 세션은 새 sessionid 필요함을 상태 문구로 안내
+
+Changed files:
+
+- app/src/init/app_init.ts
+- app/App.tsx
+- docs/log/log.md
 
 16. 2026-07-31 App Assurance 세션 URL 하드코딩
 

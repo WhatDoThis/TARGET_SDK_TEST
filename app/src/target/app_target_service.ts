@@ -1,8 +1,9 @@
 /**
  * app.target.app_target_service (App Optimize Target)
  * ==================================================
- * 공식 순서: updatePropositions(완료 콜백) → getPropositions.
- * data.__adobe.target.testNum (Map) — Target mbox 파라미터.
+ * updatePropositions → getPropositions.
+ * data는 plain nested object (RN 브릿지). Map으로 general.unexpected 나는 경우 회피.
+ * 1차: data 없이 요청 → 2차: testNum 포함 재시도.
  *
  * [Main Functions]
  * ===========
@@ -129,19 +130,43 @@ export async function fetchTargetOffers(
     }
 
     const scopes = [new DecisionScope(decisionScope)];
-    // Adobe Target Parameters: nested Map for RN → Android HashMap bridge
-    const data = new Map<string, unknown>([
-      [
-        "__adobe",
-        new Map<string, unknown>([
-          ["target", new Map<string, unknown>([["testNum", String(testNum)]])],
-        ]),
-      ],
-    ]);
+    // Android/RN 샘플과 동일: plain nested object (Map 중첩은 브릿지에서 unexpected 유발 가능)
+    const dataWithTestNum = {
+      __adobe: {
+        target: {
+          testNum: String(testNum),
+        },
+      },
+    };
 
     Optimize.clearCachedPropositions();
 
-    const updateResult = await runUpdatePropositions(scopes, data);
+    // 1차: 파라미터 없이 (통신·Target 매칭만 검증)
+    let updateResult = await runUpdatePropositions(scopes, undefined);
+    let attempt = "no-data";
+
+    // 2차: general.unexpected 등 실패 시 testNum plain object로 재시도
+    if (updateResult.path === "onError" || updateResult.path === "timeout") {
+      Optimize.clearCachedPropositions();
+      updateResult = await runUpdatePropositions(scopes, dataWithTestNum);
+      attempt = "with-testNum";
+    } else if (
+      !hasAnyProposition(updateResult.propositions) &&
+      updateResult.path !== "timeout"
+    ) {
+      // 빈 성공이면 testNum 넣어 재요청 (오퍼가 파라미터 기반일 수 있음)
+      Optimize.clearCachedPropositions();
+      const withData = await runUpdatePropositions(scopes, dataWithTestNum);
+      if (
+        withData.path !== "onError" &&
+        withData.path !== "timeout" &&
+        hasAnyProposition(withData.propositions)
+      ) {
+        updateResult = withData;
+        attempt = "with-testNum-after-empty";
+      }
+    }
+
     const propositions =
       updateResult.propositions ?? (await Optimize.getPropositions(scopes));
     const offers = parsePropositionMap(propositions);
@@ -153,25 +178,11 @@ export async function fetchTargetOffers(
           `optimize=${optimizeVersion}`,
           `scope=${decisionScope}`,
           `testNum=${testNum}`,
-          "점검: privacy OPT_IN·edge.configId·Tags Dev publish·Target Location=aep-app-test-scope·활동 Live",
+          `attempt=${attempt}`,
+          "general.unexpected = Edge/Optimize가 응답했으나 실패(timeout 아님).",
+          "Assurance에서 personalization 응답 오류·Target Location Live·클래식 Target 확장 잔존 여부 확인",
         ].join(" · ")
       );
-    }
-
-    if (offers.length === 0 || offers.every((o) => o.payload == null)) {
-      // Edge/Optimize는 응답했는데 Target 매칭 오퍼 없음
-      return {
-        offers,
-        rawPropositions: {
-          optimizeVersion,
-          decisionScope,
-          testNum,
-          updatePath: updateResult.path,
-          warning:
-            "Optimize responded but no offer payload — Target activity Location/audience/testNum 확인",
-          response: serializePropositions(propositions),
-        },
-      };
     }
 
     return {
@@ -180,8 +191,12 @@ export async function fetchTargetOffers(
         optimizeVersion,
         decisionScope,
         testNum,
+        attempt,
         updatePath: updateResult.path,
-        warning: updateResult.error,
+        warning:
+          offers.length === 0 || offers.every((o) => o.payload == null)
+            ? "Optimize OK but empty — Target Location/audience/testNum/Live 확인"
+            : updateResult.error,
         response: serializePropositions(propositions),
       },
     };
@@ -198,7 +213,7 @@ interface UpdateResult {
 
 function runUpdatePropositions(
   scopes: DecisionScope[],
-  data: Map<string, unknown>
+  data: Record<string, unknown> | undefined
 ): Promise<UpdateResult> {
   return new Promise((resolve) => {
     let settled = false;
@@ -229,7 +244,6 @@ function runUpdatePropositions(
       console.warn("[fetchTargetOffers] onPropositionUpdate failed", error);
     }
 
-    // 공식: completion handler (성공/에러 콜백)
     try {
       Optimize.updatePropositions(
         scopes,
@@ -251,7 +265,6 @@ function runUpdatePropositions(
         }
       );
     } catch (error) {
-      // 콜백 시그니처 미지원 빌드 → 무콜백 폴백
       try {
         Optimize.updatePropositions(scopes, undefined, data);
       } catch (inner) {
@@ -279,7 +292,7 @@ function runUpdatePropositions(
             });
           }
         } catch {
-          // ignore transient get errors while Edge in flight
+          // ignore
         }
       })();
     }, POLL_INTERVAL_MS);

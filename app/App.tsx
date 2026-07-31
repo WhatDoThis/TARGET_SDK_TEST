@@ -22,7 +22,7 @@
 import React, { useEffect, useState } from "react";
 import { Linking } from "react-native";
 import { loadAppConfig } from "./src/config/app_config";
-import { initMobileSdk } from "./src/init/app_init";
+import { initMobileSdk, waitForExperienceCloudOrg } from "./src/init/app_init";
 import {
   ASSURANCE_APP_SCHEME,
   connectAssuranceSession,
@@ -68,9 +68,23 @@ export default function App(): React.JSX.Element {
           return;
         }
         setSdkReady(true);
-        setStatus(
-          `SDK configured. Assurance Base URL = ${ASSURANCE_APP_SCHEME}://`
-        );
+
+        // orgId 없으면 Assurance 핸드셰이크가 웹에서 무한로딩처럼 보임
+        const org = await waitForExperienceCloudOrg();
+        if (cancelled) {
+          return;
+        }
+
+        if (isAssuranceSessionUrl(config.assurance.assuranceSessionUrl)) {
+          connectAssuranceSession(config.assurance.assuranceSessionUrl);
+          setStatus(
+            `SDK OK · org=${org} · Assurance PIN 입력 (세션 만료 시 새 sessionid 필요)`
+          );
+        } else {
+          setStatus(
+            `SDK OK · org=${org} · Base URL=${ASSURANCE_APP_SCHEME}://`
+          );
+        }
         setStatusKind("ok");
       } catch (error) {
         if (cancelled) {
@@ -184,14 +198,22 @@ export default function App(): React.JSX.Element {
   };
 
   const onAssuranceConnect = (): void => {
-    try {
-      connectAssuranceSession(assuranceUrl);
-      setStatus("Assurance startSession(url) — 앱 PIN 입력 후 웹 Connect");
-      setStatusKind("info");
-    } catch (error) {
-      setStatus(safeErrorMessage(error, "App.onAssuranceConnect"));
-      setStatusKind("err");
-    }
+    void (async () => {
+      setBusy(true);
+      try {
+        const org = await waitForExperienceCloudOrg();
+        connectAssuranceSession(assuranceUrl);
+        setStatus(
+          `Assurance startSession · org=${org} — 앱에 PIN 오버레이가 뜨는지 확인`
+        );
+        setStatusKind("info");
+      } catch (error) {
+        setStatus(safeErrorMessage(error, "App.onAssuranceConnect"));
+        setStatusKind("err");
+      } finally {
+        setBusy(false);
+      }
+    })();
   };
 
   const onAssuranceQuickConnect = (): void => {
