@@ -1,17 +1,18 @@
 /**
  * app.App (App 루트 오케스트레이션)
  * ================================
- * config → init → testNum 선택 → Optimize fetch → event-popup.
+ * config → init → Assurance 연결 → testNum → Optimize fetch → event-popup.
  * 네이티브 모듈 경로(WebView 아님). 백엔드 없음.
  *
  * [Main Functions]
  * ===========
- * - 1. App — 초기화·Fetch/ECID/팝업 핸들러
+ * - 1. App — 초기화·Assurance/Fetch/ECID/팝업 핸들러
  *
  * [Dependencies]
  * =========
  * - config/app_config
  * - init/app_init
+ * - assurance/app_assurance_service
  * - target/app_target_service
  * - identity/app_identity_service
  * - ui/AppScreen
@@ -20,6 +21,7 @@
 import React, { useEffect, useState } from "react";
 import { loadAppConfig } from "./src/config/app_config";
 import { initMobileSdk } from "./src/init/app_init";
+import { connectAssuranceSession } from "./src/assurance/app_assurance_service";
 import {
   fetchTargetOffers,
   parseEventPopup,
@@ -41,6 +43,9 @@ export default function App(): React.JSX.Element {
   const [statusKind, setStatusKind] = useState<"ok" | "err" | "info">("info");
   const [busy, setBusy] = useState(true);
   const [testNum, setTestNum] = useState<TestNum>("3");
+  const [assuranceUrl, setAssuranceUrl] = useState(
+    config.assurance.assuranceSessionUrl
+  );
   const [offers, setOffers] = useState<ParsedOffer[]>([]);
   const [debugPayload, setDebugPayload] = useState<unknown>({});
   const [eventPopup, setEventPopup] = useState<EventPopupOffer | null>(null);
@@ -135,6 +140,19 @@ export default function App(): React.JSX.Element {
     }
   };
 
+  const onAssuranceConnect = (): void => {
+    try {
+      connectAssuranceSession(assuranceUrl);
+      setStatus(
+        "Assurance startSession called — 웹 Available Devices에서 기기 선택 후 Connect / PIN"
+      );
+      setStatusKind("info");
+    } catch (error) {
+      setStatus(safeErrorMessage(error, "App.onAssuranceConnect"));
+      setStatusKind("err");
+    }
+  };
+
   return (
     <AppScreen
       decisionScope={config.target.decisionScope}
@@ -143,6 +161,9 @@ export default function App(): React.JSX.Element {
       busy={busy}
       testNum={testNum}
       onTestNumChange={setTestNum}
+      assuranceUrl={assuranceUrl}
+      onAssuranceUrlChange={setAssuranceUrl}
+      onAssuranceConnect={onAssuranceConnect}
       offers={offers}
       debugPayload={debugPayload}
       eventPopup={eventPopup}

@@ -2,6 +2,8 @@
 
 ## Log Index
 
+13. 2026-07-31 App Assurance Session URL 런타임 연결 UI
+12. 2026-07-31 App Optimize 샘플 패턴·edge.adobedc.net 강제
 11. 2026-07-31 App Optimize 콜백 미수신 — Map data·확장 진단
 10. 2026-07-30 App Optimize timeout — AEP 7.x init/fetch 수정
 9. 2026-07-30 App EAS Kotlin 1.9.25 고정 (Compose 호환)
@@ -15,6 +17,39 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+13. 2026-07-31 App Assurance Session URL 런타임 연결 UI
+
+Purpose: Available Devices 미표시(startSession 미호출) 해소 — URL 붙여넣기 후 연결
+
+Changes:
+
+- `connectAssuranceSession` 서비스 추가
+- AppScreen에 Assurance URL 입력 + Connect 버튼
+- init 시 URL이 있을 때만 자동 startSession (기존 유지)
+
+Changed files:
+
+- app/src/assurance/app_assurance_service.ts
+- app/src/ui/AppScreen.tsx
+- app/App.tsx
+- docs/log/log.md
+
+12. 2026-07-31 App Optimize 샘플 패턴·edge.adobedc.net 강제
+
+Purpose: Tags FPC domain/콜백 브릿지 이슈로 Optimize 응답이 안 오던 증상 우회
+
+Changes:
+
+- init 후 edge.domain을 edge.adobedc.net으로 강제( env에 값 있을 땐 그 값 )
+- Adobe 샘플과 동일: onPropositionUpdate + updatePropositions(무콜백) + getPropositions 폴링
+- testNum data는 plain object `__adobe.target`
+
+Changed files:
+
+- app/src/init/app_init.ts
+- app/src/target/app_target_service.ts
+- docs/log/log.md
 
 11. 2026-07-31 App Optimize 콜백 미수신 — Map data·확장 진단
 

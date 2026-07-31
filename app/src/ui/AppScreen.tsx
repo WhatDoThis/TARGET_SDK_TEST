@@ -1,7 +1,7 @@
 /**
  * app.ui.AppScreen (App 테스트 화면)
  * =================================
- * 1화면: testNum 선택 / Fetch / ECID / 오퍼 / event-popup 모달 / raw JSON.
+ * 1화면: testNum / Fetch / ECID / Assurance URL 연결 / 오퍼 / event-popup / raw JSON.
  *
  * [Main Functions]
  * ===========
@@ -22,6 +22,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import type {
@@ -40,6 +41,9 @@ export interface AppScreenProps {
   busy: boolean;
   testNum: TestNum;
   onTestNumChange: (value: TestNum) => void;
+  assuranceUrl: string;
+  onAssuranceUrlChange: (value: string) => void;
+  onAssuranceConnect: () => void;
   offers: ParsedOffer[];
   debugPayload: unknown;
   eventPopup: EventPopupOffer | null;
@@ -57,6 +61,9 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
     busy,
     testNum,
     onTestNumChange,
+    assuranceUrl,
+    onAssuranceUrlChange,
+    onAssuranceConnect,
     offers,
     debugPayload,
     eventPopup,
@@ -71,6 +78,31 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
         <Text style={styles.title}>AEP Mobile SDK · Target Test</Text>
         <Text style={styles.sub}>
           scope: {decisionScope} · Edge Network · headless JSON
+        </Text>
+
+        <Text style={styles.fieldLabel}>Assurance Session URL</Text>
+        <TextInput
+          style={styles.input}
+          value={assuranceUrl}
+          onChangeText={onAssuranceUrlChange}
+          placeholder="https://assurance.adobe.com/...adb_validation_sessionid=..."
+          placeholderTextColor="#5a6a7e"
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!busy}
+        />
+        <Pressable
+          style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
+          disabled={busy}
+          onPress={onAssuranceConnect}
+        >
+          <Text style={styles.buttonSecondaryText}>
+            Connect Assurance (startSession)
+          </Text>
+        </Pressable>
+        <Text style={styles.hint}>
+          Available Devices가 비면 = 앱에서 startSession 전. Connect 후 웹에서
+          기기 선택·PIN 입력.
         </Text>
 
         <Text style={styles.fieldLabel}>testNum</Text>
@@ -203,6 +235,24 @@ const styles = StyleSheet.create({
     color: "#9aa8bc",
     fontSize: 12,
     marginBottom: 6,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#2c3a4f",
+    backgroundColor: "#1a2332",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: "#e7ecf3",
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  hint: {
+    color: "#5a6a7e",
+    fontSize: 11,
+    lineHeight: 16,
+    marginBottom: 14,
+    marginTop: 6,
   },
   row: {
     flexDirection: "row",

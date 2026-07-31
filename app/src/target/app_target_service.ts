@@ -1,8 +1,8 @@
 /**
  * app.target.app_target_service (App Optimize Target)
  * ==================================================
- * Optimize updatePropositions → getPropositions로 JSON 오퍼를 수신·파싱한다.
- * testNum은 data.__adobe.target 요청 파라미터(Map, mbox성).
+ * Adobe 샘플앱과 동일: onPropositionUpdate + updatePropositions → getPropositions.
+ * testNum은 data.__adobe.target (plain object — RN 브릿지 호환).
  *
  * [Main Functions]
  * ===========
@@ -30,7 +30,8 @@ import { safeErrorMessage } from "../shared/app_shared_utils";
 
 const ALLOWED_TEST_NUMS: TestNum[] = ["1", "2", "3"];
 const EVENT_POPUP_TYPE = "event-popup";
-const UPDATE_WAIT_MS = 25000;
+const UPDATE_WAIT_MS = 20000;
+const POLL_INTERVAL_MS = 1000;
 
 // 3.
 export function decodeOfferContent(content: unknown): unknown {
@@ -128,17 +129,23 @@ export async function fetchTargetOffers(
     }
 
     const scopes = [new DecisionScope(decisionScope)];
-    // RN 브릿지는 Map을 기대함 (plain object면 콜백이 안 올 수 있음)
-    const data = buildTargetDataMap(testNum);
+    // Adobe 샘플: onPropositionUpdate 등록 → updatePropositions(콜백 없이) → getPropositions
+    const data = {
+      __adobe: {
+        target: {
+          testNum: String(testNum),
+        },
+      },
+    };
 
-    const updateError = await waitForUpdatePropositions(scopes, data);
-    const propositions = await Optimize.getPropositions(scopes);
+    const updateResult = await runUpdatePropositions(scopes, data);
+    const propositions =
+      updateResult.propositions ?? (await Optimize.getPropositions(scopes));
     const offers = parsePropositionMap(propositions);
-    const rawPropositions = serializePropositions(propositions);
 
-    if (updateError && offers.length === 0) {
+    if (offers.length === 0 && updateResult.error) {
       throw new Error(
-        `[fetchTargetOffers] updatePropositions failed: ${updateError} · optimize=${optimizeVersion} · scope=${decisionScope} · testNum=${testNum}`
+        `[fetchTargetOffers] ${updateResult.error} · optimize=${optimizeVersion} · scope=${decisionScope} · testNum=${testNum}`
       );
     }
 
@@ -148,8 +155,9 @@ export async function fetchTargetOffers(
         optimizeVersion,
         decisionScope,
         testNum,
-        warning: updateError,
-        response: rawPropositions,
+        updatePath: updateResult.path,
+        warning: updateResult.error,
+        response: serializePropositions(propositions),
       },
     };
   } catch (error) {
@@ -157,71 +165,99 @@ export async function fetchTargetOffers(
   }
 }
 
-function buildTargetDataMap(testNum: TestNum): Map<string, unknown> {
-  const targetParameters = new Map<string, string>();
-  targetParameters.set("testNum", testNum);
-
-  const adobe = new Map<string, unknown>();
-  adobe.set("target", targetParameters);
-
-  const data = new Map<string, unknown>();
-  data.set("__adobe", adobe);
-  return data;
+interface UpdateResult {
+  propositions: unknown | null;
+  error: string | null;
+  path: string;
 }
 
-function waitForUpdatePropositions(
+function runUpdatePropositions(
   scopes: DecisionScope[],
-  data: Map<string, unknown>
-): Promise<string | null> {
+  data: Record<string, unknown>
+): Promise<UpdateResult> {
   return new Promise((resolve) => {
     let settled = false;
-    const finish = (errorMessage: string | null): void => {
+    let latestFromEvent: unknown | null = null;
+
+    const finish = (result: UpdateResult): void => {
       if (settled) {
         return;
       }
       settled = true;
-      resolve(errorMessage);
+      clearTimeout(timer);
+      clearInterval(pollTimer);
+      resolve(result);
     };
 
-    const timer = setTimeout(() => {
-      finish(
-        [
-          "client wait exceeded before Optimize callback",
-          "1) Tags Dev Publish에 Optimize+Edge+EdgeIdentity 포함 여부",
-          "2) Edge Development Datastream = Target ON",
-          "3) Edge Domain DNS (문제 시 Tags Domain 비우고 재게시)",
-          "4) APK가 최신 init(initializeWithAppId) 빌드인지",
-        ].join(" · ")
-      );
-    }, UPDATE_WAIT_MS);
-
+    // 1) Adobe 샘플 권장: proposition 업데이트 이벤트
     try {
-      // 콜백이 누락되는 환경 대비 — proposition update 이벤트로도 완료 처리
       Optimize.onPropositionUpdate({
-        call: () => {
-          clearTimeout(timer);
-          finish(null);
+        call: (propositions: unknown) => {
+          latestFromEvent = propositions;
+          finish({
+            propositions,
+            error: null,
+            path: "onPropositionUpdate",
+          });
         },
       });
-
-      Optimize.updatePropositions(
-        scopes,
-        undefined,
-        data,
-        () => {
-          clearTimeout(timer);
-          finish(null);
-        },
-        (error: unknown) => {
-          clearTimeout(timer);
-          finish(formatOptimizeError(error));
-        }
-      );
     } catch (error) {
-      clearTimeout(timer);
-      finish(formatOptimizeError(error));
+      console.warn("[fetchTargetOffers] onPropositionUpdate failed", error);
     }
+
+    // 2) 샘플처럼 콜백 없는 update 호출 (5-arg 콜백이 브릿지에서 먹통인 경우 회피)
+    try {
+      Optimize.updatePropositions(scopes, undefined, data);
+    } catch (error) {
+      finish({
+        propositions: null,
+        error: formatOptimizeError(error),
+        path: "updatePropositions-throw",
+      });
+      return;
+    }
+
+    // 3) 폴링: 캐시에 들어오면 성공 처리
+    const pollTimer = setInterval(() => {
+      void (async () => {
+        try {
+          const cached = await Optimize.getPropositions(scopes);
+          if (hasAnyProposition(cached) || latestFromEvent != null) {
+            finish({
+              propositions: latestFromEvent ?? cached,
+              error: null,
+              path: latestFromEvent != null ? "onPropositionUpdate" : "poll-getPropositions",
+            });
+          }
+        } catch {
+          // pending update 중 get이 실패할 수 있음 — 무시하고 다음 폴링
+        }
+      })();
+    }, POLL_INTERVAL_MS);
+
+    const timer = setTimeout(() => {
+      finish({
+        propositions: latestFromEvent,
+        error: [
+          "no Optimize response within timeout",
+          "Tags Optimize v1.1.2 + Edge Dev datastream OK여도 edge.domain DNS가 막히면 동일 증상",
+          "앱은 edge.adobedc.net 강제 적용본으로 재빌드 필요",
+          "Assurance로 Edge 요청 여부 확인 권장",
+        ].join(" · "),
+        path: "timeout",
+      });
+    }, UPDATE_WAIT_MS);
   });
+}
+
+function hasAnyProposition(propositions: unknown): boolean {
+  if (propositions instanceof Map) {
+    return propositions.size > 0;
+  }
+  if (propositions != null && typeof propositions === "object") {
+    return Object.keys(propositions as object).length > 0;
+  }
+  return false;
 }
 
 async function safeOptimizeVersion(): Promise<string> {
@@ -243,18 +279,6 @@ function formatOptimizeError(error: unknown): string {
     return error.message;
   }
   try {
-    const record = error as {
-      type?: string;
-      title?: string;
-      detail?: string;
-      message?: string;
-    };
-    const parts = [record.type, record.title, record.detail, record.message]
-      .filter((part) => typeof part === "string" && part.trim().length > 0)
-      .join(" · ");
-    if (parts.length > 0) {
-      return parts;
-    }
     return JSON.stringify(error);
   } catch {
     return String(error);
