@@ -2,6 +2,7 @@
 
 ## Log Index
 
+11. 2026-07-31 App Optimize 콜백 미수신 — Map data·확장 진단
 10. 2026-07-30 App Optimize timeout — AEP 7.x init/fetch 수정
 9. 2026-07-30 App EAS Kotlin 1.9.25 고정 (Compose 호환)
 8. 2026-07-30 App EAS용 config를 example+EXPO_PUBLIC로 전환
@@ -14,6 +15,22 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+11. 2026-07-31 App Optimize 콜백 미수신 — Map data·확장 진단
+
+Purpose: updatePropositions 콜백이 오지 않던 케이스 완화 및 원인 진단 강화
+
+Changes:
+
+- Target data를 plain object → Map(`__adobe.target.testNum`)으로 전달
+- onPropositionUpdate로 완료 감지 보강
+- init 후 Optimize/Edge extensionVersion 점검, Edge·Optimize import 고정
+
+Changed files:
+
+- app/src/init/app_init.ts
+- app/src/target/app_target_service.ts
+- docs/log/log.md
 
 10. 2026-07-30 App Optimize timeout — AEP 7.x init/fetch 수정
 

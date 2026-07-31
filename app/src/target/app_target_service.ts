@@ -2,7 +2,7 @@
  * app.target.app_target_service (App Optimize Target)
  * ==================================================
  * Optimize updatePropositions → getPropositions로 JSON 오퍼를 수신·파싱한다.
- * testNum은 data.__adobe.target 요청 파라미터(mbox성, profile./entity. 아님).
+ * testNum은 data.__adobe.target 요청 파라미터(Map, mbox성).
  *
  * [Main Functions]
  * ===========
@@ -16,7 +16,6 @@
  * - @adobe/react-native-aepoptimize
  * - target/app_target_types
  * - shared/app_shared_utils
- * - Adobe: data.__adobe.target page/mbox params
  */
 
 import { DecisionScope, Optimize } from "@adobe/react-native-aepoptimize";
@@ -31,8 +30,7 @@ import { safeErrorMessage } from "../shared/app_shared_utils";
 
 const ALLOWED_TEST_NUMS: TestNum[] = ["1", "2", "3"];
 const EVENT_POPUP_TYPE = "event-popup";
-/** Optimize Tags 기본 타임아웃(10s)보다 여유 있게 대기 */
-const UPDATE_WAIT_MS = 20000;
+const UPDATE_WAIT_MS = 25000;
 
 // 3.
 export function decodeOfferContent(content: unknown): unknown {
@@ -122,14 +120,16 @@ export async function fetchTargetOffers(
   }
 
   try {
+    const optimizeVersion = await safeOptimizeVersion();
+    if (optimizeVersion === "unavailable") {
+      throw new Error(
+        "[fetchTargetOffers] Optimize.extensionVersion unavailable — native module not linked"
+      );
+    }
+
     const scopes = [new DecisionScope(decisionScope)];
-    const data = {
-      __adobe: {
-        target: {
-          testNum,
-        },
-      },
-    };
+    // RN 브릿지는 Map을 기대함 (plain object면 콜백이 안 올 수 있음)
+    const data = buildTargetDataMap(testNum);
 
     const updateError = await waitForUpdatePropositions(scopes, data);
     const propositions = await Optimize.getPropositions(scopes);
@@ -138,24 +138,40 @@ export async function fetchTargetOffers(
 
     if (updateError && offers.length === 0) {
       throw new Error(
-        `[fetchTargetOffers] updatePropositions failed: ${updateError}`
+        `[fetchTargetOffers] updatePropositions failed: ${updateError} · optimize=${optimizeVersion} · scope=${decisionScope} · testNum=${testNum}`
       );
     }
 
     return {
       offers,
-      rawPropositions: updateError
-        ? { warning: updateError, response: rawPropositions }
-        : rawPropositions,
+      rawPropositions: {
+        optimizeVersion,
+        decisionScope,
+        testNum,
+        warning: updateError,
+        response: rawPropositions,
+      },
     };
   } catch (error) {
     throw new Error(safeErrorMessage(error, "fetchTargetOffers"));
   }
 }
 
+function buildTargetDataMap(testNum: TestNum): Map<string, unknown> {
+  const targetParameters = new Map<string, string>();
+  targetParameters.set("testNum", testNum);
+
+  const adobe = new Map<string, unknown>();
+  adobe.set("target", targetParameters);
+
+  const data = new Map<string, unknown>();
+  data.set("__adobe", adobe);
+  return data;
+}
+
 function waitForUpdatePropositions(
   scopes: DecisionScope[],
-  data: Record<string, unknown>
+  data: Map<string, unknown>
 ): Promise<string | null> {
   return new Promise((resolve) => {
     let settled = false;
@@ -169,11 +185,25 @@ function waitForUpdatePropositions(
 
     const timer = setTimeout(() => {
       finish(
-        "client wait exceeded before Optimize callback (check Edge domain / Tags Dev publish / datastream)"
+        [
+          "client wait exceeded before Optimize callback",
+          "1) Tags Dev Publish에 Optimize+Edge+EdgeIdentity 포함 여부",
+          "2) Edge Development Datastream = Target ON",
+          "3) Edge Domain DNS (문제 시 Tags Domain 비우고 재게시)",
+          "4) APK가 최신 init(initializeWithAppId) 빌드인지",
+        ].join(" · ")
       );
     }, UPDATE_WAIT_MS);
 
     try {
+      // 콜백이 누락되는 환경 대비 — proposition update 이벤트로도 완료 처리
+      Optimize.onPropositionUpdate({
+        call: () => {
+          clearTimeout(timer);
+          finish(null);
+        },
+      });
+
       Optimize.updatePropositions(
         scopes,
         undefined,
@@ -192,6 +222,14 @@ function waitForUpdatePropositions(
       finish(formatOptimizeError(error));
     }
   });
+}
+
+async function safeOptimizeVersion(): Promise<string> {
+  try {
+    return await Optimize.extensionVersion();
+  } catch {
+    return "unavailable";
+  }
 }
 
 function formatOptimizeError(error: unknown): string {
