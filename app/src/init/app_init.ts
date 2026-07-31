@@ -1,12 +1,12 @@
 /**
  * app.init.app_init (AEP Mobile SDK 초기화 — 공식 골든 패스)
  * ========================================================
- * initializeWithAppId 후 Tags 원격 설정(edge.configId·experienceCloud.org) 다운로드를 ECID로 확인한다.
- * ECID 미수신 = Tags Publish/appId/망 실패. Fetch를 그 전에 호출하면 unexpected가 난다.
+ * initializeWithAppId 후 Tags 원격 설정을 ECID로 확인한다(본선 init 준비 신호).
+ * DEBUG 시 edge.* + experienceCloud.org 를 updateConfiguration으로 주입해 기기 Tags 미적용을 가른다.
  *
  * [Main Functions]
  * ===========
- * - 1. initMobileSdk — setLogLevel + initializeWithAppId (+ 선택 debug edge override)
+ * - 1. initMobileSdk — setLogLevel + initializeWithAppId (+ 선택 debug config override)
  * - 2. waitForEdgeReady — Edge Identity ECID 수신까지 대기(설정·네트워크 준비)
  * - 3. getLastInitDiagnostics — ECID 실패 시 UI/로그용 진단 스냅샷
  *
@@ -82,6 +82,10 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
     MobileCore.setPrivacyStatus(PrivacyStatus.OPT_IN);
 
     const debugOverrides: Record<string, string> = {};
+    if (!isBlank(config.debug.experienceCloudOrg)) {
+      debugOverrides["experienceCloud.org"] =
+        config.debug.experienceCloudOrg.trim();
+    }
     if (!isBlank(config.debug.edgeConfigId)) {
       debugOverrides["edge.configId"] = config.debug.edgeConfigId.trim();
     }
@@ -91,7 +95,7 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
     lastDebugOverrides = debugOverrides;
     if (Object.keys(debugOverrides).length > 0) {
       await MobileCore.updateConfiguration(debugOverrides);
-      console.warn("[initMobileSdk] DEBUG edge overrides", debugOverrides);
+      console.warn("[initMobileSdk] DEBUG config overrides", debugOverrides);
     }
 
     initialized = true;
@@ -127,11 +131,13 @@ export async function waitForEdgeReady(): Promise<EdgeReadyInfo> {
     await sleep(EDGE_READY_POLL_MS);
   }
 
-  // Adobe: experienceCloud.org 없는 원격 설정이면 ECID 미생성 → callback.timeout 반복
+  // Adobe: experienceCloud.org 없는 설정이면 Identity 준비 실패 → callback.timeout 반복
+  // CDN 소스는 OK일 수 있음 — 기기 미적용 vs Identity 등록은 org+edge override로 가름
   const hint =
-    "CAUSE: Tags 원격설정(experienceCloud.org / edge.configId) 미수신. " +
-    "① Tags Dev Publish ② File ID=앱 appId 일치 ③ Edge 확장 Dev Datastream=Target ON " +
-    "④ 기기망·assets.adobedtm.com 차단 여부 ⑤ (임시) EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID 재빌드";
+    "CAUSE: 기기에서 Identity 준비 실패(Tags 미적용 또는 EdgeIdentity 미응답). " +
+    "① Raw.debugOverrides에 experienceCloudOrg 있는지(없으면 옛 APK) " +
+    "② uninstall 후 재설치·다른 망 ③ adb logcat -s AdobeExperienceSDK:V " +
+    "④ org override 후에도 실패면 Identity 네이티브 등록 점검";
 
   throw new Error(
     `[waitForEdgeReady] Edge Identity ECID unavailable within ${EDGE_READY_WAIT_MS}ms. ` +

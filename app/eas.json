@@ -14,7 +14,8 @@
         "EXPO_PUBLIC_ADOBE_MOBILE_APP_ID": "<org>/<property>/launch-xxxx-development",
         "EXPO_PUBLIC_DECISION_SCOPE": "aep-app-test-scope",
         "EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID": "<DATASTREAM_UUID>",
-        "EXPO_PUBLIC_DEBUG_EDGE_DOMAIN": "edge.adobedc.net"
+        "EXPO_PUBLIC_DEBUG_EDGE_DOMAIN": "edge.adobedc.net",
+        "EXPO_PUBLIC_DEBUG_EXPERIENCE_CLOUD_ORG": "<IMS_ORG>@AdobeOrg"
       }
     },
     "preview": {
@@ -26,7 +27,8 @@
         "EXPO_PUBLIC_ADOBE_MOBILE_APP_ID": "<org>/<property>/launch-xxxx-development",
         "EXPO_PUBLIC_DECISION_SCOPE": "aep-app-test-scope",
         "EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID": "<DATASTREAM_UUID>",
-        "EXPO_PUBLIC_DEBUG_EDGE_DOMAIN": "edge.adobedc.net"
+        "EXPO_PUBLIC_DEBUG_EDGE_DOMAIN": "edge.adobedc.net",
+        "EXPO_PUBLIC_DEBUG_EXPERIENCE_CLOUD_ORG": "<IMS_ORG>@AdobeOrg"
       }
     },
     "production": {

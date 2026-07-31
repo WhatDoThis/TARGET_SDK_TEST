@@ -2,7 +2,7 @@
  * app.config.app_config (App Dev 환경설정 로드 — 골든 패스)
  * ========================================================
  * 본선: adobeMobileAppId + decisionScope.
- * debug edge.* 는 EAS EXPO_PUBLIC 또는 아래 SMOKE 폴백(빌드 env 누락 대비).
+ * debug edge.* / experienceCloud.org 는 EAS EXPO_PUBLIC 또는 SMOKE 폴백(ECID 진단용).
  *
  * [Main Functions]
  * ===========
@@ -21,6 +21,8 @@ import { isBlank } from "../shared/app_shared_utils";
 const SMOKE_EDGE_CONFIG_ID = "<DATASTREAM_UUID>";
 /** 샌드박스 FPC DNS 의심 시 Adobe 기본 호스트로 먼저 검증 */
 const SMOKE_EDGE_DOMAIN = "edge.adobedc.net";
+/** Tags CDN JSON과 동일 — edge.* 만으로는 ECID 진단이 불완전 */
+const SMOKE_EXPERIENCE_CLOUD_ORG = "<IMS_ORG>@AdobeOrg";
 
 export interface AppAdobeMobileConfig {
   adobeMobileAppId: string;
@@ -33,6 +35,7 @@ export interface AppTargetConfig {
 export interface AppDebugConfig {
   edgeConfigId: string;
   edgeDomain: string;
+  experienceCloudOrg: string;
   /** env에서 왔는지 smoke 폴백인지 */
   edgeSource: "env" | "example" | "smoke-fallback";
 }
@@ -53,20 +56,27 @@ export function loadAppConfig(): AppConfig {
   const base = configExample as {
     adobeMobile: { adobeMobileAppId: string };
     target: { decisionScope: string };
-    debug?: { edgeConfigId?: string; edgeDomain?: string };
+    debug?: {
+      edgeConfigId?: string;
+      edgeDomain?: string;
+      experienceCloudOrg?: string;
+    };
     assurance?: { assuranceSessionUrl?: string };
   };
 
   const envConfigId = readEnv("EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID");
   const envDomain = readEnv("EXPO_PUBLIC_DEBUG_EDGE_DOMAIN");
+  const envOrg = readEnv("EXPO_PUBLIC_DEBUG_EXPERIENCE_CLOUD_ORG");
   const exampleConfigId = base.debug?.edgeConfigId?.trim() || "";
   const exampleDomain = base.debug?.edgeDomain?.trim() || "";
+  const exampleOrg = base.debug?.experienceCloudOrg?.trim() || "";
 
   let edgeConfigId = envConfigId || exampleConfigId;
   let edgeDomain = envDomain || exampleDomain;
-  let edgeSource: AppDebugConfig["edgeSource"] = envConfigId
+  let experienceCloudOrg = envOrg || exampleOrg;
+  let edgeSource: AppDebugConfig["edgeSource"] = envConfigId || envOrg
     ? "env"
-    : exampleConfigId
+    : exampleConfigId || exampleOrg
       ? "example"
       : "smoke-fallback";
 
@@ -76,6 +86,12 @@ export function loadAppConfig(): AppConfig {
   }
   if (isBlank(edgeDomain)) {
     edgeDomain = SMOKE_EDGE_DOMAIN;
+    if (edgeSource !== "env") {
+      edgeSource = "smoke-fallback";
+    }
+  }
+  if (isBlank(experienceCloudOrg)) {
+    experienceCloudOrg = SMOKE_EXPERIENCE_CLOUD_ORG;
     if (edgeSource !== "env") {
       edgeSource = "smoke-fallback";
     }
@@ -94,6 +110,7 @@ export function loadAppConfig(): AppConfig {
     debug: {
       edgeConfigId,
       edgeDomain,
+      experienceCloudOrg,
       edgeSource,
     },
     assurance: {

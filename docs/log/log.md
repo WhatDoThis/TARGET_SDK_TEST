@@ -2,6 +2,7 @@
 
 ## Log Index
 
+26. 2026-07-31 ECID 병목 원인 확정·org override 해결안 반영
 25. 2026-07-31 ECID 실패 시 debugOverrides 노출·smoke 폴백·edge.adobedc.net
 24. 2026-07-31 EAS debug edge.configId·샌드박스 domain 임시 주입
 23. 2026-07-31 App ECID timeout 진단 보강 (Tags 원격설정 미수신)
@@ -29,6 +30,29 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+26. 2026-07-31 ECID 병목 원인 확정·org override 해결안 반영
+
+Purpose: CDN Tags는 OK·기기 ECID 실패로 원인을 좁히고, experienceCloud.org debug override와 해결 순서를 문서·코드에 고정
+
+Changes:
+
+- Root Cause: 현황 스냅샷·원인(init 준비/ECID)·가설 순위·Step 0~5 해결안
+- DEBUG updateConfiguration에 experienceCloud.org 추가 (EAS/smoke)
+- Raw debugOverrides에 experienceCloudOrg 노출
+
+Changed files:
+
+- docs/report/03_Sdk_Test_Root_Cause.md
+- docs/report/00_ReportIndex.md
+- app/src/config/app_config.ts
+- app/src/init/app_init.ts
+- app/App.tsx
+- app/eas.json
+- app/env/config.dev.example.json
+- app/env/config.dev.json
+- app/.env.example
+- docs/log/log.md
 
 25. 2026-07-31 ECID 실패 시 debugOverrides 노출·smoke 폴백·edge.adobedc.net
 

@@ -7,7 +7,8 @@
   },
   "debug": {
     "edgeConfigId": "",
-    "edgeDomain": ""
+    "edgeDomain": "",
+    "experienceCloudOrg": ""
   },
   "assurance": {
     "assuranceSessionUrl": ""

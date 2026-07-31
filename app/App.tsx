@@ -2,7 +2,7 @@
  * app.App (App 루트 — 공식 골든 패스)
  * ==================================
  * init → Edge ready(ECID) → Fetch(Optimize) → 오퍼 표시.
- * Raw 최상단에 debugOverrides(edgeConfigId·domain·source)를 항상 노출. Assurance는 디버그 수동만.
+ * Raw 최상단에 debugOverrides(org·edgeConfigId·domain·source)를 항상 노출. Assurance는 디버그 수동만.
  *
  * [Main Functions]
  * ===========
@@ -54,6 +54,7 @@ function buildDebugSnapshot(extra: Record<string, unknown> = {}): Record<string,
     decisionScope: config.target.decisionScope,
     // 최상위 키 — 실패 시에도 Raw에서 바로 보이게
     debugOverrides: {
+      experienceCloudOrg: config.debug.experienceCloudOrg,
       edgeConfigId: config.debug.edgeConfigId,
       edgeDomain: config.debug.edgeDomain,
       edgeSource: config.debug.edgeSource,
@@ -127,9 +128,9 @@ export default function App(): React.JSX.Element {
             error: String(error),
             diagnostics: getLastInitDiagnostics(),
             hint:
-              "Raw.debugOverrides가 비면 옛 APK. " +
-              "edgeSource=smoke-fallback이면 EAS env 미주입·소스 폴백 사용 중. " +
-              "그래도 ECID 실패면 기기→Adobe 망/Identity 링크 문제.",
+              "Raw.debugOverrides.experienceCloudOrg가 비면 옛 APK. " +
+              "org+edge override 후에도 ECID timeout이면 logcat으로 Identity/망 확인. " +
+              "override 후 ECID만 뜨면 Tags 기기 미적용이 원인.",
           })
         );
       } finally {
