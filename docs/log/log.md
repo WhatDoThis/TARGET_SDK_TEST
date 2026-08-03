@@ -2,6 +2,7 @@
 
 ## Log Index
 
+32. 2026-08-03 git history filter-repo 실값 제거 후 force-push
 31. 2026-08-03 app/.env·config.dev.json 채움 위치 주석 보강
 30. 2026-08-03 gitignore 로컬 실값 파일 복구 (.env / config.dev.json)
 29. 2026-08-03 공개 레포용 민감정보 제거 (org/Datastream/File ID)
@@ -35,6 +36,21 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+32. 2026-08-03 git history filter-repo 실값 제거 후 force-push
+
+Purpose: 워킹트리에서 뺀 Adobe File ID·Datastream·Org·Assurance session·샌드박스 domain이 과거 커밋에 남아 있어 공개 레포 history를 치환
+
+Changes:
+
+- `git filter-repo --replace-text`로 실값→플레이스홀더 치환 (검색 0건 확인)
+- `origin/main` force-push (`bc66996` → `791992d`)
+- 로컬 `.env` / `config.dev.json`은 gitignore 유지
+
+Changed files:
+
+- (history rewrite — 전 커밋 blob)
+- docs/log/log.md
 
 31. 2026-08-03 app/.env·config.dev.json 채움 위치 주석 보강
 

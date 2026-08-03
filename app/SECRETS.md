@@ -39,4 +39,6 @@
 ## 이미 Git에 올린 적 있는 경우
 
 워킹트리만 지워도 **과거 커밋 history에는 남을 수 있다.**  
-공개 전환 전이라면 history rewrite(filter-repo/BFG) 또는 레포 재생성 후 force-push를 검토한다.
+본 레포는 2026-08-03 `git filter-repo --replace-text` + `main` force-push로 File ID / Datastream / Org / Assurance session / 샌드박스 domain 문자열을 history에서 치환했다.  
+다른 클론·서버는 **재 clone** 하거나 `git fetch --all` 후 `git reset --hard origin/main` 할 것(옛 객체 로컬 잔존 주의).  
+GitHub 쪽 캐시·포크·이슈 첨부에는 예전 값이 남을 수 있으니 필요 시 GitHub Support에 cache purge를 요청한다.
