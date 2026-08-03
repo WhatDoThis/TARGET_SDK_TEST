@@ -1,21 +1,21 @@
 /**
- * app.target.app_target_types (App Target 타입)
- * ============================================
- * Optimize proposition/오퍼 JSON·testNum·event-popup 타입.
+ * app.03_target.app_target_types (3단계 · Target 타입)
+ * ==================================================
+ * Optimize 요청 파라미터·오퍼 JSON·팝업 계약 타입만 정의한다.
  *
  * [Main Functions]
  * ===========
- * - 타입 정의만 (TestNum, OfferPayload, EventPopupOffer, ParsedOffer, TargetFetchResult)
+ * - 타입: TestNum, OfferPayload, EventPopupOffer, ParsedOffer, TargetFetchResult
  *
  * [Dependencies]
  * =========
  * - 없음
  */
 
-/** data.__adobe.target.testNum — mbox성 요청 파라미터 (1|2|3) */
+/** data.__adobe.target.testNum — Target Custom mbox 파라미터 (1|2|3) */
 export type TestNum = "1" | "2" | "3";
 
-/** Target Form-based JSON 오퍼 최소 계약 (+ event-popup) */
+/** Form-based JSON 오퍼. type==="event-popup" 이면 UI 모달 */
 export interface OfferPayload {
   type?: string;
   title?: string;
@@ -24,7 +24,7 @@ export interface OfferPayload {
   [key: string]: unknown;
 }
 
-/** type === "event-popup" 모달용 */
+/** event-popup 모달에 넘기는 필드 */
 export interface EventPopupOffer {
   title?: string;
   body?: string;

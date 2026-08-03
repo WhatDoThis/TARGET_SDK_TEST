@@ -1,6 +1,6 @@
 /**
- * web.init.web_init (AEP Web SDK 초기화)
- * =====================================
+ * web.02_init.web_init (2단계 · AEP Web SDK 초기화)
+ * =================================================
  * alloy 인스턴스 생성 후 configure를 1회만 수행한다.
  *
  * [Main Functions]
@@ -11,12 +11,12 @@
  * [Dependencies]
  * =========
  * - @adobe/alloy
- * - config/web_config
+ * - 01_config/web_config
  * - shared/web_shared_utils
  */
 
 import { createInstance } from "@adobe/alloy";
-import type { WebConfig } from "../config/web_config";
+import type { WebConfig } from "../01_config/web_config";
 import { isBlank, safeErrorMessage } from "../shared/web_shared_utils";
 
 type AlloyCommand = (
@@ -42,13 +42,13 @@ export async function initWebSdk(config: WebConfig): Promise<void> {
       debugEnabled: config.debug.debugEnabled,
     };
 
+    // 1st-party/FPC 도메인이 있을 때만 edgeDomain 주입
     if (!isBlank(config.adobeEdge.edgeDomain)) {
       configureOptions.edgeDomain = config.adobeEdge.edgeDomain.trim();
     }
 
     await alloyInstance("configure", configureOptions);
     configured = true;
-    console.info("[initWebSdk] alloy configure success");
   } catch (error) {
     alloyInstance = null;
     configured = false;

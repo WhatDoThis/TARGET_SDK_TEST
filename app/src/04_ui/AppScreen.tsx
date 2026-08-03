@@ -1,16 +1,16 @@
 /**
- * app.ui.AppScreen (App 테스트 화면)
- * =================================
- * 1화면: testNum / Fetch / ECID / 오퍼(KPI) / Assurance(디버그) / raw JSON.
+ * app.04_ui.AppScreen (4단계 · 오퍼 렌더)
+ * ======================================
+ * testNum 선택 · Fetch · 상태 · 오퍼 카드 · event-popup 모달 · 응답 Raw.
  *
  * [Main Functions]
  * ===========
- * - 1. AppScreen — 상태·버튼·결과·모달 렌더
+ * - 1. AppScreen — KPI UI 렌더
  *
  * [Dependencies]
  * =========
  * - react / react-native
- * - target/app_target_types
+ * - 03_target/app_target_types
  * - shared/app_shared_utils
  */
 
@@ -22,14 +22,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import type {
   EventPopupOffer,
   ParsedOffer,
   TestNum,
-} from "../target/app_target_types";
+} from "../03_target/app_target_types";
 import { prettyJson } from "../shared/app_shared_utils";
 
 const TEST_NUM_OPTIONS: TestNum[] = ["1", "2", "3"];
@@ -41,16 +40,11 @@ export interface AppScreenProps {
   busy: boolean;
   testNum: TestNum;
   onTestNumChange: (value: TestNum) => void;
-  assuranceUrl: string;
-  onAssuranceUrlChange: (value: string) => void;
-  onAssuranceConnect: () => void;
-  onAssuranceQuickConnect: () => void;
   offers: ParsedOffer[];
   debugPayload: unknown;
   eventPopup: EventPopupOffer | null;
   onClosePopup: () => void;
   onFetch: () => void;
-  onIdentity: () => void;
 }
 
 // 1.
@@ -62,16 +56,11 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
     busy,
     testNum,
     onTestNumChange,
-    assuranceUrl,
-    onAssuranceUrlChange,
-    onAssuranceConnect,
-    onAssuranceQuickConnect,
     offers,
     debugPayload,
     eventPopup,
     onClosePopup,
     onFetch,
-    onIdentity,
   } = props;
 
   return (
@@ -79,7 +68,7 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
       <ScrollView contentContainerStyle={styles.page}>
         <Text style={styles.title}>AEP Mobile SDK · Target Test</Text>
         <Text style={styles.sub}>
-          scope: {decisionScope} · Edge + Optimize (official path)
+          scope: {decisionScope} · Edge + Optimize
         </Text>
 
         <Text style={styles.fieldLabel}>testNum</Text>
@@ -110,24 +99,15 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
           })}
         </View>
 
-        <View style={styles.row}>
-          <Pressable
-            style={[styles.button, busy && styles.buttonDisabled]}
-            disabled={busy}
-            onPress={onFetch}
-          >
-            <Text style={styles.buttonText}>Fetch offers (Optimize)</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
-            disabled={busy}
-            onPress={onIdentity}
-          >
-            <Text style={styles.buttonSecondaryText}>Get ECID</Text>
-          </Pressable>
-        </View>
+        <Pressable
+          style={[styles.button, busy && styles.buttonDisabled]}
+          disabled={busy}
+          onPress={onFetch}
+        >
+          <Text style={styles.buttonText}>Fetch offers (Optimize)</Text>
+        </Pressable>
 
-        {busy ? <ActivityIndicator color="#2f6fed" /> : null}
+        {busy ? <ActivityIndicator color="#2f6fed" style={styles.spinner} /> : null}
 
         <View
           style={[
@@ -142,7 +122,7 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
         {offers.length === 0 ? (
           <View style={styles.offer}>
             <Text style={styles.offerBody}>
-              No offers yet. Tap Fetch after Tags Dev publish + Target activity.
+              No offers yet. Tap Fetch after Target activity is Live.
             </Text>
           </View>
         ) : (
@@ -161,41 +141,11 @@ export function AppScreen(props: AppScreenProps): React.JSX.Element {
           ))
         )}
 
-        <Text style={styles.label}>Debug · Assurance (not acceptance criteria)</Text>
-        <TextInput
-          style={styles.input}
-          value={assuranceUrl}
-          onChangeText={onAssuranceUrlChange}
-          placeholder="aepsdktargettest://...?adb_validation_sessionid=..."
-          placeholderTextColor="#5a6a7e"
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!busy}
-        />
-        <View style={styles.row}>
-          <Pressable
-            style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
-            disabled={busy}
-            onPress={onAssuranceConnect}
-          >
-            <Text style={styles.buttonSecondaryText}>Connect Deep link</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.buttonSecondary, busy && styles.buttonDisabled]}
-            disabled={busy}
-            onPress={onAssuranceQuickConnect}
-          >
-            <Text style={styles.buttonSecondaryText}>Quick Connect</Text>
-          </Pressable>
-        </View>
-        <Text style={styles.hint}>
-          KPI는 Fetch 오퍼. Assurance는 디버그만. Base URL=aepsdktargettest://
-        </Text>
-
-        <Text style={styles.label}>Raw propositions</Text>
+        <Text style={styles.label}>Raw response</Text>
         <Text style={styles.debug}>{prettyJson(debugPayload)}</Text>
       </ScrollView>
 
+      {/* type===event-popup 오퍼만 모달로 표시 */}
       <Modal
         visible={eventPopup != null}
         transparent
@@ -244,24 +194,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 6,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#2c3a4f",
-    backgroundColor: "#1a2332",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: "#e7ecf3",
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  hint: {
-    color: "#5a6a7e",
-    fontSize: 11,
-    lineHeight: 16,
-    marginBottom: 14,
-    marginTop: 6,
-  },
   row: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -294,13 +226,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 8,
-  },
-  buttonSecondary: {
-    borderWidth: 1,
-    borderColor: "#2c3a4f",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginBottom: 10,
   },
   buttonDisabled: {
     opacity: 0.55,
@@ -309,8 +236,8 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
   },
-  buttonSecondaryText: {
-    color: "#e7ecf3",
+  spinner: {
+    marginVertical: 8,
   },
   status: {
     borderWidth: 1,

@@ -2,6 +2,8 @@
 
 ## Log Index
 
+28. 2026-08-03 App/Web 고객 샘플 코드 정리 (01~04 폴더·최소화)
+27. 2026-08-03 App Fetch 항상 testNum 전송 (Target 오디언스 매칭)
 26. 2026-07-31 ECID 병목 원인 확정·org override 해결안 반영
 25. 2026-07-31 ECID 실패 시 debugOverrides 노출·smoke 폴백·edge.adobedc.net
 24. 2026-07-31 EAS debug edge.configId·샌드박스 domain 임시 주입
@@ -30,6 +32,37 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+28. 2026-08-03 App/Web 고객 샘플 코드 정리 (01~04 폴더·최소화)
+
+Purpose: 초기화→요청→반환→렌더 학습용으로 Assurance/identity/과한 진단을 제거하고 폴더 순서를 명시
+
+Changes:
+
+- App/Web: `01_config`→`02_init`→`03_target`→`04_ui` 재배치, assurance·identity 삭제
+- App: Fetch는 항상 testNum, DEBUG override는 Troubleshooting 주석으로 유지
+- 문서 Architecture·Customer Guide 경로 갱신
+
+Changed files:
+
+- app/App.tsx, app/src/**, app/package.json, app/env/*, app/.env.example
+- web/src/** 
+- docs/report/01_Architecture.md, docs/report/02_Customer_Config_Guide.md, docs/report/03_Sdk_Test_Root_Cause.md
+- docs/log/log.md
+
+27. 2026-08-03 App Fetch 항상 testNum 전송 (Target 오디언스 매칭)
+
+Purpose: UI에서 testNum을 골라도 Edge로 파라미터가 안 나가던 분기(no-data 우선)를 제거하고, Target Custom 오디언스 매칭 검증이 가능하도록 수정
+
+Changes:
+
+- fetchTargetOffers: data 없는 1차 호출 제거 → 매 Fetch에 `__adobe.target.testNum` 전송
+- Raw에 attempt=with-testNum · sentData 노출
+
+Changed files:
+
+- app/src/target/app_target_service.ts
+- docs/log/log.md
 
 26. 2026-07-31 ECID 병목 원인 확정·org override 해결안 반영
 

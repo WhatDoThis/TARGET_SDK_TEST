@@ -1,13 +1,13 @@
 /**
  * app.shared.app_shared_utils (App 공통 유틸)
  * ==========================================
- * App 채널 도메인 패키지가 공유하는 순수 함수 모음.
+ * 도메인 폴더(01~04)가 공유하는 순수 헬퍼. 초기화~렌더 순서 밖에 둔다.
  *
  * [Main Functions]
  * ===========
- * - 1. isBlank — 빈 문자열/공백 판별
- * - 2. prettyJson — JSON pretty print
- * - 3. safeErrorMessage — 예외 메시지 추출
+ * - 1. isBlank — null/공백 문자열 판별
+ * - 2. prettyJson — Raw JSON 표시용 pretty print
+ * - 3. safeErrorMessage — 예외를 `[location] message` 문자열로 변환
  *
  * [Dependencies]
  * =========

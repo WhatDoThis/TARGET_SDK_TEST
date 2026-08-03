@@ -1,7 +1,7 @@
 /**
- * web.ui.web_ui (Web 테스트 UI)
- * ============================
- * testNum 선택·오퍼 카드·event-popup 모달·원시 JSON 디버그를 렌더한다.
+ * web.04_ui.web_ui (4단계 · 오퍼 렌더)
+ * ===================================
+ * testNum 선택 · Fetch · 상태 · 오퍼 카드 · event-popup 모달 · 응답 Raw.
  *
  * [Main Functions]
  * ===========
@@ -12,20 +12,19 @@
  * - 5. setBusy — 버튼 활성/비활성
  * - 6. getSelectedTestNum — testNum 셀렉트 값
  * - 7. parseEventPopup — type===event-popup 추출
- * - 8. showEventPopup / hideEventPopup — 모달 표시·닫기
+ * - 8. showEventPopup — 모달 표시·닫기
  *
  * [Dependencies]
  * =========
- * - target/web_target_types
+ * - 03_target/web_target_types
  * - shared/web_shared_utils
  */
 
 import type {
   EventPopupOffer,
-  OfferPayload,
   ParsedOffer,
   TestNum,
-} from "../target/web_target_types";
+} from "../03_target/web_target_types";
 import { prettyJson } from "../shared/web_shared_utils";
 
 const EVENT_POPUP_TYPE = "event-popup";
@@ -33,13 +32,11 @@ const POPUP_ROOT_ID = "event-popup-root";
 
 export interface UiHandles {
   fetchButton: HTMLButtonElement;
-  identityButton: HTMLButtonElement;
   testNumSelect: HTMLSelectElement;
 }
 
 export interface MountUiOptions {
   onFetch: () => void;
-  onIdentity: () => void;
   decisionScope: string;
 }
 
@@ -59,7 +56,6 @@ export function mountUi(root: HTMLElement, options: MountUiOptions): UiHandles {
           </select>
         </label>
         <button id="btn-fetch" type="button">Fetch offers (sendEvent)</button>
-        <button id="btn-identity" class="secondary" type="button">Get ECID</button>
       </div>
       <div id="status" class="status">Ready</div>
       <div id="offers"></div>
@@ -70,17 +66,17 @@ export function mountUi(root: HTMLElement, options: MountUiOptions): UiHandles {
   `;
 
   const fetchButton = root.querySelector("#btn-fetch") as HTMLButtonElement;
-  const identityButton = root.querySelector("#btn-identity") as HTMLButtonElement;
   const testNumSelect = root.querySelector("#testNum") as HTMLSelectElement;
-
   fetchButton.addEventListener("click", options.onFetch);
-  identityButton.addEventListener("click", options.onIdentity);
 
-  return { fetchButton, identityButton, testNumSelect };
+  return { fetchButton, testNumSelect };
 }
 
 // 2.
-export function setStatus(message: string, kind: "ok" | "err" | "info" = "info"): void {
+export function setStatus(
+  message: string,
+  kind: "ok" | "err" | "info" = "info"
+): void {
   const el = document.getElementById("status");
   if (!el) {
     return;
@@ -97,7 +93,7 @@ export function renderOffers(offers: ParsedOffer[]): void {
   }
 
   if (offers.length === 0) {
-    el.innerHTML = `<div class="offer"><p>No propositions for this scope. Check Target activity publish + decisionScope.</p></div>`;
+    el.innerHTML = `<div class="offer"><p>No propositions. Check Target activity Live + decisionScope.</p></div>`;
     return;
   }
 
@@ -129,7 +125,6 @@ export function renderDebug(value: unknown): void {
 // 5.
 export function setBusy(handles: UiHandles, busy: boolean): void {
   handles.fetchButton.disabled = busy;
-  handles.identityButton.disabled = busy;
   handles.testNumSelect.disabled = busy;
 }
 
@@ -145,17 +140,14 @@ export function getSelectedTestNum(handles: UiHandles): TestNum {
 // 7.
 export function parseEventPopup(offers: ParsedOffer[]): EventPopupOffer | null {
   for (const offer of offers) {
-    const candidates = flattenCandidates(offer.payload);
-    for (const candidate of candidates) {
-      if (candidate?.type !== EVENT_POPUP_TYPE) {
-        continue;
-      }
-      return {
-        title: trimOrUndefined(candidate.title),
-        body: trimOrUndefined(candidate.body),
-        buttonText: trimOrUndefined(candidate.buttonText),
-      };
+    if (offer.payload?.type !== EVENT_POPUP_TYPE) {
+      continue;
     }
+    return {
+      title: trimOrUndefined(offer.payload.title),
+      body: trimOrUndefined(offer.payload.body),
+      buttonText: trimOrUndefined(offer.payload.buttonText),
+    };
   }
   return null;
 }
@@ -187,22 +179,8 @@ export function showEventPopup(offer: EventPopupOffer | null): void {
 
   const closeBtn = root.querySelector("#event-popup-close");
   closeBtn?.addEventListener("click", () => {
-    hideEventPopup();
-  });
-}
-
-export function hideEventPopup(): void {
-  const root = document.getElementById(POPUP_ROOT_ID);
-  if (root) {
     root.innerHTML = "";
-  }
-}
-
-function flattenCandidates(payload: OfferPayload | null): OfferPayload[] {
-  if (payload == null) {
-    return [];
-  }
-  return [payload];
+  });
 }
 
 function trimOrUndefined(value: unknown): string | undefined {

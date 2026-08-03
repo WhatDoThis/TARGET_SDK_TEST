@@ -31,7 +31,7 @@
 
 ### 1.1 직접 원인
 
-`app/src/init/app_init.ts`의 `waitForEdgeReady`가  
+`app/src/02_init/app_init.ts`의 `waitForEdgeReady`가  
 `EdgeIdentity.getExperienceCloudId()`를 최대 45초 재시도해도 비어 있거나 `general.callback.timeout`만 반복 → **App.init 실패 · Fetch 비활성**.
 
 ECID는 Fetch용 “추가 검사”가 아니라, 로그 **#17→#19**에서 정한 **본선 init 준비 신호**다.

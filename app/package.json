@@ -11,7 +11,6 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
-    "@adobe/react-native-aepassurance": "^7.0.0",
     "@adobe/react-native-aepcore": "^7.0.0",
     "@adobe/react-native-aepedge": "^7.0.0",
     "@adobe/react-native-aepedgeidentity": "^7.0.0",

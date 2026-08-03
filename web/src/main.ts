@@ -1,7 +1,8 @@
 /**
- * web.main (Web 엔트리)
- * =====================
- * config → init → UI 오케스트레이션. testNum 선택 후 sendEvent. 백엔드 호출 없음.
+ * web.main (오케스트레이션 · init → Fetch → 렌더)
+ * ==============================================
+ * 1 config → 2 init(alloy) → 3 target sendEvent → 4 UI.
+ * KPI: testNum 매칭 오퍼(특히 event-popup) 표시.
  *
  * [Main Functions]
  * ===========
@@ -9,18 +10,17 @@
  *
  * [Dependencies]
  * =========
- * - config/web_config
- * - init/web_init
- * - target/web_target_service
- * - identity/web_identity_service
- * - ui/web_ui
+ * - 01_config/web_config
+ * - 02_init/web_init
+ * - 03_target/web_target_service
+ * - 04_ui/web_ui
+ * - shared/web_shared_utils
  */
 
-import "./ui/styles.css";
-import { loadWebConfig } from "./config/web_config";
-import { initWebSdk } from "./init/web_init";
-import { fetchTargetOffers } from "./target/web_target_service";
-import { fetchEcid } from "./identity/web_identity_service";
+import "./04_ui/styles.css";
+import { loadWebConfig } from "./01_config/web_config";
+import { initWebSdk } from "./02_init/web_init";
+import { fetchTargetOffers } from "./03_target/web_target_service";
 import {
   getSelectedTestNum,
   mountUi,
@@ -30,7 +30,7 @@ import {
   setBusy,
   setStatus,
   showEventPopup,
-} from "./ui/web_ui";
+} from "./04_ui/web_ui";
 import { safeErrorMessage } from "./shared/web_shared_utils";
 
 // 1.
@@ -45,9 +45,6 @@ async function bootstrap(): Promise<void> {
     decisionScope: config.target.decisionScope,
     onFetch: () => {
       void handleFetch(handles, config.target.decisionScope);
-    },
-    onIdentity: () => {
-      void handleIdentity(handles);
     },
   });
 
@@ -92,30 +89,18 @@ async function handleFetch(
       );
     } else if (first?.title || first?.body) {
       setStatus(
-        `Offer received (testNum=${testNum}): ${first.title ?? "(title)"}`,
+        `Offer (testNum=${testNum}): ${first.title ?? "(title)"}`,
         "ok"
       );
     } else {
       setStatus(
-        `sendEvent OK · testNum=${testNum} · propositions=${result.propositions.length} (no JSON title/body)`,
-        "ok"
+        `Empty offers · testNum=${testNum} · propositions=${result.propositions.length}`,
+        "info"
       );
     }
   } catch (error) {
     setStatus(safeErrorMessage(error, "handleFetch"), "err");
     renderDebug({ error: String(error) });
-  } finally {
-    setBusy(handles, false);
-  }
-}
-
-async function handleIdentity(
-  handles: ReturnType<typeof mountUi>
-): Promise<void> {
-  setBusy(handles, true);
-  try {
-    const ecid = await fetchEcid();
-    setStatus(ecid ? `ECID: ${ecid}` : "ECID unavailable", ecid ? "ok" : "err");
   } finally {
     setBusy(handles, false);
   }

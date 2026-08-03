@@ -73,7 +73,6 @@
 | Identity (설명에 Edge Network 포함 = Edge Identity) | 필수 |
 | Offer Decisioning and Target | 필수 |
 | Profile | 권장 |
-| AEP Assurance | 디버그 시에만 |
 
 **Installed에 두면 안 되는 것 (금지)**
 
@@ -104,8 +103,17 @@
 
 ## 3. App 최소 코드 (공식 RN 7.x)
 
-패키지: `@adobe/react-native-aepcore` · `aepedge` · `aepedgeidentity` · `aepoptimize`  
-(선택 디버그: `aepassurance`)
+패키지: `@adobe/react-native-aepcore` · `aepedge` · `aepedgeidentity` · `aepoptimize`
+
+학습용 샘플 경로(순서 폴더):
+
+```text
+app/App.tsx
+app/src/01_config/app_config.ts
+app/src/02_init/app_init.ts
+app/src/03_target/app_target_service.ts
+app/src/04_ui/AppScreen.tsx
+```
 
 ```typescript
 import { MobileCore, LogLevel } from "@adobe/react-native-aepcore";
@@ -121,7 +129,7 @@ MobileCore.setLogLevel(LogLevel.DEBUG);
 await MobileCore.initializeWithAppId("<ENVIRONMENT_FILE_ID>");
 
 const scopes = [new DecisionScope("aep-app-test-scope")];
-const data = { __adobe: { target: { testNum: "1" } } }; // 선택
+const data = { __adobe: { target: { testNum: "3" } } };
 
 Optimize.updatePropositions(
   scopes,
@@ -136,7 +144,7 @@ const cached = await Optimize.getPropositions(scopes);
 
 - Datastream ID는 **코드에 넣지 않음** — Tags Edge Publish가 `edge.configId` 주입
 - Expo Go 불가 — **EAS/네이티브 빌드** 필수
-- 본 레포 구현: `app/src/init/app_init.ts`, `app/src/target/app_target_service.ts`
+- 오퍼 팝업 JSON: `{ "type": "event-popup", "title", "body", "buttonText" }`
 
 ---
 
@@ -157,7 +165,7 @@ const result = await alloy("sendEvent", {
 });
 ```
 
-본 레포: `web/src/init/web_init.ts`, `web/src/target/web_target_service.ts`
+본 레포 샘플 경로: `web/src/main.ts` · `01_config` · `02_init` · `03_target` · `04_ui`
 
 ---
 
@@ -185,12 +193,11 @@ const result = await alloy("sendEvent", {
 | `general.unexpected` | 클래식 Target 잔존, Target Location/Live, Assurance personalization 응답 |
 | org unavailable (getSdkIdentities) | Edge-only에서 흔함 — **ECID(Edge Identity)** 로 준비 여부 판단 |
 | Edge domain DNS 이슈 | Tags에 채워진 샌드박스 도메인 연결 확인. 필요 시 임시 `edge.domain` 오버라이드 (`EXPO_PUBLIC_DEBUG_EDGE_*`) — 본선은 콘솔 샌드박스 도메인 유지 |
-| Assurance | Deep link Base URL = 앱 scheme (`aepsdktargettest://`). 웹 `https://…` 세션 URL은 Mobile용 아님. 세션 ID는 만료됨 — 하드코딩 금지 |
-
-디버그 env (레포, **EAS 본선에 넣지 않음**):
+디버그 env (Troubleshooting · 고객 골든 패스 아님):
 
 - `EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID`
 - `EXPO_PUBLIC_DEBUG_EDGE_DOMAIN`
+- `EXPO_PUBLIC_DEBUG_EXPERIENCE_CLOUD_ORG` — 기기 Tags 미적용 시 ECID용 임시 org 주입
 
 ---
 

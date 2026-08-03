@@ -1,20 +1,20 @@
 /**
- * app.target.app_target_service (App Optimize Target — 공식 골든 패스)
- * ==================================================================
- * updatePropositions(완료 콜백) → getPropositions.
- * 1차: data 없이 요청(통신·Target 매칭 검증) → 2차: testNum plain object.
+ * app.03_target.app_target_service (3단계 · 요청·반환)
+ * ==================================================
+ * updatePropositions → 콜백/캐시 → JSON 오퍼 파싱.
+ * Fetch마다 data.__adobe.target.testNum 을 전송해 Target 오디언스와 매칭한다.
  *
  * [Main Functions]
  * ===========
  * - 1. fetchTargetOffers — scope + testNum 개인화 요청
  * - 2. parsePropositionMap — Map/객체 → OfferPayload 목록
- * - 3. decodeOfferContent — string/이중string/array content 디코드
+ * - 3. decodeOfferContent — string/이중 JSON/array content 디코드
  * - 4. parseEventPopup — type===event-popup 추출
  *
  * [Dependencies]
  * =========
  * - @adobe/react-native-aepoptimize
- * - target/app_target_types
+ * - 03_target/app_target_types
  * - shared/app_shared_utils
  */
 
@@ -35,6 +35,7 @@ const UPDATE_WAIT_MS = 15000;
 // 3.
 export function decodeOfferContent(content: unknown): unknown {
   let value = content;
+  // Target JSON 오퍼는 string 또는 이중 stringify 로 올 수 있음
   if (typeof value === "string") {
     try {
       value = JSON.parse(value);
@@ -128,6 +129,7 @@ export async function fetchTargetOffers(
     }
 
     const scopes = [new DecisionScope(decisionScope)];
+    // Web과 동일: mbox 파라미터로 Target Custom 오디언스(testNum)에 전달
     const dataWithTestNum = {
       __adobe: {
         target: {
@@ -136,18 +138,8 @@ export async function fetchTargetOffers(
       },
     };
 
-    // 1차: 파라미터 없이 — Edge/Target 경로만 검증 (공식 sample과 동일)
     Optimize.clearCachedPropositions();
-    let updateResult = await updatePropositionsOnce(scopes, undefined);
-    let attempt: "no-data" | "with-testNum" = "no-data";
-
-    // 실패 시 testNum 포함 1회 재시도 (활동이 mbox 파라미터 조건일 수 있음)
-    if (updateResult.error) {
-      await sleep(500);
-      Optimize.clearCachedPropositions();
-      updateResult = await updatePropositionsOnce(scopes, dataWithTestNum);
-      attempt = "with-testNum";
-    }
+    const updateResult = await updatePropositionsOnce(scopes, dataWithTestNum);
 
     if (updateResult.error) {
       throw new Error(
@@ -156,8 +148,6 @@ export async function fetchTargetOffers(
           `optimize=${optimizeVersion}`,
           `scope=${decisionScope}`,
           `testNum=${testNum}`,
-          `attempt=${attempt}`,
-          classifyOptimizeFailure(updateResult.error),
         ].join(" · ")
       );
     }
@@ -173,11 +163,11 @@ export async function fetchTargetOffers(
         optimizeVersion,
         decisionScope,
         testNum,
-        attempt,
+        sentData: dataWithTestNum,
         updatePath: updateResult.path,
         warning: hasPayload
           ? null
-          : "Edge/Optimize OK but empty offers — Target Location must be exactly aep-app-test-scope, activity Live, audience matches",
+          : "empty offers — Location=aep-app-test-scope Live, audience testNum, Property Token",
         response: serializePropositions(propositions),
       },
     };
@@ -211,12 +201,12 @@ function updatePropositionsOnce(
     const timer = setTimeout(() => {
       finish({
         propositions: null,
-        error:
-          "updatePropositions timeout — Edge 요청 미완료. Tags Dev Publish / edge.configId / 네트워크",
+        error: "updatePropositions timeout",
         path: "timeout",
       });
     }, UPDATE_WAIT_MS);
 
+    // 캐시 갱신 알림 또는 onSuccess 중 먼저 오는 쪽으로 완료 처리
     try {
       Optimize.onPropositionUpdate({
         call: (propositions: unknown) => {
@@ -259,24 +249,6 @@ function updatePropositionsOnce(
       });
     }
   });
-}
-
-/**
- * general.unexpected = Edge/Optimize가 응답했으나 실패(SDK 미연결 아님).
- * timeout = 요청 자체가 끝나지 않음.
- */
-function classifyOptimizeFailure(errorText: string): string {
-  if (/general\.unexpected|Unexpected Error/i.test(errorText)) {
-    return (
-      "CAUSE:Edge/Target personalization failed (not a missing native module). " +
-      "Check: (1) Installed에 클래식 Adobe Target 없음 (2) Target Location=aep-app-test-scope Live " +
-      "(3) Datastream Target Environment 일치 (4) Tags Dev 재Publish"
-    );
-  }
-  if (/timeout/i.test(errorText)) {
-    return "CAUSE:no Edge completion — network / edge.configId from Tags / privacy";
-  }
-  return "CAUSE:see Optimize error detail";
 }
 
 async function safeOptimizeVersion(): Promise<string> {
@@ -370,10 +342,4 @@ function trimOrUndefined(value: unknown): string | undefined {
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
 }

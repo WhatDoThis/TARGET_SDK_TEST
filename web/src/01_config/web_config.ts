@@ -1,7 +1,7 @@
 /**
- * web.config.web_config (Web Dev 환경설정 로드)
- * ============================================
- * web/env/config.dev.json을 로드·검증한다. Adobe Edge / Target / Debug 그룹으로 구성.
+ * web.01_config.web_config (1단계 · Dev 환경설정)
+ * ==============================================
+ * web/env/config.dev.json 로드·검증. adobeEdge / target / debug 그룹.
  *
  * [Main Functions]
  * ===========
