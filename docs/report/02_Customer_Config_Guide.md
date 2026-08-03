@@ -193,11 +193,11 @@ const result = await alloy("sendEvent", {
 | `general.unexpected` | 클래식 Target 잔존, Target Location/Live, Assurance personalization 응답 |
 | org unavailable (getSdkIdentities) | Edge-only에서 흔함 — **ECID(Edge Identity)** 로 준비 여부 판단 |
 | Edge domain DNS 이슈 | Tags에 채워진 샌드박스 도메인 연결 확인. 필요 시 임시 `edge.domain` 오버라이드 (`EXPO_PUBLIC_DEBUG_EDGE_*`) — 본선은 콘솔 샌드박스 도메인 유지 |
-디버그 env (Troubleshooting · 고객 골든 패스 아님):
+디버그 env (Troubleshooting · 고객 골든 패스 아님 · **Git 커밋 금지**):
 
-- `EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID`
-- `EXPO_PUBLIC_DEBUG_EDGE_DOMAIN`
-- `EXPO_PUBLIC_DEBUG_EXPERIENCE_CLOUD_ORG` — 기기 Tags 미적용 시 ECID용 임시 org 주입
+- 키 이름만 문서화: `EXPO_PUBLIC_DEBUG_EDGE_CONFIG_ID` / `_DOMAIN` / `_EXPERIENCE_CLOUD_ORG`
+- 실값은 `app/.env`(gitignore) 또는 EAS Secrets — 상세 `app/SECRETS.md`
+- 공개 `eas.json` / 소스에 org·Datastream UUID를 넣지 말 것
 
 ---
 

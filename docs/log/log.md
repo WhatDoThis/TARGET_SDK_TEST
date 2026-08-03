@@ -2,6 +2,9 @@
 
 ## Log Index
 
+31. 2026-08-03 app/.env·config.dev.json 채움 위치 주석 보강
+30. 2026-08-03 gitignore 로컬 실값 파일 복구 (.env / config.dev.json)
+29. 2026-08-03 공개 레포용 민감정보 제거 (org/Datastream/File ID)
 28. 2026-08-03 App/Web 고객 샘플 코드 정리 (01~04 폴더·최소화)
 27. 2026-08-03 App Fetch 항상 testNum 전송 (Target 오디언스 매칭)
 26. 2026-07-31 ECID 병목 원인 확정·org override 해결안 반영
@@ -32,6 +35,51 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+31. 2026-08-03 app/.env·config.dev.json 채움 위치 주석 보강
+
+Purpose: 어떤 파일이 빌드에 쓰이고 콘솔 어디서 값을 가져오는지 파일 안에 바로 보이게 함
+
+Changes:
+
+- `.env`: 역할·형제 파일 관계·키별 Adobe 콘솔 위치 주석
+- `config.dev.json`: `_readme`/`_where`로 백업 용도·대응 EXPO_PUBLIC 키 명시
+- SECRETS.md 동기화
+
+Changed files:
+
+- app/.env, app/env/config.dev.json, app/SECRETS.md, docs/log/log.md
+
+30. 2026-08-03 gitignore 로컬 실값 파일 복구 (.env / config.dev.json)
+
+Purpose: 공개 레포에서 실값을 뺀 뒤에도 로컬/서버에서 쓸 수 있도록 gitignore 경로에 실값을 다시 보관
+
+Changes:
+
+- `app/.env`, `app/env/config.dev.json`, `web/env/config.dev.json` 실값 복구
+- `app/SECRETS.md`에 로컬 보관 위치 명시
+
+Changed files:
+
+- app/.env, app/env/config.dev.json, web/env/config.dev.json
+- app/SECRETS.md, docs/log/log.md
+
+29. 2026-08-03 공개 레포용 민감정보 제거 (org/Datastream/File ID)
+
+Purpose: public Git에 org·Datastream·Tags File ID 실값이 남지 않도록 플레이스홀더화하고 주입 위치를 문서화
+
+Changes:
+
+- eas.json / app_config smoke 하드코딩 제거, `.env.example`·`SECRETS.md` 안내
+- 실값은 gitignored `app/.env`로만 유지
+- Root Cause·Architecture·Customer Guide에서 실값 삭제
+
+Changed files:
+
+- app/eas.json, app/src/01_config/app_config.ts, app/src/02_init/app_init.ts
+- app/.env.example, app/SECRETS.md, app/env/config.dev.example.json
+- docs/report/01_Architecture.md, 02_Customer_Config_Guide.md, 03_Sdk_Test_Root_Cause.md, 00_ReportIndex.md
+- docs/log/log.md
 
 28. 2026-08-03 App/Web 고객 샘플 코드 정리 (01~04 폴더·최소화)
 

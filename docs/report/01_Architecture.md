@@ -46,8 +46,10 @@ App init의 ECID 대기는 준비 신호이며, 별도 identity 패키지/Assura
 | `app/env/config.dev.example.json` | `adobeMobile` | `adobeMobileAppId` |
 | | `target` | `decisionScope` |
 | | `debug` | `edgeConfigId`, `edgeDomain`, `experienceCloudOrg` (**Troubleshooting만**) |
-| `eas.json` 본선 | | `EXPO_PUBLIC_ADOBE_MOBILE_APP_ID`, `EXPO_PUBLIC_DECISION_SCOPE` |
-| `eas.json` Troubleshooting | | `EXPO_PUBLIC_DEBUG_*` (org/edge) |
+| `eas.json` | tracked | **플레이스홀더만** (실값 금지) |
+| `app/.env` | **gitignore** | 로컬 실값 — 키 목록은 `app/.env.example` |
+| EAS Secrets | Expo 대시보드 | 클라우드 빌드용 `EXPO_PUBLIC_*` |
+| 비밀 안내 | `app/SECRETS.md` | 어디에 넣는지 |
 | 고객 가이드 | `docs/report/02_Customer_Config_Guide.md` | 골든 패스·체크리스트 |
 
 ## 데이터 흐름

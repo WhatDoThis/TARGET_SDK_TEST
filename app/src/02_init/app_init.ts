@@ -53,7 +53,8 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
     await MobileCore.initializeWithAppId(appId);
     MobileCore.setPrivacyStatus(PrivacyStatus.OPT_IN);
 
-    // Troubleshooting only — Tags 원격설정이 기기에 안 올 때 org/edge를 로컬 주입
+    // Troubleshooting only — 값은 app/.env 또는 EAS Secrets에서만 (Git 하드코딩 금지)
+    // 키: EXPO_PUBLIC_DEBUG_EXPERIENCE_CLOUD_ORG / _EDGE_CONFIG_ID / _EDGE_DOMAIN
     const debugOverrides: Record<string, string> = {};
     if (!isBlank(config.debug.experienceCloudOrg)) {
       debugOverrides["experienceCloud.org"] =
@@ -67,7 +68,9 @@ export async function initMobileSdk(config: AppConfig): Promise<void> {
     }
     if (Object.keys(debugOverrides).length > 0) {
       await MobileCore.updateConfiguration(debugOverrides);
-      console.warn("[initMobileSdk] Troubleshooting overrides", debugOverrides);
+      console.warn(
+        "[initMobileSdk] Troubleshooting overrides applied (source=env/example, not source code)"
+      );
     }
 
     initialized = true;
