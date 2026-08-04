@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adobe Target 전환 — 체크리스트 Q&amp;A 배경지식 답안지</title>
+<style>
+  :root{--bg:#f8f9fb;--card:#fff;--accent:#1a73e8;--accent2:#e8453c;--insider:#7c3aed;--border:#e2e6ea;--text:#1e293b;--sub:#64748b;--green:#16a34a;--amber:#d97706}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 28px}
+  .container{max-width:1320px;margin:0 auto}
+  h1{font-size:1.75rem;font-weight:800;margin-bottom:6px;letter-spacing:-.03em}
+  .subtitle{color:var(--sub);font-size:.92rem;margin-bottom:22px}
+  .legend{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 22px;margin-bottom:20px;font-size:.85rem}
+  .legend h2{font-size:.95rem;margin-bottom:8px}
+  .legend span.item{display:inline-block;margin-right:14px}
+  .toc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 26px;margin-bottom:22px}
+  .toc h2{font-size:1rem;margin-bottom:10px}
+  .toc ol{padding-left:20px}
+  .toc li{margin:3px 0;font-size:.88rem}
+  .toc a{color:var(--accent);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  .cat-banner{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;border-radius:14px;padding:20px 26px;margin:26px 0 16px}
+  .cat-banner h2{font-size:1.35rem;font-weight:800;margin-bottom:4px}
+  .cat-banner p{font-size:.86rem;opacity:.85}
+  .section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px 32px;margin-bottom:20px}
+  .section-id{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:20px;margin-bottom:10px;letter-spacing:.04em}
+  .section-id.cross{background:var(--insider)}
+  .section-id.gap{background:var(--amber)}
+  h2.sec{font-size:1.18rem;font-weight:700;margin-bottom:6px;letter-spacing:-.02em}
+  .sec-desc{color:var(--sub);font-size:.86rem;margin-bottom:14px}
+  .qa{border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:14px 0;border-left:4px solid var(--accent)}
+  .qa.appq{border-left-color:var(--insider)}
+  .qa .qno{font-size:.72rem;font-weight:700;color:var(--accent);letter-spacing:.03em}
+  .qa.appq .qno{color:var(--insider)}
+  .qa h3{font-size:1rem;font-weight:700;margin:4px 0 10px}
+  .qa .lbl{font-size:.78rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-top:10px}
+  .qa p{font-size:.9rem;margin:3px 0}
+  .fu{background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:.86rem}
+  .fu .futag{font-size:.72rem;font-weight:700;color:var(--insider);letter-spacing:.03em}
+  .fu .fq{font-weight:600;margin:2px 0 4px}
+  .cite{margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:.8rem}
+  .cite a{color:var(--accent);text-decoration:none}
+  .cite a:hover{text-decoration:underline}
+  .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-right:4px}
+  .b-doc{background:#dcfce7;color:#166534}
+  .b-guide{background:#ede9fe;color:#6d28d9}
+  .b-warn{background:#fee2e2;color:#991b1b}
+  .b-new{background:#fef9c3;color:#854d0e}
+  .b-reuse{background:#dbeafe;color:#1e40af}
+  .b-part{background:#e0e7ff;color:#3730a3}
+  .b-no{background:#fee2e2;color:#991b1b}
+  .b-sdk{background:#ccfbf1;color:#0f766e}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem;line-height:1.55}
+  th,td{
+    border:1px solid var(--border);padding:10px 14px;text-align:left;vertical-align:top;
+    word-break:keep-all;overflow-wrap:break-word;hyphens:none;
+  }
+  th{background:#f1f5f9;font-weight:700;line-height:1.4}
+  tr:nth-child(even){background:#fafbfc}
+  code{background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:.8rem;font-family:'Fira Code',ui-monospace,monospace}
+  /* 표 안 code는 토큰 단위로 붙이고, 셀 폭이 부족하면 다음 줄로(중간 쪼개기 방지) */
+  td code,th code{white-space:nowrap;display:inline-block;max-width:100%;vertical-align:baseline}
+  .muted{font-size:.8rem;color:var(--sub);font-weight:500;line-height:1.45}
+  .muted code{font-size:.76rem}
+  .cell-stack{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+  .cell-stack > .muted,.cell-br{display:block;margin-top:0}
+  /* 경로 맵(6열) — 좁은 열 고정, 긴 열에 여유 */
+  table.t-path{table-layout:fixed}
+  table.t-path col.c-id{width:56px}
+  table.t-path col.c-ch{width:52px}
+  table.t-path col.c-route{width:72px}
+  table.t-path col.c-sdk{width:22%}
+  table.t-path col.c-key{width:26%}
+  table.t-path col.c-cname{width:auto}
+  table.t-path td:first-child{font-weight:700;letter-spacing:.02em}
+  /* 비교·조합 표 */
+  table.t-combo{table-layout:fixed}
+  table.t-combo col.c-set{width:12%}
+  table.t-combo col.c-wa{width:8%}
+  table.t-combo col.c-ma{width:8%}
+  table.t-combo col.c-sign{width:22%}
+  table.t-combo col.c-note{width:auto}
+  table.t-cmp{table-layout:fixed}
+  table.t-cmp col.c-label{width:18%}
+  table.t-cmp col.c-ma2,table.t-cmp col.c-mb2{width:41%}
+  table.t-web{table-layout:fixed}
+  table.t-web col.c-method{width:18%}
+  table.t-web col.c-where{width:28%}
+  table.t-web col.c-key2{width:20%}
+  table.t-web col.c-tgt{width:18%}
+  table.t-web col.c-tags{width:8%}
+  #checklist{table-layout:fixed}
+  #checklist col.c-qid{width:88px}
+  #checklist col.c-ch2{width:64px}
+  #checklist col.c-q{width:42%}
+  #checklist col.c-fu{width:auto}
+  #rfp-ib table{font-size:.82rem}
+  #rfp-ib td.guide{line-height:1.55}
+  .note{background:#fffbeb;border-left:4px solid var(--amber);padding:11px 15px;border-radius:0 8px 8px 0;margin:12px 0;font-size:.85rem}
+  .note strong{color:var(--amber)}
+  .tip{background:#ecfdf5;border-left:4px solid var(--green);padding:11px 15px;border-radius:0 8px 8px 0;margin:12px 0;font-size:.85rem}
+  .tip strong{color:var(--green)}
+  pre{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.82rem;overflow-x:auto;margin:8px 0}
+  .section ol,.section ul,.qa ol,.qa ul,.note ol,.note ul,.tip ol,.tip ul,.step-list{margin:6px 0 6px 22px}
+  .section li,.qa li,.note li,.tip li,.step-list li{font-size:.88rem;margin:4px 0;line-height:1.6}
+  /* ===== 구현방식 A/B/C · 부록 방법 블록 — 카드형으로 단락 경계 명확화 ===== */
+  .codeblock{
+    margin:28px 0 8px;padding:0 0 16px;
+    border:1.5px solid #cbd5e1;border-radius:14px;
+    background:#fff;box-shadow:0 2px 0 rgba(15,23,42,.04);
+    overflow:hidden;
+  }
+  .codeblock + .codeblock{margin-top:36px}
+  .codeblock.alloy{border-color:#86efac;box-shadow:0 2px 0 rgba(22,163,74,.08)}
+  .codeblock.legacy{border-color:#cbd5e1;border-style:dashed}
+  .codeblock .cap{
+    display:block;font-size:.95rem;font-weight:800;letter-spacing:-.02em;
+    color:#1e40af;margin:0 0 14px;padding:12px 16px;
+    background:#eff6ff;border-bottom:1px solid #bfdbfe;line-height:1.45;
+  }
+  .codeblock.alloy .cap{color:#166534;background:#f0fdf4;border-bottom-color:#bbf7d0}
+  .codeblock.legacy .cap{color:#475569;background:#f8fafc;border-bottom-color:#e2e8f0}
+  .codeblock .sub,.codeblock .note,.codeblock .tip,.codeblock .cite,
+  .codeblock .nlist,.codeblock table,.codeblock pre,.codeblock > p:not(.cap),
+  .codeblock .note-h{margin-left:16px;margin-right:16px}
+  .codeblock .sub{font-size:.8rem;color:var(--sub);margin-top:10px;margin-bottom:4px;font-weight:600}
+  .codeblock > .sub:first-of-type{margin-top:2px}
+  .codeblock .cite{margin-top:14px;padding-top:10px}
+  .codeblock > .note,.codeblock > .tip{margin-top:12px}
+  .pill{display:inline-block;font-size:.7rem;font-weight:700;padding:1px 8px;border-radius:10px;margin-right:6px;background:#e2e8f0;color:#334155}
+  .pill.web{background:#dbeafe;color:#1e40af}
+  .pill.app{background:#f5f3ff;color:#6d28d9}
+  .pill.rec{background:#dcfce7;color:#166534}
+  .pill.legacy{background:#f1f5f9;color:#475569}
+  .faq dt{font-weight:700;font-size:.9rem;margin-top:10px;color:var(--text)}
+  .faq dd{font-size:.88rem;margin:2px 0 0;color:var(--sub)}
+  .faq dd strong{color:var(--green)}
+  /* ===== 필기형(노트) 유틸 ===== */
+  .keybox{background:#fffdf5;border:2px solid var(--amber);border-radius:12px;padding:14px 18px;margin:14px 0;box-shadow:2px 2px 0 rgba(217,119,6,.12)}
+  .keybox .kt{display:inline-block;font-weight:800;color:#fff;background:var(--amber);font-size:.74rem;padding:2px 10px;border-radius:8px;margin-bottom:8px;letter-spacing:.03em}
+  .keybox p{font-size:.9rem;margin:2px 0}
+  .hl{background:linear-gradient(transparent 55%,#fde68a 55%);font-weight:700;padding:0 2px}
+  .hl2c{background:linear-gradient(transparent 55%,#bfdbfe 55%);font-weight:700;padding:0 2px}
+  h3.note-h{font-size:1rem;margin:16px 0 6px;color:var(--text);border-left:4px solid var(--accent);padding-left:9px}
+  .nlist{list-style:none;margin:8px 0 8px 2px !important;padding:0}
+  .nlist li{position:relative;padding-left:24px;margin:5px 0;font-size:.9rem;line-height:1.6;list-style:none}
+  .nlist li::before{content:"→";position:absolute;left:2px;top:0;color:var(--accent);font-weight:800}
+  .nlist li.ok::before{content:"✓";color:var(--green)}
+  .nlist li.no::before{content:"✕";color:var(--accent2)}
+  .nlist li.warn::before{content:"⚠";color:var(--amber)}
+  .flow{margin:12px 0}
+  .flow .node{border:1.5px solid var(--border);border-left:5px solid var(--accent);border-radius:9px;padding:10px 14px;background:#fff;font-size:.87rem}
+  .flow .node b{color:var(--accent)}
+  .flow .node.hl2{border-left-color:var(--accent2);background:#fef2f2}
+  .flow .node.hl2 b{color:var(--accent2)}
+  .flow .node.ok2{border-left-color:var(--green);background:#ecfdf5}
+  .flow .node.ok2 b{color:var(--green)}
+  .flow .arw{text-align:center;color:var(--sub);font-size:.82rem;line-height:1.4;margin:3px 0}
+  .flow .node .tiny{color:var(--sub);font-size:.78rem;font-weight:600}
+  /* ===== 체크리스트 원문 링크/하이라이트 ===== */
+  .qlink{display:inline-block;font-size:.7rem;font-weight:600;color:var(--sub);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:0 7px;margin-left:8px;vertical-align:middle}
+  .qlink:hover{color:var(--accent);border-color:var(--accent);background:#f0f6ff}
+  #checklist td{font-size:.84rem;vertical-align:top}
+  #checklist .cid{white-space:nowrap;font-weight:700}
+  #checklist .cid a{color:var(--accent);text-decoration:none}
+  #checklist .ch-fu{color:var(--insider)}
+  tr:target>td{background:#fde68a !important;box-shadow:inset 4px 0 0 var(--amber)}
+  .section:target{box-shadow:0 0 0 3px rgba(26,115,232,.22)}
+  .qa:target{box-shadow:0 0 0 3px rgba(124,58,237,.28)}
+  #rfp-ib .guide a{color:var(--accent);text-decoration:none;font-weight:600}
+  #rfp-ib .guide a:hover{text-decoration:underline}
+  @media(max-width:900px){
+    .container{max-width:100%}
+    table.t-path,table.t-combo,table.t-cmp,table.t-web,#checklist{table-layout:auto}
+    td code,th code{white-space:normal}
+  }
+  @media(max-width:768px){body{padding:12px}.section{padding:18px 16px}th,td{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Adobe Target 전환 — 체크리스트 Q&amp;A 배경지식 답안지</h1>
+<p class="subtitle">LG유플러스 OA시스템 구축 프로젝트 · 디지털IB 질의서 대응 | 회의 문항별 배경지식 · 근거는 공식문서 최우선</p>
+
+<nav class="toc">
+  <h2>📑 목차</h2>
+  <ol>
+    <li><a href="#priority"><strong>★ 구축 가이드라인 — 웹·앱 가능 경로(권장/대안) + 간판</strong></a></li>
+    <li><a href="#pre1">사전 배경 ① — 인사이더 vs 타겟 동작 원리(스크립트 vs SDK)</a></li>
+    <li><a href="#pre2">사전 배경 ② — 헤드리스 JSON 아키텍처 &amp; 개발사 스코프</a></li>
+    <li><a href="#pre3">사전 배경 ③ — 구현 예시(W-A/M-A/M-B/W-B) &amp; 혼동 FAQ</a></li>
+    <li><a href="#cat1">【대분류 1】 질문 체크리스트 배경지식 (A~F)</a>
+      <ol>
+        <li><a href="#a">A. 현행 인사이더 구축 현황(접근)</a></li>
+        <li><a href="#b">B. 데이터레이어 &amp; 함수 정의</a></li>
+        <li><a href="#c">C. 오퍼/렌더링(JSON) 구조</a></li>
+        <li><a href="#d">D. 웹 타겟 구축 요건</a></li>
+        <li><a href="#e">E. 앱 타겟 구축 요건</a></li>
+        <li><a href="#f">F. 식별자·프로필 연동</a></li>
+      </ol>
+    </li>
+    <li><a href="#cat2">【대분류 2】 갭·채널 매핑 배경지식 (웹/앱/공통)</a></li>
+    <li><a href="#appendix"><strong>부록 — 1st-party 도메인</strong></a> (<a href="#appendix">웹 ③</a> · <a href="#appendix-app">앱 ④</a>)</li>
+    <li><a href="#appendix-tags"><strong>부록 — Adobe Tags Build · install 알고리즘</strong></a></li>
+    <li><a href="#rfp-ib"><strong>별첨 — RFP 디지털 IB 요건 대응 매핑 (OSFR-0058~0088)</strong></a></li>
+    <li><a href="#ref">공식문서 레퍼런스 인덱스</a></li>
+    <li><a href="#checklist"><strong>체크리스트 원문 — 문항 + 후속질문 리스트</strong></a></li>
+  </ol>
+</nav>
+
+<!-- ===== TOP PRIORITY ===== -->
+<div class="section" id="priority" style="border:2px solid var(--accent2)">
+  <span class="section-id" style="background:var(--accent2)">구축 가이드</span>
+  <h2 class="sec">★ 구축 가이드라인 — 웹·앱 가능 경로(권장/대안) + 1st-party 간판</h2>
+  <p class="sec-desc">RFP 무과금 = 고객사 소유 호스트(SNI) 필수. 웹·앱 모두 <b>권장(Edge) / 대안(클래식 Target Delivery)</b> 두 문을 연다. 상세 스니펫은 <a href="#pre3">사전배경 ③</a>·도메인 절차는 <a href="#appendix">부록</a>.</p>
+
+  <div class="keybox">
+    <div class="kt">한 줄 스탠스 · 근거 등급</div>
+    <ul class="nlist">
+      <li class="ok"><b>권장 · 근거 확실</b> — 웹 alloy + 앱 Edge/Optimize. 간판 키(<code>edgeDomain</code>/<code>edge.domain</code>)에 “first-party domain” 공식 문구 + Adobe-Managed Certificate</li>
+      <li class="warn"><b>대안 · 웹 확실 / 앱은 추론+검증</b> — 웹 at.js는 Target CNAME HOWTO에 <code>serverDomain</code> 적용이 <b>명시</b>. 앱 클래식은 호스트 오버라이드 키 <code>target.server</code>는 공식이나, CNAME HOWTO·무과금은 <b>모바일 적용 스텝이 없음</b> → Delivery API·소스상 동일 호스트 호출은 가능하나 <b>PoC·AE 확인 전 “무과금 확정”으로 쓰지 말 것</b></li>
+      <li>CNAME 프로그램이 둘로 갈림: Edge Managed Cert(<code>*.data.adobedc.net</code>) vs Target CNAME(<code>*.tt.omtrdc.net</code>). Adobe가 혼용을 <b>기술 차단</b>한다고 적힌 문서는 없음 — 다만 통신사 규칙·인증서 이중 운영상 <b>한 세트로 맞추는 것을 권장</b></li>
+    </ul>
+  </div>
+
+  <h3 class="note-h">0. 왜 간판이 필요한가</h3>
+  <div class="flow">
+    <div class="node">RFP — 디지털 IB 트래픽 <b>무과금</b> (기존 고정 IP)</div>
+    <div class="arw">↓</div>
+    <div class="node hl2">Adobe CDN = <b>유동 IP</b> → 고정 IP 무과금 불가</div>
+    <div class="arw">↓</div>
+    <div class="node">고객사 1st-party 호스트 + CNAME/인증서 → 통신사 <b>도메인(SNI)</b> 무과금</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">SDK에 그 호스트 지정 — 웹 <code>edgeDomain</code>/<code>serverDomain</code> · 앱 <code>edge.domain</code>/<code>target.server</code></div>
+  </div>
+
+  <h3 class="note-h">1. 가능 경로 맵 (4갈래)</h3>
+  <table class="t-path">
+    <colgroup>
+      <col class="c-id"><col class="c-ch"><col class="c-route"><col class="c-sdk"><col class="c-key"><col class="c-cname">
+    </colgroup>
+    <tr><th>ID</th><th>채널</th><th>경로</th><th>SDK / API</th><th>간판 키</th><th>CNAME 프로그램</th></tr>
+    <tr>
+      <td>W-A</td><td>웹</td><td><span class="pill rec">권장</span></td>
+      <td class="cell-stack"><span>alloy ·</span><code>sendEvent</code></td>
+      <td><code>edgeDomain</code></td>
+      <td>Edge Managed Cert</td>
+    </tr>
+    <tr>
+      <td>W-B</td><td>웹</td><td><span class="pill legacy">대안</span></td>
+      <td>at.js · page load</td>
+      <td class="cell-stack"><code>serverDomain</code><span class="muted">+ <code>overrideMboxEdgeServer:false</code></span></td>
+      <td>Target CNAME</td>
+    </tr>
+    <tr>
+      <td>M-A</td><td>앱</td><td><span class="pill rec">권장</span></td>
+      <td class="cell-stack"><span>Edge+Optimize ·</span><code>updatePropositions</code></td>
+      <td><code>edge.domain</code></td>
+      <td>Edge Managed Cert</td>
+    </tr>
+    <tr>
+      <td>M-B</td><td>앱</td><td><span class="pill legacy">대안</span></td>
+      <td class="cell-stack"><span>Adobe Target ·</span><span>retrieve / prefetch</span></td>
+      <td><code>target.server</code></td>
+      <td class="cell-stack"><span>Target CNAME 호스트 지정</span><span class="muted">(추론 · AE/PoC 확인)</span></td>
+    </tr>
+  </table>
+
+  <div class="keybox">
+    <div class="kt">웹 Tags 기준 — 먼저 이 표만 보고 갈래를 잡기</div>
+    <table>
+      <tr><th></th><th>W-A (가이드 2)</th><th>W-B (가이드 3)</th></tr>
+      <tr><td>Tags에 설치</td><td><b>AEP Web SDK</b> 확장</td><td><b>Adobe Target</b> 확장 (at.js)</td></tr>
+      <tr><td>페이지에 넣는 것</td><td>Environment <b>install</b> 1줄</td><td>Environment <b>install</b> 1줄 (동일)</td></tr>
+      <tr><td>“Load Target” Rule</td><td><b>없음</b> (at.js 안 씀)</td><td><b>있음</b> — Load Target → page load</td></tr>
+      <tr><td>개인화 호출</td><td>Rule 또는 페이지 코드 <code>sendEvent</code></td><td>page load / <code>getOffers</code></td></tr>
+      <tr><td>FE 렌더 코드</td><td colspan="2">자동 적용이면 최소 · <b>JSON 헤드리스면 둘 다 필요</b> (아래 A-2 / B-2)</td></tr>
+    </table>
+  </div>
+
+  <!-- ===== W-A ===== -->
+  <h3 class="note-h" id="guide-wa">2. W-A 웹 권장 — Tags + AEP Web SDK (alloy)</h3>
+  <p class="sec-desc" style="margin-bottom:10px">Tags 기준 전체 흐름. <b>Load Target 없음</b>. 간판=<code>edgeDomain</code>.</p>
+
+  <h3 class="note-h" style="font-size:.95rem;border-left-color:var(--green)">2-① 최초 셋업 (한 번)</h3>
+  <div class="flow">
+    <div class="node">① Data Collection → <b>Datastream</b> 생성 · 서비스에 <b>Adobe Target ON</b></div>
+    <div class="arw">↓</div>
+    <div class="node">② (무과금 간판) Adobe-Managed Cert → 고객사 DNS에 CNAME → 예 <code>data.회사.com</code></div>
+    <div class="arw">↓</div>
+    <div class="node">③ Tags <b>Web</b> property → Catalog에서 <b>AEP Web SDK</b> Install
+      <span class="tiny">Datastream 선택 · Edge domain = <code>data.회사.com</code></span></div>
+    <div class="arw">↓</div>
+    <div class="node">④ Library Build → <b>Publish</b> → Environment의 <b>install 코드</b>를 사이트 <code>&lt;head&gt;</code>에 삽입</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">⑤ Rule로 개인화 요청 (아래 런타임) — Target 확장·Load Target <b>불필요</b></div>
+  </div>
+  <p class="sub" style="margin:8px 0 4px;font-size:.8rem;color:var(--sub);font-weight:600">④ HTML에 넣는 것 = Tags install만 (Web SDK가 alloy를 올림)</p>
+  <pre><code>&lt;!-- Tags → Environments → 해당 환경 Install 코드 복사 --&gt;
+&lt;script src="https://assets.adobedtm.com/xxxx/xxxx/launch-xxxx.min.js" async&gt;&lt;/script&gt;
+&lt;!-- ↑ 이 한 줄이 Web SDK(alloy) + 확장 설정을 로드. Load Target 액션 없음 --&gt;</code></pre>
+
+  <h3 class="note-h" style="font-size:.95rem;border-left-color:var(--green)">2-② 런타임 — 갈래 A-1 자동 렌더 (FE 커스텀 최소)</h3>
+  <div class="flow">
+    <div class="node">페이지 로드 → Tags install 실행 → Web SDK 준비</div>
+    <div class="arw">↓</div>
+    <div class="node">Rule (예: Library Loaded / DOM Ready) → <b>Send event</b>
+      <span class="tiny"><code>renderDecisions: true</code> · decisionScopes 또는 페이지 범위</span></div>
+    <div class="arw">↓</div>
+    <div class="node ok2">Edge→Target 응답 → SDK가 HTML 오퍼를 DOM에 적용 (VEC式)
+      <span class="tiny">FE가 JSON 파싱·컴포넌트 렌더를 안 해도 됨</span></div>
+  </div>
+  <pre><code>// Tags Rule 액션이 같은 API를 호출. 개념 코드:
+alloy("sendEvent", {
+  renderDecisions: true,   // ← SDK가 DOM에 자동 적용
+  xdm: { web: { webPageDetails: { name: "home", URL: location.href } } }
+});
+// FE 추가 렌더 함수 없음 (HTML/VEC 오퍼 전제)</code></pre>
+
+  <h3 class="note-h" style="font-size:.95rem;border-left-color:var(--accent)">2-③ 런타임 — 갈래 A-2 헤드리스 JSON (이번 RFP·인사이더式 · FE 개발)</h3>
+  <div class="flow">
+    <div class="node">페이지 로드 → Tags install → Web SDK 준비</div>
+    <div class="arw">↓</div>
+    <div class="node">Rule 또는 프론트 코드 → <code>sendEvent</code>
+      <span class="tiny"><code>renderDecisions: false</code> · <code>decisionScopes: ["home-hero"]</code></span></div>
+    <div class="arw">↓</div>
+    <div class="node">응답 <code>propositions[].items[].data.content</code> = JSON</div>
+    <div class="arw">↓</div>
+    <div class="node ok2"><b>FE 개발 코드</b>가 JSON 파싱 → React/Vue/자체 컴포넌트 렌더</div>
+  </div>
+  <pre><code>// (1) Tags Custom Code / 페이지 스크립트 — 요청
+alloy("sendEvent", {
+  renderDecisions: false,              // ← 자동 DOM 적용 OFF
+  decisionScopes: ["home-hero"],     // Target location / mbox 이름
+  data: {
+    __adobe: { target: { "profile.loginStatus": "logged-in" } }
+  }
+}).then(function (result) {
+  // (2) FE가 미리 만들어 둔 렌더 함수
+  (result.propositions || []).forEach(function (p) {
+    (p.items || []).forEach(function (item) {
+      if (item.data &amp;&amp; item.data.content) {
+        renderHero(p.scope, item.data.content);  // ← 프론트엔드 개발
+      }
+    });
+  });
+});
+
+// (3) FE 쪽 예시 (별도 번들)
+function renderHero(scope, json) {
+  // json = Target JSON Offer 페이로드
+  document.querySelector("[data-mbox="+scope+"]").innerHTML =
+    "&lt;h2&gt;"+json.title+"&lt;/h2&gt;&lt;p&gt;"+json.text+"&lt;/p&gt;";
+}</code></pre>
+  <div class="tip"><strong>W-A 핵심</strong> — Tags에 넣는 것은 Web SDK 확장+install. <b>Load Target Rule 없음</b>. FE 코드는 A-2(헤드리스)일 때만 필수. 간판은 확장의 Edge domain / <code>edgeDomain</code>.</div>
+  <div class="cite"><span class="badge b-doc">공식</span>
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/aep/target-overview" target="_blank">Target with Web SDK</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/install/tags" target="_blank">Tags에 Web SDK 설치</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/collection/js/commands/configure/edgedomain" target="_blank">edgeDomain</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/sendevent/overview" target="_blank">sendEvent</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/core-services/interface/data-collection/adobe-managed-cert" target="_blank">Adobe-Managed Certificate</a></div>
+
+  <!-- ===== W-B ===== -->
+  <h3 class="note-h" id="guide-wb">3. W-B 웹 대안 — Tags + Adobe Target (at.js)</h3>
+  <p class="sec-desc" style="margin-bottom:10px">Tags 기준 전체 흐름. <b>Load Target 필요</b>. 간판=<code>serverDomain</code> (Target CNAME).</p>
+
+  <h3 class="note-h" style="font-size:.95rem;border-left-color:var(--sub)">3-① 최초 셋업 (한 번)</h3>
+  <div class="flow">
+    <div class="node">① Client Care <b>Target CNAME</b> → DNS에 <code>target.회사.com</code> → <code>xxxx.tt.omtrdc.net</code></div>
+    <div class="arw">↓</div>
+    <div class="node">② Tags <b>Web</b> property → Catalog에서 <b>Adobe Target</b> Install (at.js)</div>
+    <div class="arw">↓</div>
+    <div class="node">③ Rule 만들기 (순서 고정)
+      <span class="tiny">Custom Code(<code>targetGlobalSettings</code>) → <b>Load Target</b> → Fire page load request</span></div>
+    <div class="arw">↓</div>
+    <div class="node">④ Publish → Environment <b>install</b>을 사이트 <code>&lt;head&gt;</code>에 삽입</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">⑤ 페이지 로드 시 Rule이 at.js를 로드·요청 (아래 런타임)</div>
+  </div>
+  <p class="sub" style="margin:8px 0 4px;font-size:.8rem;color:var(--sub);font-weight:600">④ HTML = install만 / ③ Rule 액션 ①번 = CNAME 간판 (at.js 로드 <b>전</b>)</p>
+  <pre><code>&lt;!-- 페이지: Tags install (W-A와 같은 형태, property·확장이 다름) --&gt;
+&lt;script src="https://assets.adobedtm.com/yyyy/yyyy/launch-yyyy.min.js" async&gt;&lt;/script&gt;
+
+/* Tags Rule 액션 1 — Custom Code (Load Target 보다 앞) */
+window.targetGlobalSettings = {
+  serverDomain:           "target.회사.com",
+  overrideMboxEdgeServer: false
+};
+/* Tags Rule 액션 2 — Adobe Target: Load Target */
+/* Tags Rule 액션 3 — Adobe Target: Fire page load request */</code></pre>
+
+  <h3 class="note-h" style="font-size:.95rem;border-left-color:var(--green)">3-② 런타임 — 갈래 B-1 자동 적용 (FE 커스텀 최소)</h3>
+  <div class="flow">
+    <div class="node">페이지 로드 → install → Rule 실행</div>
+    <div class="arw">↓</div>
+    <div class="node"><b>Load Target</b> (at.js 삽입) → Fire page load</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">Target 응답 → at.js가 HTML 오퍼를 셀렉터/mbox에 적용
+      <span class="tiny">VEC·HTML Offer 전제 · FE JSON 렌더 없어도 됨</span></div>
+  </div>
+  <pre><code>// B-1은 보통 추가 JS 없음.
+// 마케터가 Target UI에서 HTML/VEC 오퍼 → page load가 자동 적용.
+// (필요 시) 전역 파라미터만:
+window.targetPageParams = function () {
+  return { "profile.loginStatus": "logged-in" };
+};</code></pre>
+
+  <h3 class="note-h" style="font-size:.95rem;border-left-color:var(--accent)">3-③ 런타임 — 갈래 B-2 헤드리스 JSON (FE 개발)</h3>
+  <div class="flow">
+    <div class="node">install → Load Target 완료 후</div>
+    <div class="arw">↓</div>
+    <div class="node">FE/Custom Code → <code>adobe.target.getOffers(...)</code></div>
+    <div class="arw">↓</div>
+    <div class="node">응답 mbox <code>options[].content</code> = JSON</div>
+    <div class="arw">↓</div>
+    <div class="node ok2"><b>FE 개발 코드</b>가 파싱 → 자체 컴포넌트 렌더</div>
+  </div>
+  <pre><code>// Load Target 이후 (Rule Custom Code 또는 페이지 번들)
+adobe.target.getOffers({
+  request: {
+    execute: { mboxes: [{ index: 0, name: "home-hero" }] }
+  }
+}).then(function (res) {
+  var opt = res.execute.mboxes[0].options || [];
+  var json = opt[0] &amp;&amp; opt[0].content;
+  if (json) renderHero("home-hero", json);   // ← 프론트엔드 개발 (A-2와 동일 역할)
+});
+
+function renderHero(scope, json) {
+  document.querySelector("[data-mbox="+scope+"]").innerHTML =
+    "&lt;h2&gt;"+json.title+"&lt;/h2&gt;&lt;p&gt;"+json.text+"&lt;/p&gt;";
+}</code></pre>
+  <div class="tip"><strong>W-B 핵심</strong> — Tags에 <b>Adobe Target</b> 확장 + Rule에 <b>Load Target</b>이 있음. FE 코드는 B-2(헤드리스)일 때만 필수. “B는 FE 불필요”는 B-1(자동 적용)에만 해당.</div>
+  <div class="cite"><span class="badge b-doc">공식</span>
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/implementation/implement-cname-support-in-target" target="_blank">CNAME in Target</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/at-js-implementation/functions-overview/targetglobalsettings" target="_blank">targetGlobalSettings</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/platform-learn/implement-in-websites/implement-solutions/target" target="_blank">Tags에서 Target 구현</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-get-offers-atjs-2" target="_blank">getOffers()</a></div>
+
+  <div class="note"><strong>한 줄 비교 (Tags 기준)</strong>
+    <ul class="nlist">
+      <li>공통: 페이지에는 <b>install 스크립트</b>만 넣고, 확장은 Tags에서 관리</li>
+      <li>W-A: Web SDK · <b>Load Target 없음</b> · 호출=<code>sendEvent</code></li>
+      <li>W-B: Target(at.js) · <b>Load Target 있음</b> · 호출=page load / <code>getOffers</code></li>
+      <li>FE 렌더: 자동 적용(A-1/B-1)이면 최소 · <b>JSON 헤드리스(A-2/B-2)면 둘 다 FE 개발</b></li>
+    </ul>
+  </div>
+
+  <!-- ===== M-A ===== -->
+  <h3 class="note-h" id="guide-ma">4. M-A 앱 권장 — Edge Network + Optimize</h3>
+  <div class="flow">
+    <div class="node">① XDM Schema → Dataset
+      <span class="tiny"><a href="https://developer.adobe.com/client-sdks/home/getting-started/set-up-schemas-and-datasets" target="_blank">schemas/datasets</a></span></div>
+    <div class="arw">↓</div>
+    <div class="node">② Datastream = AEP(Event Dataset) + <b>Target ON</b>
+      <span class="tiny"><a href="https://developer.adobe.com/client-sdks/home/getting-started/configure-datastreams" target="_blank">datastreams</a></span></div>
+    <div class="arw">↓</div>
+    <div class="node">③ (간판) Edge Managed Cert → Tags Edge 확장 <b>Edge Network domain</b> = <code>data.회사.com</code></div>
+    <div class="arw">↓</div>
+    <div class="node">④ Tags Mobile: Core · Identity(Edge) · Edge Network · Optimize · Publish</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">⑤ 앱 register → <code>updatePropositions</code>/<code>getPropositions</code> → JSON 렌더</div>
+  </div>
+  <pre><code>import AEPCore; import AEPEdge; import AEPEdgeIdentity; import AEPOptimize
+
+MobileCore.registerExtensions([Edge.self, Identity.self, Optimize.self]) {
+  MobileCore.configureWith(appId: "ENVIRONMENT_ID")  // Tags Dev/Stage/Prod File ID
+}
+// 간판은 보통 Tags Edge 필드로 주입. 코드 오버라이드 시:
+// MobileCore.updateConfiguration(["edge.domain": "data.회사.com"])
+
+let scope = DecisionScope(name: "home-hero")
+Optimize.updatePropositions(for: [scope], withXdm: nil)
+Optimize.getPropositions(for: [scope]) { props, _ in
+  // props?[scope]?.offers.first?.content → 네이티브 렌더
+}</code></pre>
+  <div class="tip"><strong>AE 확인(M-A)</strong> — Event Schema·데이터스트림 Target/AEP 서비스가 Target 단독 계약으로 되는지 · Dataset 필요 범위 · datastream allow list.</div>
+  <div class="cite"><span class="badge b-doc">공식</span>
+    <a href="https://developer.adobe.com/client-sdks/documentation/getting-started" target="_blank">Getting Started (Edge)</a> ·
+    <a href="https://developer.adobe.com/client-sdks/edge/edge-network/" target="_blank">Edge Network · edge.domain</a> ·
+    <a href="https://developer.adobe.com/client-sdks/edge/adobe-journey-optimizer-decisioning/" target="_blank">Offer Decisioning and Target</a> ·
+    <a href="https://developer.adobe.com/client-sdks/edge/identity-for-edge-network/" target="_blank">Identity for Edge Network</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/platform-learn/migrate-target-to-mobile-sdk-decisioning/initial-setup" target="_blank">Target→Optimize 초기 설정</a></div>
+
+  <!-- ===== M-B ===== -->
+  <h3 class="note-h" id="guide-mb">5. M-B 앱 대안 — 클래식 Adobe Target + Target CNAME</h3>
+  <div class="flow">
+    <div class="node">① (웹 W-B와 동일) Target CNAME 발급 · DNS · 호스트 예 <code>target.회사.com</code></div>
+    <div class="arw">↓</div>
+    <div class="node">② Tags Mobile: Core · Identity · <b>Adobe Target</b> · Publish
+      <span class="tiny">Getting Started — solutions-specific</span></div>
+    <div class="arw">↓</div>
+    <div class="node">③ 앱: <code>target.server</code> = CNAME 호스트 (Tags Install UI에 필드 없음 → 코드/원격 config)</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">④ <code>retrieveLocationContent</code> / prefetch → JSON·콘텐츠 렌더 · QA는 Mobile Preview</div>
+  </div>
+  <pre><code>import AEPCore; import AEPIdentity; import AEPTarget
+
+MobileCore.registerExtensions([Identity.self, Target.self]) {
+  MobileCore.configureWith(appId: "ENVIRONMENT_ID")
+}
+// CNAME 간판 — Delivery API 호스트 고정 (① target.server ≫ ② edgeHost ≫ ③ client.tt.omtrdc.net)
+MobileCore.updateConfiguration([
+  "target.server": "target.회사.com"   // W-B serverDomain과 동일 호스트 권장
+])
+
+let req = TargetRequest(mboxName: "home-hero", defaultContent: "{}",
+                        targetParameters: nil) { content in renderHero(from: content) }
+Target.retrieveLocationContent([req], with: nil)</code></pre>
+  <div class="tip"><strong>근거 구분 (고객 전달 시 필수)</strong>
+    <ul class="nlist">
+      <li class="ok"><b>공식</b> — <code>target.server</code> = “all Target requests will be sent to this host”</li>
+      <li class="ok"><b>소스·API</b> — 클래식 모바일 Delivery = <code>/rest/v1/delivery</code> (at.js 2.x와 동일 API 계열). 호스트 우선순위상 <code>target.server</code>가 최우선</li>
+      <li class="warn"><b>추론(확정 전 주의)</b> — Target CNAME HOWTO 적용 스텝은 at.js <code>serverDomain</code>만. 모바일+CNAME+무과금을 Adobe가 “지원 경로”로 명시한 문서는 없음 → <b>발급 호스트로 TLS/Delivery PoC 후</b> 방향 확정</li>
+    </ul>
+  </div>
+  <div class="cite"><span class="badge b-doc">공식·소스</span>
+    <a href="https://developer.adobe.com/client-sdks/solution/adobe-target/" target="_blank">Adobe Target mobile · target.server</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/api/delivery-api/overview" target="_blank">Delivery API</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/implementation/implement-cname-support-in-target" target="_blank">CNAME in Target</a> ·
+    <a href="https://github.com/adobe/aepsdk-target-android" target="_blank">aepsdk-target-android</a> ·
+    <a href="https://github.com/adobe/aepsdk-target-ios" target="_blank">aepsdk-target-ios</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/mobile-apps/target-mobile-preview" target="_blank">Mobile Preview</a></div>
+
+  <h3 class="note-h">6. 경로 조합 권장</h3>
+  <table class="t-combo">
+    <colgroup>
+      <col class="c-set"><col class="c-wa"><col class="c-ma"><col class="c-sign"><col class="c-note">
+    </colgroup>
+    <tr><th>조합</th><th>웹</th><th>앱</th><th>간판</th><th>고객 제시 시</th></tr>
+    <tr>
+      <td class="ok"><b>권장 세트</b></td><td>W-A</td><td>M-A</td>
+      <td>Edge 호스트 1개<br><span class="muted">(웹·앱 공용 가능)</span></td>
+      <td><b>1순위 제안</b> — 문서·Tags UI·first-party 문구가 닫힘</td>
+    </tr>
+    <tr>
+      <td><b>대안 세트</b></td><td>W-B</td><td>M-B</td>
+      <td>Target CNAME<br><span class="muted">호스트 1개</span></td>
+      <td class="cell-stack"><span>웹은 문서 확실 · <b>앱 무과금은 PoC/AE 후</b></span><span class="muted">Preview·스키마 부담 ↓</span></td>
+    </tr>
+    <tr>
+      <td class="warn">혼용</td><td colspan="2">W-A+M-B<br>또는 W-B+M-A</td>
+      <td>Edge Cert<br>+ Target CNAME</td>
+      <td class="cell-stack"><span>Adobe 기술 차단 문서 없음</span><span class="muted">통신사·인증서 이중 운영 → <b>운영상 비권장</b></span></td>
+    </tr>
+  </table>
+
+  <div class="note">문항 A~F 서술 기본 전제는 <b>권장 세트(W-A+M-A)</b>. 대안 세트는 “가능 후보”로 열어 두되, 앱 간판·무과금은 <b>검증 전제</b>로 말할 것. 전체 코드 → <a href="#pre3">사전배경 ③</a> · 도메인 → <a href="#appendix">부록 ③·④</a>.</div>
+</div>
+
+<div class="legend">
+  <h2>표기 범례</h2>
+  <span class="item"><span class="badge b-doc">공식</span> Adobe/Insider 공식문서</span>
+  <span class="item"><span class="badge b-new">신규개발</span></span>
+  <span class="item"><span class="badge b-part">부분재사용</span></span>
+  <span class="item"><span class="badge b-reuse">재사용</span></span>
+  <span class="item"><span class="badge b-no">불가</span></span>
+  <span class="item"><span class="badge b-sdk">SDK시 최소/불요</span> 헤드리스 SDK 구현 선택 시 고려 최소화·불필요</span>
+</div>
+
+<!-- ===== PRE 1 ===== -->
+<div class="section" id="pre1">
+  <span class="section-id cross">사전 배경 ①</span>
+  <h2 class="sec">인사이더 vs 타겟 동작 원리 — "스크립트 삽입" vs "SDK 구축"</h2>
+  <p class="sec-desc">체크리스트 전반(A·C·D·E)의 밑바탕 개념 — 웹(스크립트)과 앱(SDK)의 구현 방식 차이.</p>
+  <table>
+    <tr><th>구분</th><th>웹(Web)</th><th>앱(App)</th></tr>
+    <tr><td>코드 반영 방식</td><td>페이지에 <strong>공통 스크립트 로드</strong>(ins.js / at.js · alloy.js)</td><td><strong>SDK를 앱 빌드에 임베드</strong>(스토어 재배포 필요)</td></tr>
+    <tr><td>화면 단위</td><td>HTML <strong>DOM</strong>(엘리먼트 트리)</td><td>네이티브 UI(View/Activity/Composable)</td></tr>
+    <tr><td>콘텐츠 주입</td><td>DOM 조작 또는 JSON 수신 후 렌더</td><td>JSON 수신 후 <strong>네이티브 컴포넌트가 렌더</strong>(DOM 조작 불가)</td></tr>
+  </table>
+  <div class="note"><strong>핵심 함의</strong> — 웹은 스크립트만으로 주입 가능하나 <strong>앱은 SDK 구축 + 화면 렌더링 개발</strong>이 필수. 따라서 DOM 셀렉터 안정성(<a href="#c">C-3</a>)·flicker 방지 pre-hiding(<a href="#d">D-2</a>)·CMP 동의 후 로드(<a href="#d">D-4</a>) 관련 문항은 <strong>웹 전용</strong>입니다.</div>
+  <div class="tip"><strong>라이선스</strong> — <b>웹</b>: Tags·데이터스트림·Target 서비스는 Target 단독으로 구성 가능(RTCDP 불요). <b>앱 Edge</b>: 공식상 스키마·Dataset·AEP 서비스가 선행 — RTCDP 구매와는 별개이나 Target 단독 계약으로 가능한지는 AE 확인. Platform-native(RTCDP·CJA·Customer AI)는 별도.</div>
+  <div class="cite">
+    <span class="badge b-doc">공식</span>
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/aep/target-overview" target="_blank">Target with Web SDK</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/datastreams/overview" target="_blank">Datastreams overview</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/how-atjs-works" target="_blank">How at.js works</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/home" target="_blank">AEP Web SDK</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/edge/personalization/adobe-target/target-overview" target="_blank">Mobile SDK — Target</a>
+  </div>
+</div>
+
+<!-- ===== PRE 2 ===== -->
+<div class="section" id="pre2">
+  <span class="section-id cross">사전 배경 ②</span>
+  <h2 class="sec">헤드리스 JSON 아키텍처 &amp; 개발사 스코프 정의</h2>
+  <p class="sec-desc">이번 프로젝트의 성격을 규정하는 두 전제 — 구현 아키텍처(헤드리스)와 개발 범위.</p>
+  <h3 class="note-h">① 주요 오퍼를 JSON으로 주고받는 "헤드리스" 방식</h3>
+  <ul class="nlist">
+    <li>웹·앱 모두 SDK로 구축, 타겟은 <b>"콘텐츠 결정(decisioning)"만</b> 담당</li>
+    <li><b>렌더링은 자사/고객 프론트·네이티브 컴포넌트</b>가 수행 (VEC로 DOM 직접 변경 안 함)</li>
+    <li>결과 → <b>DOM 셀렉터·flicker 비중 ↓</b>, <b>JSON 스키마·렌더 컴포넌트 준비도</b>가 핵심</li>
+  </ul>
+  <h3 class="note-h">② 개발사(자사) 스코프 = 타겟 가이드 + 타겟 솔루션</h3>
+  <ul class="nlist">
+    <li><b>서버사이드 작업 = 고객사 개발자</b>, 자사 = <b>타겟 솔루션 구성 + 구현 가이드</b></li>
+    <li class="warn">"SDK 구축 = 서버사이드"가 아님 — at.js·Web SDK·모바일 SDK는 모두 <b>클라이언트사이드</b>(서버사이드 SDK는 별개 축)</li>
+  </ul>
+  <div class="tip"><strong>결정 포인트</strong> — 자사 구축 범위 = "타겟 실행에 필요한 부분 + 타겟이 못 하는 것을 고객에게 <em>요청</em>". 고객 서버/앱 네이티브 개발과의 경계를 초반에 확정하는 지점.</div>
+  <div class="note"><strong>헤드리스(JSON) 선택 시</strong> — <span class="badge b-sdk">SDK시 최소/불요</span> DOM 셀렉터 안정성(<a href="#c">C-3</a>) · flicker 방지 pre-hiding(<a href="#d">D-2</a>) · DOM 앵커 삽입(<a href="#gap-8">갭#8</a>) 비중 ↓ / JSON 렌더 컴포넌트(<a href="#c">C-2</a>) · 앱 네이티브 렌더(<a href="#e">E-5</a>) 비중 ↑. SPA 라우팅(<a href="#d">D-1</a>)·CMP(<a href="#d">D-4</a>)·데이터레이어(B)·식별자(F)는 방식과 무관하게 필요. (VEC/DOM 병행 시 C-3·D-2 유효)</div>
+  <div class="cite">
+    <span class="badge b-doc">공식</span>
+    <a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/form-experience-composer" target="_blank">Form-Based Composer</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/offers/create-json-offer" target="_blank">JSON Offer</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/server-side/server-side-implementation" target="_blank">Server-side Implementation</a>
+  </div>
+</div>
+
+<!-- ===== PRE 3 ===== -->
+<div class="section" id="pre3">
+  <span class="section-id cross">사전 배경 ③</span>
+  <h2 class="sec">구현 방식별 예시 코드 — W-A / M-A(권장) · M-B / W-B(대안)</h2>
+  <p class="sec-desc">★ 구축 가이드(<a href="#priority">W-A·W-B·M-A·M-B</a>)와 같은 순서. <strong>권장(alloy → 앱 Edge)을 먼저</strong>, 이어서 앱 클래식·at.js. 코드는 개념 스니펫 — ID·mbox명은 프로젝트 값으로 교체.</p>
+
+  <div class="note"><strong>배포 경로는 둘 다 가능</strong> — at.js·alloy 모두 ① <strong>HTML에 직접 삽입</strong> 또는 ② <strong>Tags(데이터 컬렉션) 확장</strong>으로 배포할 수 있습니다. Tags를 쓰면 환경(PRD/STG/DEV)별 install 코드 → Rules에서 "Target 로드 → 페이지 요청" 순서로 관리돼 배포·롤백이 편합니다. <em>둘 중 무엇을 쓰든 라이브러리(at.js/alloy)와 초기화 흐름은 동일합니다.</em></div>
+
+  <h3 class="note-h">❓ 자주 헷갈리는 점 (FAQ) — 라이선스·범위 혼동 정리</h3>
+  <dl class="faq">
+    <dt>Q1. Web SDK/데이터스트림을 쓰려면 AEP(Experience Platform)를 구매해야 하나요?</dt>
+    <dd><strong>웹(W-A):</strong> 공식 FAQ — Web SDK 사용에 AEP/RTCDP 구매 <b>불필요</b>. 데이터스트림에 Target 서비스만 켜도 동작. RTCDP·CJA 등은 별도.<br>
+      <strong>앱 Edge(M-A):</strong> Event Schema·데이터스트림 구성이 가이드상 선행. <b>Dataset</b>은 데이터스트림에서 <b>AEP(Experience Platform) 서비스</b>로 적재할 때 필요(Target만 ON이어도 스키마 선택은 통상 필요). Target 단독 계약으로 Platform UI/적재가 되는지는 <b>AE 확인</b>. allow list 가능.<br>
+      <strong>앱 클래식(M-B):</strong> 데이터스트림·XDM 스키마 불요 — Target clientCode + Identity + Target 확장.</dd>
+    <dt>Q2. XDM 스키마를 반드시 정의해야 하나요?</dt>
+    <dd><strong>경로별 다름.</strong><br>
+      <b>웹(alloy)</b> — Target 파라미터는 <code>data.__adobe.target</code>으로 <b>XDM 스키마 없이</b> 가능(공식 data 객체).<br>
+      <b>앱 M-A(Edge+Optimize)</b> — Edge로 보내는 experience 데이터는 <b>XDM 객체</b>가 기본. “비XDM 객체 미지원”은 Edge 수집 가이드 문구. 다만 Optimize는 Target 파라미터를 <b>data 딕셔너리</b>로도 보낼 수 있음(학습 가이드). 스키마 정의는 통상 필요 · Dataset은 AEP 적재 시.<br>
+      <b>앱 M-B(클래식 Target)</b> — mbox/profile 파라미터 맵 — <b>XDM 스키마 불요</b>.
+    </dd>
+    <dt>Q3. "SDK 구축"은 곧 서버사이드 작업인가요?</dt>
+    <dd><strong>아니요.</strong> at.js·alloy·모바일 SDK는 모두 <strong>클라이언트사이드</strong>. 서버사이드 Delivery는 별축.</dd>
+    <dt>Q4. at.js / 앱 클래식은 못 쓰나요? 무과금은?</dt>
+    <dd><strong>제품 지원:</strong> 둘 다 지원·동작. 권장 제안은 W-A+M-A.<br>
+      <strong>무과금 간판:</strong> 웹 W-A·W-B는 공식 문서가 닫힘. 앱 M-A도 <code>edge.domain</code> first-party 문구로 닫힘. 앱 M-B는 <code>target.server</code> 호스트 지정까지 공식 · <b>CNAME/무과금은 문서 공백 → PoC·AE 전 “확정 가능”으로 말하지 말 것</b> (★·부록).</dd>
+    <dt>Q5. 반드시 Tags(데이터 컬렉션)로만 넣어야 하나요?</dt>
+    <dd><strong>필수는 아닙니다</strong>(HTML/앱 직접 삽입·SDK 가능). 운영·환경 분리상 Tags 권장 → <a href="#a">A-1</a>.</dd>
+  </dl>
+
+  <h3 class="note-h">방식별 예시 — A(W-A) → B(M-A) → B′(M-B) → C(W-B)</h3>
+
+  <!-- alloy (AEP Web SDK) -->
+  <div class="codeblock alloy">
+    <p class="cap"><span class="pill web">WEB</span><span class="pill rec">권장 · W-A</span>A. AEP Web SDK (alloy) — 상세 (클라이언트사이드)</p>
+    <p class="sub">① 로드 + configure — <code>datastreamId</code>(구 edgeConfigId) + <code>orgId</code>로 초기화. 데이터스트림에 <strong>Target 서비스만 활성화</strong>되면 AEP 없이 동작</p>
+    <pre><code>&lt;!-- 직접 삽입: alloy CDN / Tags면 아래 대신 Environment install + Tags: AEP Web SDK 확장 --&gt;
+&lt;script src="https://cdn1.adoberesources.net/alloy/2.x/alloy.min.js" async&gt;&lt;/script&gt;  &lt;!-- Tags: AEP Web SDK --&gt;
+&lt;script&gt;
+  // alloy 큐 부트스트랩(공식 base code) — Tags: AEP Web SDK 확장이 동일 API 제공
+  !function(n,o){o.forEach(function(o){n[o]||((n.__alloyNS=n.__alloyNS||[]).push(o),
+    n[o]=function(){var u=arguments;return new Promise(function(i,l){
+    n[o].q.push([i,l,u])})},n[o].q=[])})}(window,["alloy"]);
+
+  alloy("configure", {
+    datastreamId: "1a2b3c4d-xxxx-xxxx",   // Tags: AEP Web SDK — 데이터스트림 ID
+    orgId: "ABC123@AdobeOrg"              // Experience Cloud Org ID
+    // ↑ Target 단독(AEP 정식 라이선스 없이)으로도 동작
+  });
+&lt;/script&gt;</code></pre>
+    <p class="sub">② pre-hiding snippet (alloy) — 스타일 ID는 <code>alloy-prehiding</code>, 최대 3초 뒤 자동 해제</p>
+    <pre><code>&lt;script&gt;
+  !function(e,a,n,t){if(a){var i=e.head;if(i){
+    var o=e.createElement("style");
+    o.id=t,o.innerHTML=n,i.appendChild(o),
+    setTimeout(function(){o.parentNode&amp;&amp;o.parentNode.removeChild(o)},a)}}}
+  (document, 3000, ".personalization-container { opacity: 0 !important }", "alloy-prehiding");
+&lt;/script&gt;</code></pre>
+    <p class="sub">③ 데이터 전달 + 개인화 요청 (자동 렌더) — <code>xdm</code>(표준) / <code>data.__adobe.target</code>(비XDM 자유형) 동시 사용 가능</p>
+    <pre><code>alloy("sendEvent", {
+  renderDecisions: true,                 // 타겟이 반환 콘텐츠를 DOM에 자동 렌더
+  xdm: {
+    web: { webPageDetails: { name: "home", URL: location.href } },
+    identityMap: {                       // 로그인 UID → Target 3rd Party ID
+      "userId": [{ id: "user-uid-123", authenticatedState: "authenticated", primary: true }]
+    }
+  },
+  data: {                                // XDM 스키마 없이 Target 파라미터 전달
+    __adobe: {
+      target: {
+        "profile.loginStatus": "logged-in",
+        "profile.grade": "vip",
+        "entity.id": "PROD-1234"
+      }
+    }
+  }
+});
+// ※ identityMap의 "userId" 네임스페이스를 데이터스트림 Target 설정에서 3rd Party ID로 매핑</code></pre>
+    <p class="sub">④ 헤드리스(자체 렌더) — <code>renderDecisions:false</code> + <code>propositions</code> 파싱해 자체 컴포넌트로 렌더</p>
+    <pre><code>alloy("sendEvent", {
+  renderDecisions: false,                        // 자동 렌더 끄고 직접 렌더
+  decisionScopes: ["home-hero", "reco-slot"],    // = mbox/location 이름
+  xdm: { web: { webPageDetails: { name: "home" } } }
+}).then(function (result) {
+  (result.propositions || []).forEach(function (p) {
+    (p.items || []).forEach(function (item) {
+      // JSON offer는 item.data.content 에 담겨 옴
+      if (item.data &amp;&amp; item.data.content) {
+        renderComponent(p.scope, item.data.content);   // ← 자체 컴포넌트 렌더
+      }
+    });
+  });
+});</code></pre>
+    <p class="sub">⑤ SPA 뷰 전환 — <code>webPageDetails.viewName</code>으로 뷰 전환 신호(at.js의 triggerView 대응)</p>
+    <pre><code>alloy("sendEvent", {
+  renderDecisions: true,
+  xdm: { web: { webPageDetails: { viewName: "product-detail" } } }
+});</code></pre>
+    <p class="sub">⑥ 동의(CMP 연동) — 동의 신호 전달로 데이터 수집 제어</p>
+    <pre><code>alloy("setConsent", {
+  consent: [{
+    standard: "Adobe",
+    version: "2.0",
+    value: { collect: { val: "y" } }     // 동의 "y" / 거부 "n"
+  }]
+});</code></pre>
+    <div class="tip"><strong>alloy(웹) 핵심 정리</strong> — 프론트(클라이언트사이드)에서 동작하며, Target 파라미터는 <code>data.__adobe.target</code>으로 <strong>정식 XDM 스키마 없이</strong> 보낼 수 있습니다. 전제는 데이터스트림 <strong>Target 서비스 활성화</strong>. ※ 앱 Edge 경로는 XDM 스키마·dataset이 별도 필수(아래 B·FAQ Q2).</div>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/aep/target-overview" target="_blank">Target with Web SDK</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/sendevent/data" target="_blank">data 객체</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/personalization/rendering-personalization-content" target="_blank">개인화 렌더링</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/personalization/manage-flicker" target="_blank">flicker(alloy-prehiding)</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/setconsent" target="_blank">setConsent</a></div>
+  </div>
+
+  <!-- mobile SDK -->
+  <div class="codeblock alloy">
+    <p class="cap"><span class="pill app">APP</span><span class="pill rec">권장 · M-A</span>B. 앱 = Edge Network + Offer Decisioning and Target (Optimize)</p>
+    <p class="sub">※ 앱 권장. 대안 클래식은 바로 아래 <b>B′</b>. 간판=<code>edge.domain</code> · <a href="#guide-ma">★ M-A</a> · <a href="#appendix-app">부록 ④</a>.</p>
+    <p class="sub">① (선행) XDM 스키마 → Dataset → Datastream(AEP Event Dataset + Target 서비스) — <a href="#priority">★ 표준·권장</a> 앱 순서 1~2</p>
+    <p class="sub">② Tags 모바일 property — Catalog에서 확장 Install (표시명 기준)</p>
+    <table>
+      <tr><th>Tags 확장명 (Install)</th><th>필수</th><th>앱 import (참고)</th></tr>
+      <tr><td>Mobile Core</td><td>O</td><td><code>AEPCore</code></td></tr>
+      <tr><td>Identity for Edge Network</td><td>O (아래 tip)</td><td><code>AEPEdgeIdentity</code></td></tr>
+      <tr><td>Adobe Experience Platform Edge Network</td><td>O (데이터스트림·Edge Network domain)</td><td><code>AEPEdge</code></td></tr>
+      <tr><td>Offer Decisioning and Target</td><td>O (Target proposition)</td><td><code>AEPOptimize</code></td></tr>
+      <tr><td>Consent</td><td>선택 (동의 연동 시)</td><td><code>AEPEdgeConsent</code></td></tr>
+    </table>
+    <div class="tip"><strong>앱 Edge + XDM (정확 구분)</strong> — Edge 수집 가이드: experience 데이터는 <b>XDM 객체</b>, “non-XDM objects currently unsupported”. 통상 Event Schema 생성 → 데이터스트림에 연결. <b>Dataset</b>은 AEP 서비스로 Lake 적재할 때 필요(Target 서비스만으로도 스키마 선택은 가이드에 포함). Optimize의 Target 파라미터는 학습 가이드상 <b>data 딕셔너리</b>로도 전달 가능.
+      <span class="cite" style="display:inline;border:none;padding:0;margin:0">
+        <a href="https://developer.adobe.com/client-sdks/home/getting-started/set-up-schemas-and-datasets" target="_blank">schemas and datasets</a> ·
+        <a href="https://experienceleague.adobe.com/en/docs/platform-learn/migrate-target-to-mobile-sdk-decisioning/initial-setup" target="_blank">Target→Optimize 초기 설정</a> ·
+        <a href="https://experienceleague.adobe.com/en/docs/platform-learn/implement-mobile-sdk/experience-cloud/target" target="_blank">Mobile SDK Target lesson</a>
+      </span>
+    </div>
+    <div class="tip"><strong>Identity for Edge Network를 쓰는 이유</strong> — Optimize/Target이 “누구의 프로필인지”를 알려면 Edge 요청마다 식별자가 붙어야 합니다. 이 확장이 그 역할을 담당합니다.
+      <ol style="margin:6px 0 0 18px">
+        <li><b>익명(미로그인)</b> — 디바이스에 <b>ECID</b>를 발급·보관하고, Edge Network 호출에 자동 첨부 → Target이 방문자를 구분</li>
+        <li><b>로그인 후</b> — 앱이 자체 UID를 <b>identityMap</b>으로 넣으면, 데이터스트림 Target 설정에서 그 값을 <b>mbox3rdPartyId(3rd Party ID)</b>로 매핑 → 웹·앱·기기 간 동일 프로필 병합 (참고. <a href="#f">F-1</a>)</li>
+        <li><b>설치 순서</b> — Edge Network·Optimize보다 먼저 register. Identity 없이 Edge만 올리면 식별 컨텍스트가 비어 Target 프로필·오디언스 매칭이 깨짐</li>
+      </ol>
+      <p style="margin-top:6px">웹 alloy는 Identity가 SDK에 내장(<code>sendEvent</code>의 <code>identityMap</code>)이고, <b>앱만 Tags에 별도 확장</b>으로 설치합니다. “개인화 콘텐츠를 받는 확장”이 아니라 <b>누구인지 붙여 주는 확장</b>입니다.</p>
+    </div>
+    <p class="sub">③ Edge Network 확장에 <b>Edge Network domain</b>·데이터스트림 설정 후 Publish → 앱은 appId로 수신</p>
+    <p class="sub">④ 앱 초기화 — 설치한 확장에 대응하는 모듈 register (Consent는 쓸 때만)</p>
+    <pre><code>import AEPCore          // Tags: Mobile Core
+import AEPEdge          // Tags: Adobe Experience Platform Edge Network
+import AEPEdgeIdentity  // Tags: Identity for Edge Network
+import AEPOptimize      // Tags: Offer Decisioning and Target
+// import AEPEdgeConsent // Tags: Consent (선택 — 동의 연동 시)
+
+MobileCore.registerExtensions([   // Tags: Mobile Core (호스트)
+  Edge.self,       // Tags: Adobe Experience Platform Edge Network
+  Identity.self,   // Tags: Identity for Edge Network
+  Optimize.self    // Tags: Offer Decisioning and Target
+  // , Consent.self // Tags: Consent (선택)
+]) {
+  MobileCore.configureWith(appId: "your-app-config-id")  // Tags 모바일 property ENVIRONMENT_ID
+}</code></pre>
+    <p class="sub">⑤ 오퍼 요청 + JSON 수신 — Offer Decisioning and Target(<code>Optimize</code>)으로 proposition 조회 후 네이티브 렌더</p>
+    <pre><code>let scope = DecisionScope(name: "home-hero")   // = Target mbox/location
+
+Optimize.updatePropositions(for: [scope], withXdm: nil)   // Tags: Offer Decisioning and Target
+Optimize.getPropositions(for: [scope]) { propositions, error in
+  guard let offer = propositions?[scope]?.offers.first else { return }
+  // offer.content(JSON) 파싱 → 네이티브 컴포넌트 렌더
+}</code></pre>
+    <p class="sub">⑥ 식별자(로그인 UID) — Identity 확장이 만든 identity 컨텍스트에 UID를 얹음</p>
+    <ul class="nlist">
+      <li>앱 코드: Identity for Edge Network API로 로그인 UID를 <b>identityMap</b>에 설정 (네임스페이스 예: <code>userId</code>)</li>
+      <li>Tags/데이터스트림: Target 서비스에서 그 네임스페이스 → <b>3rd Party ID</b>(= Target <code>mbox3rdPartyId</code>)로 매핑</li>
+      <li>결과: Optimize proposition 요청이 “익명 ECID + (로그인 시) 공통 UID”를 들고 가서 Target 프로필·Audience에 연결</li>
+    </ul>
+    <div class="note">RN/Flutter는 각 <strong>래퍼 패키지</strong>로 동일 API 제공. 앱은 <strong>스토어 재배포</strong>가 필요하므로 SDK 반영 시점을 릴리스 일정과 조율 (참고. <a href="#e">E-1·E-2 — 앱 개발방식·배포 파이프라인</a>). 기존 인사이더/클래식 Target 콜백은 <strong>Optimize 방식으로 매핑 설계</strong> (참고. <a href="#e">E-3 — SDK init·콜백 매핑</a>).</div>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://developer.adobe.com/client-sdks/edge/identity-for-edge-network/" target="_blank">Identity for Edge Network</a> ·
+      <a href="https://developer.adobe.com/client-sdks/edge/edge-network/" target="_blank">Edge Network mobile(edge.domain)</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/platform-learn/migrate-target-to-mobile-sdk-decisioning/send-parameters" target="_blank">Target→Optimize(Edge) 전환</a> ·
+      (참고. <a href="#f">F-1 — 공통 UID·mbox3rdPartyId</a>)</div>
+  </div>
+
+  <!-- classic Target mobile (M-B) -->
+  <div class="codeblock legacy">
+    <p class="cap"><span class="pill app">APP</span><span class="pill legacy">대안 · M-B</span>B′. 앱 = 클래식 Adobe Target 확장 + Target CNAME</p>
+    <p class="sub">※ Getting Started의 <b>solutions-specific</b> 축. 간판 키=<code>target.server</code>. 웹 W-B CNAME 호스트와 문자열을 맞추는 것이 <b>운영상 후보</b>(무과금은 PoC 전제). Preview·스키마 부담↓ — <a href="#guide-mb">★ M-B</a> · <a href="#appendix-app">부록 ④</a>.</p>
+    <p class="sub">① Tags 모바일 property — Catalog Install</p>
+    <table>
+      <tr><th>Tags 확장명</th><th>필수</th><th>앱 import</th></tr>
+      <tr><td>Mobile Core</td><td>O</td><td><code>AEPCore</code></td></tr>
+      <tr><td>Identity (솔루션 Identity)</td><td>O</td><td><code>AEPIdentity</code></td></tr>
+      <tr><td>Adobe Target</td><td>O (clientCode 자동감지)</td><td><code>AEPTarget</code></td></tr>
+    </table>
+    <p class="sub">② (선행·인프라) Client Care Target CNAME → DNS → 호스트 예 <code>target.회사.com</code>
+      (<a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/implementation/implement-cname-support-in-target" target="_blank">CNAME in Target</a>)</p>
+    <p class="sub">③ 앱 초기화 + 간판 호스트 고정</p>
+    <pre><code>import AEPCore       // Tags: Mobile Core
+import AEPIdentity   // Tags: Identity
+import AEPTarget     // Tags: Adobe Target
+
+MobileCore.registerExtensions([Identity.self, Target.self]) {
+  MobileCore.configureWith(appId: "ENVIRONMENT_ID")
+}
+// Configuration keys — “all Target requests will be sent to this host”
+MobileCore.updateConfiguration([
+  "target.server": "target.회사.com"   // = W-B serverDomain 호스트 (protocol·slash 없음)
+])</code></pre>
+    <p class="sub">④ 오퍼 요청 — <code>retrieveLocationContent</code> (또는 prefetch → retrieve)</p>
+    <pre><code>let params = TargetParameters(
+  parameters: ["channel": "app"],
+  profileParameters: ["loginStatus": "logged-in"],
+  order: nil, product: nil
+)
+let request = TargetRequest(
+  mboxName: "home-hero",
+  defaultContent: "{}",
+  targetParameters: params
+) { content in
+  // content = 오퍼 문자열(JSON 등) → 네이티브 렌더
+  renderHero(from: content)
+}
+Target.retrieveLocationContent([request], with: nil)</code></pre>
+    <div class="tip"><strong>호스트 (공식 vs 추론)</strong> — 클래식 모바일 Delivery 경로 <code>/rest/v1/delivery</code>. 소스상 호스트 ① <code>target.server</code> ② Edge Host ③ <code>clientCode.tt.omtrdc.net</code>.
+      CNAME HOWTO는 at.js <code>serverDomain</code>만 명시 — 모바일에 “동일 키로 쓰라”는 공식 문장은 없음. 실무상 <b>같은 CNAME 호스트 문자열을 <code>target.server</code>에 넣는 후보</b>이며, TLS·Delivery·무과금은 <b>PoC 후 확정</b>.</div>
+    <div class="note">QA는 <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/mobile-apps/target-mobile-preview" target="_blank">Target mobile preview</a>(클래식 경로). 3rd Party ID는 Target/Identity API(또는 프로필 파라미터)로 매핑 — Edge identityMap과 방식이 다름(참고. <a href="#f">F-1</a>).</div>
+    <div class="cite"><span class="badge b-doc">공식·소스</span>
+      <a href="https://developer.adobe.com/client-sdks/solution/adobe-target/" target="_blank">Adobe Target mobile</a> ·
+      <a href="https://developer.adobe.com/client-sdks/solution/adobe-target/api-reference/" target="_blank">retrieveLocationContent API</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/api/delivery-api/overview" target="_blank">Delivery API</a> ·
+      <a href="https://github.com/adobe/aepsdk-target-android" target="_blank">aepsdk-target-android</a> ·
+      <a href="https://github.com/adobe/aepsdk-target-ios" target="_blank">aepsdk-target-ios</a></div>
+  </div>
+
+  <!-- at.js -->
+  <div class="codeblock legacy">
+    <p class="cap"><span class="pill web">WEB</span><span class="pill legacy">대안 · W-B</span>C. at.js + Target CNAME (client code 기반)</p>
+    <p class="sub">※ 권장은 A(alloy). 대안 세트(W-B+M-B)일 때 사용. 간판=<code>serverDomain</code> — <a href="#guide-wb">★ W-B</a> · <a href="#appendix">부록 ③</a>.</p>
+    <p class="sub">⓪ (CNAME 시) at.js <b>로드 전</b> 호스트 고정 — <code>overrideMboxEdgeServer:false</code> 필수</p>
+    <pre><code>window.targetGlobalSettings = {
+  serverDomain:           "target.회사.com",
+  overrideMboxEdgeServer: false
+};</code></pre>
+    <p class="sub">① 로드/초기화 (Tags 확장 또는 직접 삽입) — Tags면 Rule에서 "Load Target → Fire page load request" 순서</p>
+    <pre><code>&lt;!-- Tags Environment install (컨테이너) — PRD/STG/DEV별 발급 --&gt;
+&lt;script src="//assets.adobedtm.com/xxxx/launch-xxxx.min.js" async&gt;&lt;/script&gt;
+&lt;!-- ↑ 위 컨테이너 안에서 Tags: Adobe Target 확장
+     Rule 액션: Load Target → Fire page load request
+     (직접 삽입이면 at.js 라이브러리 다운로드 파일을 대신 로드) --&gt;</code></pre>
+    <p class="sub">② pre-hiding snippet (at.js) — <code>at-body-style</code> 주입 후 최대 3초 뒤 자동 해제</p>
+    <pre><code>&lt;style id="at-body-style"&gt;body { opacity: 0 !important }&lt;/style&gt;
+&lt;script&gt;
+  setTimeout(function () {
+    var s = document.getElementById("at-body-style");
+    if (s &amp;&amp; s.parentNode) s.parentNode.removeChild(s);
+  }, 3000);
+&lt;/script&gt;</code></pre>
+    <p class="sub">③ 데이터 전달 — 전역 <code>targetPageParams</code>로 프로필·엔티티 파라미터 주입</p>
+    <pre><code>window.targetPageParams = function () {
+  return {
+    "profile.loginStatus": "logged-in",
+    "profile.grade": "vip",
+    "entity.id": "PROD-1234",
+    "entity.categoryId": "outerwear"
+  };
+};</code></pre>
+    <p class="sub">④ JSON 오퍼 수신 + 자체 렌더 (헤드리스) — <code>getOffers()</code> 후 콜백에서 직접 렌더</p>
+    <pre><code>adobe.target.getOffers({
+  request: { execute: { mboxes: [{ index: 0, name: "home-hero" }] } }
+}).then(function (res) {
+  var options = res.execute.mboxes[0].options || [];
+  var offer = options[0] &amp;&amp; options[0].content;  // JSON offer payload
+  if (offer) renderHero(offer);                   // ← 자체 렌더 함수
+});</code></pre>
+    <p class="sub">⑤ SPA 뷰 전환 — 라우팅 시 호출해 매 화면 개인화 재실행</p>
+    <pre><code>adobe.target.triggerView("product-detail");</code></pre>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-get-offers-atjs-2" target="_blank">getOffers()</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-trigger-view-atjs-2" target="_blank">triggerView()</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/manage-flicker-with-atjs" target="_blank">at.js flicker</a></div>
+  </div>
+
+  <!-- PRE3-END -->
+</div>
+
+<div class="cat-banner" id="cat1">
+  <h2>【대분류 1】 질문 체크리스트 배경지식</h2>
+  <p>A~F 문항별 배경지식 + 후속질문 대응. 각 카드에 <span style="background:#f5f3ff;color:#6d28d9;padding:1px 6px;border-radius:6px">후속</span> 블록으로 체크리스트의 후속 질문과 답변 포인트를 수록.</p>
+</div>
+
+<!-- ===== A ===== -->
+<div class="section" id="a">
+  <span class="section-id">A</span>
+  <h2 class="sec">A. 현행 인사이더 구축 현황(접근)</h2>
+  <p class="sec-desc">현재 코드가 "어디에 어떻게" 들어가 있는지 파악해 타겟 삽입 경로·작업량을 산정.</p>
+
+  <div class="qa">
+    <div class="qno">A-1 · 웹 <a class="qlink" href="#cl-a1">체크리스트 ↗</a></div>
+    <h3>인사이더 공통 스크립트(ins.js) 삽입 위치·방식 (HTML head 직접 / 태그 매니저)</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>개인화 = 페이지에 <strong>공통 스크립트</strong> 로드 필요 (타겟도 동일)</li>
+      <li>현행 삽입 위치(HTML 직접 / GTM 등) 확인 → 인사이더 제거·병행 계획용</li>
+      <li class="ok">Adobe Tags를 이미 쓰지 않으면 <b>Tags 신규 도입</b> (Environment install + AEP Web SDK 확장 + Rules). 기존 GTM은 GA 등용으로 유지 가능</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 태그매니저 경유면: 해당 컨테이너 접근 권한을 받을 수 있는가?</p>
+      <p><span class="badge b-no">필요없음</span> Target은 Tags 신규 도입이 전제라, 기존 컨테이너 권한이 배포 경로를 바꾸지 않음.</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/install/tags" target="_blank">Tags에 Web SDK 설치</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/aep/target-overview" target="_blank">Target with Web SDK</a> ·
+      (참고. <a href="#gap-1">갭#1 — 스크립트 삽입</a>)
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">A-2 ~ A-5 · 공통 <a class="qlink" href="#cl-a2">체크리스트 ↗</a></div>
+    <h3>소스 열람 · 연동 정의서 · 적용 범위 · 인수인계</h3>
+    <p class="lbl">배경지식</p>
+    <p>타겟 재설계의 원본은 <strong>현행 인사이더 연동 코드</strong>입니다. 아래 4가지가 확보될수록 역분석 공수가 줄고 재사용 범위(B·F)가 커집니다.</p>
+    <ol>
+      <li>소스/레포 접근 또는 연동부 발췌</li>
+      <li>데이터레이어 명세·이벤트 목록 등 <strong>연동 정의서</strong></li>
+      <li>적용 페이지/화면 범위</li>
+      <li>기존 구축 개발자와의 인수인계</li>
+    </ol>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 자료가 어려우면: 연동부 코드 발췌 / 개발자 인터뷰 / 역분석</p>
+      <p>자료 부족 시 <strong>코드·문서 기반 역분석</strong>만으로 진행 → 공수 급증. 최소한 인사이더 연동부(스크립트 초기화·이벤트 push 부분) 발췌라도 확보하는 것을 목표로.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== B ===== -->
+<div class="section" id="b">
+  <span class="section-id">B</span>
+  <h2 class="sec">B. 데이터레이어 &amp; 함수 정의</h2>
+  <p class="sec-desc">인사이더에 넘기던 데이터/이벤트를 타겟 파라미터·XDM으로 재매핑하기 위한 원본 파악.</p>
+
+  <div class="qa">
+    <div class="qno">B-1 · 웹 <a class="qlink" href="#cl-b1">체크리스트 ↗</a></div>
+    <h3>InsiderQueue 초기화 &amp; push 구조 → 타겟 파라미터/XDM 재설계</h3>
+    <p class="lbl">배경지식</p>
+    <p>인사이더는 <code>window.insider_object</code> / <code>InsiderQueue.push()</code>로 user·product·cart와 init을 전달합니다. 타겟은 두 방식으로 재현합니다.</p>
+    <ol>
+      <li><strong>at.js</strong> — mbox/프로필 파라미터(<code>targetPageParams</code>)</li>
+      <li><strong>AEP Web SDK</strong> — <code>sendEvent()</code>의 <code>xdm</code> 또는 <code>data.__adobe.target</code> 객체</li>
+    </ol>
+    <p>즉 인사이더 push 객체 = 타겟 파라미터/XDM 설계 원본. (참고. <a href="#pre3">at.js / alloy / 모바일 예시 코드</a>)</p>
+    <div class="tip"><strong>XDM — 웹 vs 앱</strong> — <b>웹</b>: Target 파라미터만이면 <code>data.__adobe.target</code> 자유형으로 정식 스키마 불요(오디언스 커스텀 매칭 시 XDM 권장). <b>앱</b>: Edge Network는 XDM 객체만 지원 → 스키마·dataset 구성이 선행(참고. FAQ Q2 · 사전배경 ③ 앱 B).</div>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 페이지 유형별 push 데이터 목록/샘플을 받을 수 있는가?</p>
+      <p>페이지 유형(홈/목록/상세/장바구니/주문완료)별 push 스냅샷을 받으면 <strong>XDM 스키마/파라미터 매핑표</strong>를 1:1로 설계 가능. 샘플이 곧 매핑 명세가 됩니다.</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/personalization/rendering-personalization-content" target="_blank">Web SDK 개인화 콘텐츠</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/sendevent/data" target="_blank">data 객체(비XDM)</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/platform-learn/implement-web-sdk/initial-configuration/configure-schemas" target="_blank">XDM 스키마 불필요(Target)</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Parameters</a> ·
+      (참고. <a href="#gap-2">갭#2 — 데이터레이어 어댑터</a>)
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">B-2 ~ B-4 · 공통 <a class="qlink" href="#cl-b2">체크리스트 ↗</a></div>
+    <h3>커스텀 이벤트/함수 · 사용자 식별/속성 · 이커머스 객체</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>커스텀 이벤트(<code>custom_event</code>·<code>add_to_cart</code>) → <strong>이벤트 재매핑</strong></li>
+      <li>사용자 속성(uuid/email/custom) → <strong>프로필 속성</strong>. 그중 <b>로그인 UID(uuid 등)</b>는 “속성”이 아니라 <b>식별자</b>로 따로 취급</li>
+      <li>식별자 전달 경로(권장 Edge 스택) —
+        <ul class="nlist" style="margin-top:4px">
+          <li><b>웹</b>: alloy <code>sendEvent</code>의 <code>identityMap</code> (Identity가 Web SDK에 내장)</li>
+          <li><b>앱</b>: Tags <b>Identity for Edge Network</b> 확장으로 ECID 관리 + 로그인 UID를 identityMap에 설정 → 데이터스트림에서 Target <b>3rd Party ID</b> 매핑</li>
+        </ul>
+        이메일·등급 같은 일반 속성은 프로필 파라미터/<code>data.__adobe.target</code> 쪽으로 보내고, UID만 Identity 경로로 보냄 (참고. <a href="#f">F-1</a> · 사전배경 ③ 앱 B tip)
+      </li>
+      <li>이커머스 객체(product/cart/order) → <strong>파라미터 매핑</strong></li>
+      <li>상품 데이터는 <strong>Recommendations 카탈로그(피드)</strong>와 직결 → 피드/필드 정의 함께 확보</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 이벤트 트리거 시점·파라미터 명세 / 속성 키 목록·타입 / 상품 카탈로그(피드)·필드 정의</p>
+      <p>이벤트별 <strong>트리거 시점</strong>(클릭·로드·조건)과 파라미터, 속성 키·데이터 타입, 상품 피드 필드가 확정되면 재매핑 범위가 정량화됩니다. 상품 피드는 Target Recommendations 카탈로그(피드) 연동 입력물 (참고. <a href="#gap-5">갭#5 — Recommendations</a>).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Parameters</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/recommendations/entities/feeds" target="_blank">Recommendations Feeds</a>
+    </div>
+  </div>
+
+  <div class="qa appq">
+    <div class="qno">B-5 · 앱 <a class="qlink" href="#cl-b5">체크리스트 ↗</a></div>
+    <h3>RNInsider / 네이티브 이벤트 메서드(itemPurchased, visitProductDetailPage 등)</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>앱은 push 대신 <strong>SDK 네이티브 메서드</strong>로 이벤트 전달 (예 <code>RNInsider.itemPurchased()</code>·<code>visitProductDetailPage()</code>)</li>
+      <li>타겟 전환 = <strong>AEP Mobile SDK 이벤트/XDM 전송</strong>으로 매핑</li>
+      <li>필수 산출물 = <strong>앱 이벤트 인벤토리(메서드 목록 + 호출 위치)</strong></li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 앱 이벤트 호출 위치(화면/액션) 목록을 받을 수 있는가?</p>
+      <p>호출 위치가 화면·액션 단위로 정리되면 타겟 <code>trackEvent</code>/파라미터(이커머스 이벤트) 매핑을 화면별로 설계 가능 (참고. <a href="#gap-10">갭#10 — 이커머스이벤트</a>).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://developer.adobe.com/client-sdks/documentation/adobe-target/" target="_blank">Client SDKs — Target</a> ·
+      (참고. <a href="#gap-10">갭#10 — 이커머스이벤트</a>)
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">B-6 · 웹 <a class="qlink" href="#cl-b6">체크리스트 ↗</a></div>
+    <h3>타겟 실행 시점에 개인화 데이터가 준비돼 있는가 (비동기 완료 이벤트/콜백)</h3>
+    <p class="lbl">배경지식</p>
+    <p>개인화에 필요한 데이터(로그인·상품 정보)가 <strong>타겟 호출 시점에 아직 로드되지 않았다면</strong> 잘못된/빈 개인화가 나가는 <strong>타이밍 버그</strong>가 발생합니다. 데이터가 비동기로 늦게 오면 다음 중 하나로 처리합니다.</p>
+    <ol>
+      <li>데이터 준비 완료 후 타겟을 호출하도록 <strong>지연(deferral)</strong></li>
+      <li>at.js <code>targetPageParams</code> / Web SDK <code>sendEvent</code>를 <strong>데이터 준비 콜백 이후</strong>에 실행</li>
+    </ol>
+    <p>Web SDK는 데이터 수집·개인화 요청 타이밍을 코드로 제어할 수 있습니다.</p>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 비동기라면: 데이터 준비 후 타겟 호출을 지연시킬 훅이 있는가?</p>
+      <p>프론트에 "데이터 로드 완료 이벤트/프라미스"가 있으면 그 콜백에서 타겟을 호출(또는 <code>renderDecisions</code> 시점 조정). 훅이 없으면 <strong>신규 이벤트 훅 추가</strong>가 필요(고객 프론트 개발 몫). flicker 방지 pre-hiding과 결합해 지연 동안 깜빡임을 방지 (참고. <a href="#d">D-2</a>).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-get-offers-atjs-2" target="_blank">getOffers() 타이밍 제어</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/sendevent/overview" target="_blank">Web SDK sendEvent</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== C ===== -->
+<div class="section" id="c">
+  <span class="section-id">C</span>
+  <h2 class="sec">C. 오퍼/렌더링(JSON) 구조</h2>
+  <p class="sec-desc">"타겟이 콘텐츠를 결정만 하고, 렌더링은 누가 하느냐"가 핵심.</p>
+
+  <div class="qa">
+    <div class="qno">C-1 · 공통 <a class="qlink" href="#cl-c1">체크리스트 ↗</a></div>
+    <h3>자동 렌더링(인사이더) vs 자체 렌더링</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>인사이더 = <strong>ins.js가 캠페인 규칙대로 DOM에 자동 삽입</strong></li>
+      <li>타겟 = VEC/HTML Offer로 자동 렌더 가능, <strong>헤드리스는 JSON Offer를 자체 프론트/네이티브가 렌더</strong></li>
+      <li>현행이 "자동 렌더 위주" → 전환 시 <strong>렌더링 로직 신규 개발</strong> 필요</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 자동 렌더 위주면: 타겟 전환 시 렌더링 로직 신규 개발 필요</p>
+      <p>인사이더가 알아서 그려주던 것을 타겟에선 <strong>자체 렌더로 구현</strong>해야 합니다 (참고. <a href="#gap-3">갭#3 — 오버레이 자체렌더</a>). 렌더 주체·컴포넌트 재고를 JSON 렌더 컴포넌트 준비도(<a href="#c">C-2</a>)에서 이어 확인.</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/vec/visual-experience-composer" target="_blank">VEC</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/offers/create-json-offer" target="_blank">JSON Offer</a> ·
+      (참고. <a href="#gap-3">갭#3 — 오버레이 자체렌더</a>)
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">C-2 · 공통 <a class="qlink" href="#cl-c2">체크리스트 ↗</a></div>
+    <h3>JSON 수신 → 렌더할 레이아웃 컴포넌트 준비도</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>JSON Offer는 <strong>원시 데이터(제목·이미지·링크)만</strong> 반환 → 그릴 <strong>웹/네이티브 컴포넌트</strong> 필수</li>
+      <li>at.js = <code>getOffers()</code> 수신 후 콜백에서 JSON 파싱해 자체 렌더 (HTML Offer만 <code>applyOffers()</code>)</li>
+      <li>Web SDK/서버사이드 = 응답 JSON을 직접 처리</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 신규 개발 필요면: 디자인/퍼블리싱 산출물 제공 주체는 누구인가?</p>
+      <p>컴포넌트가 없으면 디자인·퍼블리싱 산출물이 있어야 개발 가능. <strong>산출물 제공 주체</strong>를 계약 범위로 명확히.</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-get-offers-atjs-2" target="_blank">getOffers()</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-apply-offers-atjs-2" target="_blank">applyOffers()</a>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">C-3 · 웹 · <span class="badge b-sdk">SDK시 최소/불요</span> <a class="qlink" href="#cl-c3">체크리스트 ↗</a></div>
+    <h3>DOM 셀렉터 안정성 &amp; 자체 앵커(mbox-loc) 대체</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>DOM 삽입 = <strong>안정적 셀렉터</strong>(고정 id/class) 필요</li>
+      <li>React/Vue의 <code>css-1a2b3c</code>류 <strong>자동생성·수시변경 클래스</strong>는 부적합</li>
+      <li>대안 = <strong>고정 ID 앵커 요소</strong>를 런타임 생성해 삽입 지점으로 사용 ↓</li>
+    </ul>
+    <pre><code>var sel = "#scroll-config-mbox-loc";
+if (!document.querySelector(sel)) {
+  var div = document.createElement("div");
+  div.id = "scroll-config-mbox-loc";
+  document.body.insertAdjacentElement("beforeend", div);
+}</code></pre>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 불안정하면: 자체 앵커(mbox-loc 컨테이너) 생성 방식으로 대체 가능한가?</p>
+      <p>위 패턴으로 <strong>고정 앵커를 만들어 안정 삽입</strong> 가능 (참고. <a href="#gap-8">갭#8 — DOM앵커</a>). 단 웹 전용(앱은 DOM 없음).</p>
+    </div>
+    <div class="note"><span class="badge b-sdk">SDK시 최소/불요</span> 헤드리스면 DOM 셀렉터·앵커 고려 대부분 불필요. VEC/DOM 병행 시에만 유효.</div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/vec/experience-composer-options" target="_blank">VEC 요소 선택</a> ·
+      (참고. <a href="#gap-8">갭#8 — DOM앵커</a>)
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">C-4 · 공통 <a class="qlink" href="#cl-c4">체크리스트 ↗</a></div>
+    <h3>기존 캠페인 노출 위치·형태 목록(전면팝업/인라인/스티키바/추천슬롯/인앱)</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>재현 대상 정의 = 현행 캠페인 <strong>형태 인벤토리</strong> 필요</li>
+      <li>재현 난이도: 인라인·추천슬롯(용이) → 전면팝업·스티키바(자체 렌더) → <strong>인앱 메시지(타겟 SDK 밖)</strong> — 참고. <a href="#e">E-4</a> · <a href="#gap-11">갭#11 — 인앱메시지(불가)</a></li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 형태별로 타겟 재현 가능/불가 사전 분류</p>
+      <p>형태 목록을 받아 <strong>재현 판정(재사용/신규개발/불가)</strong>으로 분류 → 물량·난이도 산정. 예: 오버레이=자체 렌더, 추천=Recommendations, 인앱=Target SDK 밖 (참고. <a href="#gap-3">갭#3</a> · <a href="#gap-5">갭#5</a> · <a href="#gap-11">갭#11</a>).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== D ===== -->
+<div class="section" id="d">
+  <span class="section-id">D</span>
+  <h2 class="sec">D. 웹 타겟 구축 요건</h2>
+  <p class="sec-desc">웹 전용. SPA 대응 · flicker 방지 · 도메인/쿠키/크로스도메인 · CMP.</p>
+
+  <div class="qa">
+    <div class="qno">D-1 · 웹 <a class="qlink" href="#cl-d1">체크리스트 ↗</a></div>
+    <h3>SPA 여부 &amp; 라우팅 — triggerView()</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>SPA = 전체 재로드 없이 View만 교체 → <strong>최초 1회 개인화로는 화면 전환 못 잡음</strong></li>
+      <li>해법 = <code>triggerView()</code>(at.js 2.x) / Web SDK <code>sendEvent</code>+<code>renderDecisions</code>로 <strong>뷰 전환 신호</strong> → 매 화면 개인화 재실행</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ SPA면: 라우팅 전환 이벤트 훅을 제공/추가할 수 있는가?</p>
+      <p>라우터 전환 시 <code>triggerView("뷰명")</code>를 호출할 훅이 있어야 함. 없으면 고객 프론트에 <strong>라우팅 훅 추가</strong> 요청(호출 규격·뷰명 설계 가이드 제공).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-trigger-view-atjs-2" target="_blank">triggerView()</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/deploy-at-js/target-atjs-single-page-application" target="_blank">SPA 구현</a>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">D-2 · 웹 · <span class="badge b-sdk">SDK시 최소/불요</span> <a class="qlink" href="#cl-d2">체크리스트 ↗</a></div>
+    <h3>Flicker(FOOC) 방지 — pre-hiding snippet을 head 최상단에 삽입 가능?</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li><strong>깜빡임(FOOC)</strong> = 비동기 로딩 시 원본이 잠깐 보였다 바뀌는 현상</li>
+      <li>방지 = <strong>pre-hiding snippet</strong>을 <code>&lt;head&gt;</code> 최상단에 넣어 콘텐츠를 잠시 숨김</li>
+      <li>동작: <code>opacity:0</code>으로 숨김 → 개인화 완료 시 SDK가 스타일 <strong>제거</strong> / 지연 시 <strong>최대 3000ms 후 자동 해제</strong></li>
+    </ul>
+    <p class="lbl">SDK별 차이 (공식 확인)</p>
+    <ul class="nlist">
+      <li><strong>at.js</strong> — 스타일 ID <code>at-body-style</code>, 응답 수신 시 at.js가 이 ID를 찾아 제거</li>
+      <li><strong>AEP Web SDK</strong> — <code>prehidingStyle</code> 설정으로 관리</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 삽입 제약이 있으면: 비동기 로딩 시 타임아웃 정책 협의</p>
+      <p>head 최상단 삽입이 막히면(TMS 순서 등) 깜빡임 위험 ↑. 이때 <strong>타임아웃(기본 3s) 값·적용 범위</strong>를 조정하고, 동기 로딩 여부/우선순위를 협의. 데이터 준비 지연(<a href="#b">B-6</a>)과 함께 설계.</p>
+    </div>
+    <div class="note"><span class="badge b-sdk">SDK시 최소/불요</span> 헤드리스면 pre-hiding 비중 ↓. 응답 대기 로딩 UI는 자체 관리 (참고. <a href="#b">B-6 — 데이터 준비 타이밍</a>).</div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/personalization/manage-flicker" target="_blank">Web SDK — Manage flicker</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/manage-flicker-with-atjs" target="_blank">at.js — Manage flicker</a> ·
+      (참고. <a href="#gap-1">갭#1 — 스크립트 삽입</a>)
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">D-3 · 웹 <a class="qlink" href="#cl-d3">체크리스트 ↗</a></div>
+    <h3>도메인 구성(단일/멀티/서브도메인) &amp; 쿠키·크로스도메인 식별 요건</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>익명 방문자 식별 = <strong>ECID</strong>(쿠키/디바이스 기반)</li>
+      <li>ECID는 <strong>도메인별로 다른 값</strong> → 여러 도메인 이동 시 동일인이 다르게 잡힐 수 있음</li>
+      <li>완화 = Web SDK <strong>1st-party 도메인(CNAME)</strong> + <strong>도메인 간 ID 공유</strong> 옵션</li>
+    </ul>
+    <div class="note"><strong>로그인 시</strong> — 공통 <code>mbox3rdPartyId</code>가 있으면 도메인별 ECID가 달라도 프로필 병합 (참고. <a href="#f">F-1 — 공통 UID·크로스디바이스</a>). 이슈는 주로 <b>익명 구간</b> 크로스도메인.</div>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 멀티 도메인이면: 크로스도메인 ID 공유 설정 필요</p>
+      <p>익명 구간까지 도메인 간 연속 식별이 필요하면 Web SDK 크로스도메인 ID 공유/1st-party CNAME을 설정. 로그인 위주 개인화면 mbox3rdPartyId 재사용으로 대부분 해결.</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/identity/overview" target="_blank">Web SDK Identity</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/identity/features/ecid" target="_blank">ECID</a> ·
+      (참고. <a href="#gap-14">갭#14 — 3rdPartyId</a> · <a href="#gap-15">갭#15 — 크로스디바이스</a>)
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">D-4 · 웹 <a class="qlink" href="#cl-d4">체크리스트 ↗</a></div>
+    <h3>쿠키 동의 배너(CMP) — 동의 전 스크립트 미발화 여부 &amp; 사용 도구</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li><strong>CMP</strong> = 동의 관리 쿠키 배너 도구(OneTrust 등)</li>
+      <li>동의 전 개인화/추적 스크립트 <strong>차단</strong>이 일반적 → <strong>타겟도 동의 이후에만 로드</strong></li>
+      <li>Adobe = Web SDK/Tags의 <strong>consent 신호</strong>로 데이터 수집 제어 제공</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ CMP 연동이면: 동의 이후 타겟 로드 순서 설계</p>
+      <p>CMP의 동의 콜백/이벤트 이후 타겟을 초기화하도록 <strong>로드 순서·조건부 발화</strong>를 설계. 동의 전 개인화 미노출을 전제로 flicker 방지 pre-hiding 타임아웃도 함께 조정 (참고. <a href="#d">D-2</a>).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/setconsent" target="_blank">Web SDK setConsent</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/consent/supporting-consent" target="_blank">Supporting consent</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== E ===== -->
+<div class="section" id="e">
+  <span class="section-id">E</span>
+  <h2 class="sec">E. 앱 타겟 구축 요건</h2>
+  <p class="sec-desc">앱 전용. SDK 구축 필수이며, 인앱 메시지가 최대 갭 지점.</p>
+
+  <div class="qa appq">
+    <div class="qno">E-1 ~ E-2 · 앱 <a class="qlink" href="#cl-e1">체크리스트 ↗</a></div>
+    <h3>앱 개발 방식 &amp; 최소 OS/배포 파이프라인</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>SDK 설치 = 프레임워크별 상이: 네이티브(Swift/Kotlin)=SPM/Gradle · RN/Expo=npm+네이티브 빌드(autolink) · Flutter/Cordova=각 플러그인</li>
+      <li>본 프로젝트 표준 = <strong>AEP Edge Network(+Optimize)</strong> — 웹 alloy와 같이 Edge 경로 (참고. <a href="#priority">표준 구축 방향</a>)</li>
+      <li>앱은 <strong>스토어 재배포</strong> 필요 → 최소 OS·심사 주기·파이프라인(EAS)을 SDK 반영 시점과 사전 조율</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ RN/Expo면 패키지·autolink 확인 / 스토어 심사 주기가 길면 SDK 반영 시점 조율</p>
+      <p>RN/Expo는 네이티브 모듈 링크(autolink)·config plugin 구성이 관건. 심사 주기가 길면 <strong>SDK 반영을 정규 릴리스에 태우는 일정</strong>을 미리 확보(핫픽스 불가 전제).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/edge/personalization/adobe-target/target-overview" target="_blank">Mobile SDK — Target</a> ·
+      <a href="https://developer.adobe.com/client-sdks/documentation/adobe-target/" target="_blank">Client SDKs</a> ·
+      (참고. <a href="#gap-9">갭#9 — 앱SDK init</a>)
+    </div>
+  </div>
+
+  <div class="qa appq">
+    <div class="qno">E-3 · 앱 <a class="qlink" href="#cl-e3">체크리스트 ↗</a></div>
+    <h3>인사이더 앱 SDK 초기화(init)·콜백(callback) 구조</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>SDK = 앱 시작 시 <strong>init</strong>, 이벤트 발생 시 <strong>callback</strong>으로 동작</li>
+      <li>현행이 콜백 기반 로직(메시지 표시·데이터 수신) 多 → 타겟(AEP Mobile SDK) 이벤트/콜백으로 <strong>대응 매핑 설계</strong> 필요</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 콜백 기반 로직이 많으면: 타겟 대응 매핑 설계 필요</p>
+      <p>인사이더 콜백 목록을 뽑아 타겟 <code>Optimize</code> proposition/이벤트 리스너로 1:1 매핑표를 만들고, 매핑 불가 콜백은 갭으로 분류.</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://developer.adobe.com/client-sdks/documentation/adobe-target/api-reference/" target="_blank">Target Mobile API Reference</a> ·
+      (참고. <a href="#gap-9">갭#9 — 앱SDK init</a>)
+    </div>
+  </div>
+
+  <div class="qa appq">
+    <div class="qno">E-4 · 앱 · <span class="badge b-no">최대 갭</span> <a class="qlink" href="#cl-e4">체크리스트 ↗</a></div>
+    <h3>앱 인앱 메시지(배너/팝업/스크래치/룰렛 등) — 타겟 SDK 범위 밖</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>인사이더 = SDK에 <strong>인앱 메시지 빌더</strong>(템플릿·노출 규칙·타이밍) 내장</li>
+      <li>Adobe Target 모바일 SDK = <strong>"콘텐츠 결정" 위주</strong>, 인앱 메시지 저작/노출 관리는 <strong>범위 밖</strong></li>
+      <li class="no">이번 구축에서는 인앱 메시지 동등 기능을 <strong>커버하지 않음</strong> → 사용 중이면 <b>범위 제외</b></li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 사용이면: 범위 제외 확정</p>
+      <p>인앱 메시지는 Target SDK로 재현 불가하며, 이번 구축 범위에서도 다루지 않음. 사용 여부를 확인하고 <strong>범위 제외</strong>로 합의 (참고. <a href="#gap-11">갭#11 — 인앱메시지(불가)</a>).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/edge/personalization/adobe-target/target-overview" target="_blank">Mobile SDK — Target</a> ·
+      (참고. <a href="#gap-11">갭#11 — 인앱메시지(불가)</a>)
+    </div>
+  </div>
+
+  <div class="qa appq">
+    <div class="qno">E-5 · 앱 <a class="qlink" href="#cl-e5">체크리스트 ↗</a></div>
+    <h3>오퍼 JSON 수신 후 렌더할 네이티브/RN 컴포넌트 준비도</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>앱도 JSON Offer 표시 = <strong>네이티브/RN 컴포넌트</strong> 필수 (웹 JSON 렌더 컴포넌트 준비도 <a href="#c">C-2</a>의 앱 버전)</li>
+      <li>미준비 → 컴포넌트 신규 개발 범위·주체 확정</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 미준비면: 컴포넌트 신규 개발 범위/주체 확정</p>
+      <p>배너/팝업/추천 슬롯별 네이티브 컴포넌트 유무를 재고 조사 → 없는 형태는 개발 물량으로 산정 (참고. <a href="#gap-3">갭#3 — 오버레이 자체렌더</a> · <a href="#gap-13">갭#13 — 앱추천</a>).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://developer.adobe.com/client-sdks/edge/edge-network/" target="_blank">Optimize updatePropositions / getPropositions</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== F ===== -->
+<div class="section" id="f">
+  <span class="section-id">F</span>
+  <h2 class="sec">F. 식별자·프로필 연동</h2>
+  <p class="sec-desc">웹·앱을 한 사용자로 묶고, 데이터레이어를 재사용하기 위한 ID·연동 설계.</p>
+
+  <div class="qa">
+    <div class="qno">F-1 · 공통 <a class="qlink" href="#cl-f1">체크리스트 ↗</a></div>
+    <h3>웹·앱 공통 키(로그인 UID) 전달 — mbox3rdPartyId 매핑 &amp; 크로스디바이스</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>타겟 식별자 2축 = <strong>ECID</strong>(익명·쿠키/디바이스별) + <strong>mbox3rdPartyId</strong>(자체 UID=로그인 ID)</li>
+      <li>웹·앱 통합 = <strong>공통 키를 양쪽에서 동일 전달</strong></li>
+      <li>로그인 시 공통 <code>mbox3rdPartyId</code> 전달 → 멀티 도메인·디바이스여도 <strong>동일 프로필 병합</strong></li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 공통 키가 없으면: 통합 키 신규 정의·주입 필요 / 익명 시에도 전달되는가?</p>
+      <p>공통 UID가 없으면 <strong>통합 키를 신규 정의·주입</strong> (참고. <a href="#gap-15">갭#15 — 크로스디바이스</a>). "로그인 시점에만 취득 vs 익명 시에도 전달"이 설계 분기점 — 익명 개인화가 필요하면 ECID 크로스도메인까지 검토 (참고. <a href="#d">D-3 — 도메인·쿠키</a>).</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/mbox-3rdparty-id" target="_blank">mbox3rdPartyId</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/identity/features/ecid" target="_blank">ECID</a> ·
+      (참고. <a href="#gap-14">갭#14 — 3rdPartyId</a> · <a href="#gap-15">갭#15 — 크로스디바이스</a>)
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qno">F-2 · 공통 <a class="qlink" href="#cl-f2">체크리스트 ↗</a></div>
+    <h3>데이터레이어 재사용 + 변환 어댑터 방식 가능성 (UID·상품·장바구니 전체)</h3>
+    <p class="lbl">배경지식</p>
+    <ul class="nlist">
+      <li>기존 데이터레이어(함수/객체)는 <strong>그대로 두고 "변환 어댑터"만</strong> 붙이면 재계측 불필요</li>
+      <li>어댑터 = 인사이더 push 형식 → 타겟 파라미터/XDM으로 매핑하는 얇은 레이어</li>
+      <li>재사용 가능 → 공수 ↓ / 불가 → 페이지·화면별 신규 계측 필요</li>
+    </ul>
+    <div class="fu">
+      <span class="futag">후속질문</span>
+      <p class="fq">→ 재사용 가능하면: 어댑터 설계 / 불가하면: 페이지·화면별 신규 계측 필요</p>
+      <p>데이터레이어가 안정적·표준적이면 <strong>어댑터 1벌</strong>로 전 페이지 커버 가능 (참고. <a href="#gap-2">갭#2 — 데이터레이어 어댑터</a>). 페이지마다 구조가 다르거나 값이 누락되면 신규 계측 범위를 화면 단위로 산정.</p>
+    </div>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/personalization/rendering-personalization-content" target="_blank">Web SDK 데이터/개인화</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Parameters</a> ·
+      (참고. <a href="#gap-2">갭#2 — 데이터레이어 어댑터</a>)
+    </div>
+  </div>
+</div>
+
+<div class="cat-banner" id="cat2">
+  <h2>【대분류 2】 갭·채널 매핑 배경지식</h2>
+  <p>인사이더 현행 요소 → 타겟 대응 방식 → 재현 판정(재사용/부분/신규/불가). 앞 A~F에서 이미 다룬 항목은 링크로 연결하고, 그 외는 공식문서 근거로 보강.</p>
+</div>
+
+<div class="section">
+  <span class="section-id gap">읽는 법</span>
+  <h2 class="sec">재현 판정 4단계 &amp; 표 보는 법</h2>
+  <p class="sec-desc">재현 가능 여부 판정 기준(재사용 / 부분재사용 / 신규개발 / 불가).</p>
+  <table>
+    <tr><th>판정</th><th>의미</th><th>대응</th></tr>
+    <tr><td><span class="badge b-reuse">재사용</span></td><td>타겟 기본 기능으로 설정만 하면 됨</td><td>활동/오디언스 재구성(설정)</td></tr>
+    <tr><td><span class="badge b-part">부분재사용</span></td><td>기존 데이터/키를 쓰되 변환·매핑 개발 필요</td><td>어댑터·매핑 코드</td></tr>
+    <tr><td><span class="badge b-new">신규개발</span></td><td>타겟은 결정만, 렌더/연동 코드는 새로 개발</td><td>컴포넌트·연동 개발</td></tr>
+    <tr><td><span class="badge b-no">불가</span></td><td>타겟 범위 밖 → 이번 구축에서 커버하지 않음</td><td>범위 제외 합의</td></tr>
+  </table>
+</div>
+
+<!-- 웹 갭 -->
+<div class="section">
+  <span class="section-id gap">갭·웹</span>
+  <h2 class="sec">웹 채널 갭 매핑 (#1~#8)</h2>
+  <table>
+    <tr><th>#</th><th>인사이더(현행)</th><th>타겟 대응</th><th>판정</th><th>근거 · 교차참조</th></tr>
+    <tr id="gap-1"><td>1</td><td>ins.js 공통 스크립트 로드</td><td>at.js 2.x / AEP Web SDK 삽입·초기화</td><td><span class="badge b-new">신규</span></td><td><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/deploy-at-js/implement-target-using-adobe-launch" target="_blank">배포</a> · <a href="#a">A-1</a>/<a href="#d">D-2</a></td></tr>
+    <tr id="gap-2"><td>2</td><td>InsiderQueue 데이터레이어</td><td>mbox 파라미터/XDM 매핑</td><td><span class="badge b-part">부분</span></td><td><a href="#b">B-1</a>/<a href="#f">F-2</a>(어댑터)</td></tr>
+    <tr id="gap-3"><td>3</td><td>자동 오버레이 렌더링(배너/팝업)</td><td>JSON 수신 후 자체 렌더 또는 VEC</td><td><span class="badge b-new">신규</span></td><td><a href="#c">C-1·C-2</a></td></tr>
+    <tr id="gap-4"><td>4</td><td>Onsite Experiment(A/B)</td><td>Target A/B(VEC/Form-based)</td><td><span class="badge b-reuse">재사용</span></td><td>아래 심화 ①</td></tr>
+    <tr id="gap-5"><td>5</td><td>Smart Recommender 위젯</td><td>Target Recommendations(피드+오퍼)</td><td><span class="badge b-new">신규</span></td><td>아래 심화 ②</td></tr>
+    <tr id="gap-6"><td>6</td><td>세그먼트/규칙 기반 타겟팅</td><td>Target Audience(profile.* 등)</td><td><span class="badge b-reuse">재사용</span></td><td>아래 심화 ③</td></tr>
+    <tr id="gap-7"><td>7</td><td>currency/language push</td><td>mbox 파라미터로 로케일 전달</td><td><span class="badge b-new">신규</span></td><td>아래 심화 ④</td></tr>
+    <tr id="gap-8"><td>8</td><td>DOM 인라인 삽입</td><td>고정 앵커(mbox-loc) 생성 방식</td><td><span class="badge b-new">신규</span> <span class="badge b-sdk">SDK시 불요</span></td><td><a href="#c">C-3</a></td></tr>
+  </table>
+  <div class="qa">
+    <div class="qno">심화 ① · #4</div>
+    <h3>Onsite Experiment → Target A/B (재사용)</h3>
+    <p>인사이더 Onsite Experiment(요소 CSS/HTML 직접 수정 A/B)는 타겟 <strong>A/B Test</strong>로 재현됩니다(VEC 또는 Form-based). 활동 타입·트래픽 분할·목표 지표를 <strong>재구성(설정)</strong>하면 되므로 코드 신규 개발 부담은 낮음. 단 통계 방법론(타겟=빈도주의/Bandit, 인사이더=빈도+베이지안)이 달라 <strong>위너 판단 기준</strong>을 팀에 안내 필요.</p>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target/using/activities/abtest/test-ab" target="_blank">A/B Test</a></div>
+  </div>
+  <div class="qa">
+    <div class="qno">심화 ② · #5·#13</div>
+    <h3>Smart Recommender / getSmartRecommendation() → Target Recommendations (신규개발)</h3>
+    <p>인사이더 추천 위젯은 타겟 <strong>Recommendations</strong>로 대응합니다.</p>
+    <ol>
+      <li><strong>카탈로그 피드 연동</strong>(CSV 피드 = 기본 카탈로그, 자주 바뀌는 값은 Entities/API)</li>
+      <li><strong>기준(criteria) 설정</strong></li>
+      <li><strong>위젯 렌더링</strong>(헤드리스면 JSON 수신 후 자체 렌더)</li>
+    </ol>
+    <p>엔티티 속성값은 <strong>61일 후 만료</strong>되므로 최소 월 1회 갱신 권장. 난이도 상(피드+렌더 동시).</p>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target/using/recommendations/entities/feeds" target="_blank">Catalog Feeds</a> · <a href="https://experienceleague.adobe.com/en/docs/target/using/recommendations/criteria/algorithms" target="_blank">Criteria</a></div>
+  </div>
+  <div class="qa">
+    <div class="qno">심화 ③ · #6</div>
+    <h3>세그먼트/규칙 기반 타겟팅 → Target Audience (재사용)</h3>
+    <p>인사이더 세그먼트/규칙은 타겟 <strong>Audience</strong>(방문자 프로필·<code>profile.*</code>·지오·행동 등 조건)로 재정의. 기능적으로 재사용 가능하나, <strong>식별·속성 데이터가 선행 수집</strong>되어야 조건이 동작(B·F 선행).</p>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/target-audiences" target="_blank">Audiences</a></div>
+  </div>
+  <div class="qa">
+    <div class="qno">심화 ④ · #7</div>
+    <h3>currency/language push → mbox 파라미터 (신규개발)</h3>
+    <p>다국어/통화 로케일 값은 타겟에 <strong>mbox/프로필 파라미터</strong>로 전달해 오디언스·오퍼 분기에 사용. 전달 코드는 신규 작성하나 난이도는 낮음. 다국어/통화 사이트면 로케일 축 설계 필요.</p>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile/mbox Parameters</a></div>
+  </div>
+</div>
+
+<!-- 앱 갭 -->
+<div class="section">
+  <span class="section-id gap">갭·앱</span>
+  <h2 class="sec">앱 채널 갭 매핑 (#9~#13)</h2>
+  <table>
+    <tr><th>#</th><th>인사이더(현행)</th><th>타겟 대응</th><th>판정</th><th>근거 · 교차참조</th></tr>
+    <tr id="gap-9"><td>9</td><td>앱 SDK init·콜백</td><td>AEP Mobile SDK init·콜백</td><td><span class="badge b-new">신규</span></td><td><a href="#e">E-1·E-3</a></td></tr>
+    <tr id="gap-10"><td>10</td><td>내장 이커머스 이벤트(itemPurchased 등)</td><td>Target trackEvent / mbox 파라미터</td><td><span class="badge b-new">신규</span></td><td><a href="#b">B-5</a></td></tr>
+    <tr id="gap-11"><td>11</td><td>인앱 메시지(배너/팝업/스크래치/룰렛)</td><td>타겟 미지원 → 이번 구축 범위 제외</td><td><span class="badge b-no">불가</span></td><td><a href="#e">E-4</a> (최대 갭)</td></tr>
+    <tr id="gap-12"><td>12</td><td>Content Optimizer(앱 변수 A/B)</td><td>Target mbox 기반 조건 렌더</td><td><span class="badge b-new">신규</span></td><td>아래 심화 ⑤</td></tr>
+    <tr id="gap-13"><td>13</td><td>getSmartRecommendation()</td><td>Target Recommendations</td><td><span class="badge b-new">신규</span></td><td>위 심화 ②</td></tr>
+  </table>
+  <div class="qa appq">
+    <div class="qno">심화 ⑤ · #12</div>
+    <h3>Content Optimizer(앱 변수 A/B) → mbox 기반 조건 렌더 (신규개발)</h3>
+    <p>인사이더가 앱 내 변수/문구를 A/B로 바꾸던 기능은, 타겟에서 <strong>mbox(location)로 변수 값을 수신</strong>해 앱이 <strong>분기 렌더링</strong>하는 방식으로 재현. 값 수신·분기 코드는 신규 개발이며, 앱이 JSON 값을 읽어 UI에 반영하는 구조가 전제 (참고. <a href="#e">E-5 — 앱 네이티브 렌더 컴포넌트</a>).</p>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://developer.adobe.com/client-sdks/documentation/adobe-target/api-reference/" target="_blank">retrieveLocationContent</a></div>
+  </div>
+  <div class="note"><strong>앱 갭 요약</strong> — 앱은 #9·#10·#12·#13 모두 <span class="badge b-new">신규개발</span>이고 #11 인앱 메시지는 <span class="badge b-no">불가(최대 갭)</span>·이번 구축 범위 제외. 앱 쪽이 웹보다 신규 개발 물량이 큼.</div>
+</div>
+
+<!-- 공통 갭 -->
+<div class="section">
+  <span class="section-id gap">갭·공통</span>
+  <h2 class="sec">공통 채널 갭 매핑 (#14~#20)</h2>
+  <table>
+    <tr><th>#</th><th>인사이더(현행)</th><th>타겟 대응</th><th>판정</th><th>근거 · 교차참조</th></tr>
+    <tr id="gap-14"><td>14</td><td>식별자(uuid/email)</td><td>mbox3rdPartyId로 전달</td><td><span class="badge b-reuse">재사용</span></td><td><a href="#f">F-1</a></td></tr>
+    <tr id="gap-15"><td>15</td><td>웹·앱 크로스디바이스 통합</td><td>mbox3rdPartyId 공통키(또는 AEP Identity)</td><td><span class="badge b-part">부분</span></td><td><a href="#f">F-1</a>/<a href="#d">D-3</a></td></tr>
+    <tr id="gap-16"><td>16</td><td>프로필 속성(커스텀 다수)</td><td>Target profile.* / Customer Attributes</td><td><span class="badge b-part">부분</span></td><td>아래 심화 ⑥</td></tr>
+    <tr id="gap-17"><td>17</td><td>이벤트 히스토리 기반 세그먼트</td><td>Profile Script로 누적값 계산·저장</td><td><span class="badge b-part">부분재현</span></td><td>아래 심화 ⑦</td></tr>
+    <tr id="gap-18"><td>18</td><td>AI 예측 세그먼트(이탈·CLV 등)</td><td>타겟 미지원 → AEP Customer AI</td><td><span class="badge b-no">불가·별도</span></td><td>아래 심화 ⑧</td></tr>
+    <tr id="gap-19"><td>19</td><td>서버에서 인사이더 Upsert로 속성 주입</td><td>Target Bulk/Single Profile Update API</td><td><span class="badge b-new">신규</span></td><td>아래 심화 ⑨</td></tr>
+    <tr id="gap-20"><td>20</td><td>ESD 리포팅(증분 지표)</td><td>A4T(Adobe Analytics)</td><td><span class="badge b-no">불가·별도</span></td><td>아래 심화 ⑩</td></tr>
+  </table>
+
+  <div class="qa">
+    <div class="qno">심화 ⑥ · #16</div>
+    <h3>프로필 속성 다수 → profile.* / Customer Attributes (부분재사용)</h3>
+    <p>커스텀 프로필 속성은 타겟 <strong>프로필 속성(<code>profile.*</code>)</strong> 또는 Experience Cloud <strong>Customer Attributes</strong>(오프라인 CSV 업로드)로 매핑. 속성 키·타입을 1:1로 매핑하는 작업이 필요(부분재사용).</p>
+    <div class="tip"><strong>참고</strong> — 프로필 속성 한도는 <a href="https://experienceleague.adobe.com/en/docs/target/using/troubleshoot/target-limits" target="_blank">Target Limits</a> 문서로 확인.</div>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target/using/troubleshoot/target-limits" target="_blank">Target Limits</a> · <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Parameters</a></div>
+  </div>
+  <div class="qa">
+    <div class="qno">심화 ⑦ · #17</div>
+    <h3>이벤트 히스토리 세그먼트 → Profile Script (부분재현·한계 명확)</h3>
+    <p><strong>Profile Script</strong>는 매 요청 시 서버에서 실행되어 <strong>누적 파생값</strong>(<code>user.purchaseCount</code>, <code>user.lastPurchaseDate</code> 등)을 계산·저장하므로 <strong>단순 집계형 세그먼트는 부분 재현</strong> 가능. 단 <strong>롤링 N일·장기 lookback·원시 이벤트 재조회는 불가</strong>(이 영역은 AEP 필요). 프로필 <strong>TTL 기본 2주 / 최대 90일</strong>(공식 일치).</p>
+    <div class="note"><strong>정리</strong> — "구매횟수/최근구매/관심카테고리" 수준은 Profile Script로 개발 가능(난이도 상), 복잡한 시계열은 "불가"로 분류하는 것이 타당.</div>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Scripts/Parameters</a> · <a href="https://experienceleague.adobe.com/en/docs/target/using/administer/manage-profiles/visitor-profile-lifetime" target="_blank">Profile Lifetime(2주/90일)</a></div>
+  </div>
+  <div class="qa">
+    <div class="qno">심화 ⑧ · #18</div>
+    <h3>AI 예측 세그먼트(이탈·CLV) → 타겟 미지원, AEP Customer AI (불가·별도)</h3>
+    <p>이탈 가능성·CLV 같은 <strong>예측 세그먼트는 Adobe Target 단독으로는 미지원</strong>. Adobe 스택에서는 <strong>AEP Customer AI</strong>(별도 라이선스)로 산출 후 타겟 오디언스로 활용. 초기 스코프에서는 "불가·별도 제품"으로 명시.</p>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/experience-platform/intelligent-services/customer-ai/overview" target="_blank">AEP Customer AI</a></div>
+  </div>
+  <div class="qa">
+    <div class="qno">심화 ⑨ · #19</div>
+    <h3>서버 Upsert(속성 주입) → Bulk/Single Profile Update API (신규개발)</h3>
+    <p>인사이더 <strong>Upsert User Data API</strong>(서버에서 프로필 속성 주입)는 타겟 <strong>Profile Update API</strong>로 대체: 단건=Single, 대량=<strong>Bulk Profile Update</strong>. 키는 <code>mbox3rdPartyId</code>. <strong>속성 주입 위주</strong>이며 이벤트 히스토리 저장 용도는 아님.</p>
+    <div class="tip"><strong>중요</strong> — Profile Update API는 <strong>Target 제품에 포함</strong>되어 <strong>AEP 없이 구성만으로 사용 가능</strong>. 단 <strong>서버측 작업은 고객 개발 스코프</strong> (참고. <a href="#pre2">사전 배경 ② — 헤드리스 JSON·개발사 스코프</a>) — API 규격·키 매핑 가이드 제공.</div>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/api/profiles-api/update-profiles/bulk-profile-update" target="_blank">Bulk Profile Update</a> · <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/api/profiles-api/before-administer-profiles-api" target="_blank">Profile API</a></div>
+  </div>
+  <div class="qa">
+    <div class="qno">심화 ⑩ · #20</div>
+    <h3>ESD 리포팅(증분 지표) → A4T (불가·별도)</h3>
+    <p>인사이더 리포팅의 증분 지표는 타겟 단독 리포트로는 한계가 있어, 정밀 분석은 <strong>A4T(Analytics for Target)</strong>로 <strong>Adobe Analytics</strong> 리포트 스위트에 연동합니다. <strong>Analytics 보유 시에만</strong> 가능하므로 미보유면 타겟 자체 리포트로 범위를 한정.</p>
+    <div class="cite"><span class="badge b-doc">공식</span> <a href="https://experienceleague.adobe.com/en/docs/target/using/integrate/a4t/a4t" target="_blank">A4T</a></div>
+  </div>
+</div>
+
+<!-- ===== APPENDIX ===== -->
+<div class="section" id="appendix" style="border:2px solid var(--amber)">
+  <span class="section-id gap">부록</span>
+  <h2 class="sec">부록 — 1st-party 도메인 구성 흐름 (요약)</h2>
+  <p class="sec-desc">RFP상 요구되는 1st-party 도메인(CNAME) 구성 원리·설정·흐름. 공식문서 근거.</p>
+
+  <div class="keybox">
+    <div class="kt">한 줄 개념 (비유)</div>
+    <p>Adobe 서버(임대 건물)는 <span class="hl">주소(IP)가 수시로 바뀜</span> → 통신사가 고정 IP로 무과금 처리할 수 없음.</p>
+    <p>대신 그 건물 앞에 <span class="hl2c">우리 회사 간판(1st-party 도메인)</span>을 달면, 통신사는 <b>그 간판(도메인=SNI)</b>을 보고 무과금 처리.</p>
+  </div>
+
+  <h3 class="note-h">왜 Adobe 공용 도메인(<code>clientCode.tt.omtrdc.net</code> 등)은 안 되나</h3>
+  <ul class="nlist">
+    <li>기본 호출 호스트 예: at.js <code>&lt;clientCode&gt;.tt.omtrdc.net</code> · Edge Network <code>edge.adobedc.net</code> / <code>*.data.adobedc.net</code></li>
+    <li class="no"><b><code>clientCode</code>가 고객마다 달라도</b> 여전히 <b>Adobe 소유 apex</b>(<code>tt.omtrdc.net</code> / <code>adobedc.net</code>) — "우리 서비스 도메인"이 아님</li>
+    <li class="no">통신사 무과금은 요청의 <b>간판 도메인(SNI)</b>을 보고 판단 → 등록 대상은 보통 <b>고객사(당사) 소유 도메인</b>. Adobe 벤더 공용 도메인을 무과금 목록에 넣는 방식은 RFP 취지·운영과 맞지 않음</li>
+    <li class="ok">그래서 CNAME으로 <b>고객사 도메인</b>(예 <code>data.회사.com</code>)을 Adobe에 연결하고, SDK에는 그 도메인을 지정 → 통신사가 보는 간판 = 고객사 도메인</li>
+  </ul>
+  <div class="note"><strong>한 줄 정리</strong> — <code>clientCode</code>는 Target 계정 식별용이지, 통신사에 올릴 "우리 간판"이 아님. 통신사에 올릴 간판은 <b>고객사 1st-party 도메인</b>이어야 함.</div>
+
+  <h3 class="note-h">용어 — 프로그램을 섞지 말 것</h3>
+  <ul class="nlist">
+    <li><b>1st-party 도메인</b> — 고객사 소유 <b>서브도메인</b>(예 <code>data.회사.com</code> · <code>target.회사.com</code>). apex(<code>회사.com</code>)는 기존 DNS와 충돌 위험이 커 Target CNAME FAQ도 서브도메인 권장.</li>
+    <li><b>프로그램 A — Adobe-Managed Certificate</b> — Edge/데이터 수집용. CNAME 타깃 예 <code>xxxx.data.adobedc.net</code>. SDK 키: 웹 <code>edgeDomain</code> · 앱 <code>edge.domain</code>.</li>
+    <li><b>프로그램 B — Target CNAME</b> — Target Delivery용(별도 호스트·인증서). CNAME 타깃 예 <code>xxxx.tt.omtrdc.net</code>. SDK 키: 웹 at.js <code>serverDomain</code>(공식 HOWTO) · 앱 <code>target.server</code>(호스트 오버라이드 공식, CNAME 연계는 추론).</li>
+    <li class="warn">Analytics CNAME과 Target CNAME도 <b>호스트·인증서 공유 불가</b>(Target FAQ). Edge Managed Cert ≠ Target CNAME.</li>
+  </ul>
+
+  <h3 class="note-h">① 설정 흐름도 — 권장 세트(W-A+M-A, Edge Managed Cert)</h3>
+  <div class="flow">
+    <div class="node">1) 1st-party 서브도메인 확정 (웹·앱 공용 권장) — 예 <code>data.회사.com</code></div>
+    <div class="arw">↓</div>
+    <div class="node">2) Customer Care에 <b>Adobe-Managed Certificate</b> 티켓 → CNAME 타깃(<code>xxxx.data.adobedc.net</code>)</div>
+    <div class="arw">↓</div>
+    <div class="node">3) 고객사 DNS CNAME 등록 → DigiCert 인증서 발급·자동갱신</div>
+    <div class="arw">↓</div>
+    <div class="node">4) SDK — 웹 <code>edgeDomain</code> / 앱 Tags Edge <b>Edge Network domain</b>(<code>edge.domain</code>)</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">5) 통신사 무과금 목록에 해당 도메인 등록 요청</div>
+  </div>
+  <div class="note"><strong>대안 세트(W-B+M-B)</strong> — 흐름은 동일하되 티켓·타깃이 <b>Target CNAME</b>(<code>*.tt.omtrdc.net</code>)이고, 웹은 <code>serverDomain</code>, 앱은 <code>target.server</code>(앱 무과금은 PoC 전제). 상세 → 아래 ③·④.</div>
+
+  <h3 class="note-h">② 런타임 흐름도 (요청 → 응답) — 권장 세트 기준</h3>
+  <div class="flow">
+    <div class="node">고객 앱/웹 — 개인화 요청 (<code>sendEvent</code> / <code>updatePropositions</code>)</div>
+    <div class="arw">↓ 목적지 = <code>data.회사.com</code> (우리 간판)</div>
+    <div class="node hl2">통신사망 — 목적지 <b>도메인(SNI) 확인</b> → 등록된 도메인이면 <b>과금 제외</b> (통신사 정책)</div>
+    <div class="arw">↓ CNAME으로 실제 연결</div>
+    <div class="node">Adobe Edge Network — Target decisioning</div>
+    <div class="arw">↓ JSON proposition 반환</div>
+    <div class="node ok2">앱/웹 <b>자체 컴포넌트가 렌더</b> (헤드리스)</div>
+  </div>
+  <div class="note">대안 세트면 목적지가 <code>target.회사.com</code>, 백엔드는 Target Delivery(<code>/rest/v1/delivery</code>) — Edge Network 경로가 아님.</div>
+
+  <h3 class="note-h">③ 웹에서 "간판 도메인" 다는 2가지 방법 — <span class="pill rec">권장 alloy</span> 먼저 · at.js는 대안</h3>
+  <p style="font-size:.9rem;margin:2px 0 6px">원리(고객사 호스트→Adobe)는 같으나 <b>프로그램·CNAME 타깃이 다름</b> — A=Edge Managed Cert · B=Target CNAME.</p>
+  <table class="t-web">
+    <colgroup>
+      <col class="c-method"><col class="c-where"><col class="c-key2"><col class="c-tgt"><col class="c-tags">
+    </colgroup>
+    <tr><th>방법</th><th>설정 위치</th><th>설정 키</th><th>CNAME 타깃</th><th>Tags</th></tr>
+    <tr>
+      <td><b>Web SDK</b><br><span class="muted">alloy</span> <span class="pill rec">권장</span></td>
+      <td class="cell-stack"><span>Tags Web SDK · <b>Edge domain</b></span><span class="muted">또는 <code>configure</code></span></td>
+      <td><code>edgeDomain</code></td>
+      <td><code>xxxx.data.adobedc.net</code></td>
+      <td><b>O</b><br><span class="muted">확장 필드</span></td>
+    </tr>
+    <tr>
+      <td>at.js<br><span class="muted">대안</span></td>
+      <td class="cell-stack"><span>① Target UI Header + 다운로드</span><span class="muted">② Tags: Load Target 전 <code>targetGlobalSettings</code></span></td>
+      <td class="cell-stack"><code>serverDomain</code><span class="muted">+ <code>overrideMboxEdgeServer:false</code></span></td>
+      <td><code>xxxx.tt.omtrdc.net</code></td>
+      <td><b>O</b><br><span class="muted">사전 선언</span></td>
+    </tr>
+  </table>
+
+  <div class="codeblock alloy">
+    <p class="cap"><span class="pill web">WEB</span><span class="pill rec">권장</span>방법 A — Web SDK(alloy) <code>edgeDomain</code></p>
+    <pre><code>alloy("configure", {
+  datastreamId: "1a2b3c4d-xxxx",
+  orgId:        "ABC123@AdobeOrg",
+  edgeDomain:   "data.회사.com"   // 서브도메인 (protocol·slash 없음)
+});</code></pre>
+  </div>
+
+  <div class="codeblock legacy">
+    <p class="cap"><span class="pill web">WEB</span><span class="pill legacy">대안</span>방법 B — at.js <code>serverDomain</code> (<code>targetGlobalSettings</code>)</p>
+    <p class="sub"><b>공통 조건</b> — at.js가 읽기 <em>전에</em> <code>window.targetGlobalSettings</code>가 있어야 함. CNAME 프로비저닝(아래 note)이 먼저. HOWTO 예시는 <code>target.example.com</code> 형태.</p>
+    <pre><code>window.targetGlobalSettings = {
+  cookieDomain:           "회사.com",           // 쿠키 스코프(사이트 apex)
+  serverDomain:           "target.회사.com",     // Target 호출 간판(=CNAME 호스트)
+  overrideMboxEdgeServer: false                  // CNAME HOWTO 필수
+};</code></pre>
+
+    <h3 class="note-h" style="margin-top:12px">B-1. at.js 다운로드 배포 시</h3>
+    <ul class="nlist">
+      <li>Target UI → <b>Administration → Implementation → Edit at.js settings → Custom Library Header</b>에 위 코드 입력</li>
+      <li><b>라이브러리 다운로드</b>(edited) → 구현체에 반영 → 헤더 코드가 at.js에 <b>구워져</b> 나감</li>
+    </ul>
+
+    <h3 class="note-h">B-2. Tags 배포 시</h3>
+    <ul class="nlist">
+      <li>Rule에서 <b>Load Target 전</b> Custom Code로 <code>targetGlobalSettings</code> 사전 선언</li>
+      <li>액션 순서 예: Custom Code → Load Target → Fire Page Load Request</li>
+    </ul>
+    <div class="note"><strong>순서 주의 — 프로비저닝이 먼저</strong>
+      <ul class="nlist">
+        <li>① Client Care에 CNAME 티켓 → Adobe가 <code>xxxx.tt.omtrdc.net</code> 타깃 발급</li>
+        <li>② DNS 등록: <code>target.회사.com → xxxx.tt.omtrdc.net</code></li>
+        <li>③ Adobe 관리형 인증서 설치</li>
+        <li>④ <b>그다음</b> <code>serverDomain</code> 반영 (B-1 다운로드 또는 B-2 Tags 사전 선언)</li>
+        <li class="warn">첫 전환 시 옛 호스트(<code>clientcode.tt.omtrdc.net</code>) 쿠키를 못 읽어 <b>재방문자가 1회 신규로 초기화</b>(인증서 갱신 땐 없음)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cite">
+    <span class="badge b-doc">공식</span>
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/implementation/implement-cname-support-in-target" target="_blank">CNAME in Target(serverDomain)</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/at-js-implementation/functions-overview/targetglobalsettings" target="_blank">targetGlobalSettings(at.js 로드 전)</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/platform-learn/implement-in-websites/implement-solutions/target" target="_blank">Tags: Custom Code → Load Target 순서</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/core-services/interface/data-collection/adobe-managed-cert" target="_blank">관리형 인증서·Web SDK Edge domain</a>
+  </div>
+
+  <h3 class="note-h" id="appendix-app">④ 앱(네이티브) 간판 도메인 — M-A(Edge) / M-B(클래식 Target)</h3>
+  <p style="font-size:.9rem;margin:2px 0 6px">앱 간판도 <b>두 문 오픈</b>. 권장=M-A · 대안=M-B. 구축 흐름·API 코드는 <a href="#guide-ma">★ M-A</a> · <a href="#guide-mb">★ M-B</a> · <a href="#pre3">사전배경 ③ B·B′</a>.</p>
+  <table class="t-cmp">
+    <colgroup>
+      <col class="c-label"><col class="c-ma2"><col class="c-mb2">
+    </colgroup>
+    <tr>
+      <th>구분</th>
+      <th><span class="pill rec">M-A</span> Edge + Optimize</th>
+      <th><span class="pill legacy">M-B</span> 클래식 Adobe Target</th>
+    </tr>
+    <tr>
+      <td>확장</td>
+      <td>Core · Identity(Edge) · Edge Network · Optimize</td>
+      <td>Core · Identity · <b>Adobe Target</b></td>
+    </tr>
+    <tr><td>도메인 키</td><td><code>edge.domain</code></td><td><code>target.server</code></td></tr>
+    <tr>
+      <td>Tags UI</td>
+      <td>Edge Network → <b>Edge Network domain</b></td>
+      <td class="cell-stack"><span>Install에 server 필드 없음</span><span class="muted">→ <code>updateConfiguration</code></span></td>
+    </tr>
+    <tr>
+      <td>공식 문구</td>
+      <td>“first-party domain mapped to … Edge Network domain”</td>
+      <td>“all Target requests will be sent to this host”</td>
+    </tr>
+    <tr>
+      <td>CNAME 프로그램</td>
+      <td class="cell-stack"><span>Adobe-Managed Cert</span><code>*.data.adobedc.net</code></td>
+      <td class="cell-stack"><span>Target CNAME</span><span class="muted"><code>*.tt.omtrdc.net</code> (W-B와 동일 호스트 후보)</span></td>
+    </tr>
+    <tr>
+      <td>RFP 무과금</td>
+      <td><b>가능</b> <span class="muted">(문서 닫힘)</span></td>
+      <td class="warn cell-stack"><span><b>후보</b> — 호스트 지정 공식</span><span class="muted">CNAME/무과금은 PoC·AE</span></td>
+    </tr>
+    <tr>
+      <td>호스트 우선순위</td>
+      <td>Tags/코드 <code>edge.domain</code></td>
+      <td class="cell-stack"><span>① <code>target.server</code></span><span class="muted">② Edge Host · ③ clientCode.tt.omtrdc.net</span></td>
+    </tr>
+    <tr>
+      <td>문서 한계</td>
+      <td>—</td>
+      <td class="cell-stack"><span>CNAME HOWTO는 at.js만</span><span class="muted">모바일 “지원” 명시 문장 없음</span></td>
+    </tr>
+    <tr>
+      <td>부가 확인</td>
+      <td>스키마 · (AEP 시) Dataset · 계약</td>
+      <td>발급 호스트 TLS/Delivery PoC + AE</td>
+    </tr>
+  </table>
+
+  <div class="codeblock alloy">
+    <p class="cap"><span class="pill app">APP</span><span class="pill rec">M-A</span>간판 절차 — Edge Network domain</p>
+    <div class="flow">
+      <div class="node">① Edge Managed Cert + DNS CNAME (웹 W-A와 동일 호스트 권장)</div>
+      <div class="arw">↓</div>
+      <div class="node">② Tags Mobile → Edge Network 확장 · Domain = <code>data.회사.com</code></div>
+      <div class="arw">↓</div>
+      <div class="node ok2">③ Publish → 앱은 appId만 (원격 설정). 필요 시 코드 오버라이드</div>
+    </div>
+    <pre><code>MobileCore.updateConfiguration([
+  "edge.domain": "data.회사.com"   // protocol·slash 없음
+])</code></pre>
+  </div>
+
+  <div class="codeblock legacy" style="margin-top:12px">
+    <p class="cap"><span class="pill app">APP</span><span class="pill legacy">M-B</span>간판 절차 — target.server + Target CNAME</p>
+    <div class="flow">
+      <div class="node">① Target CNAME 티켓·DNS (웹 W-B와 동일 호스트 권장)</div>
+      <div class="arw">↓</div>
+      <div class="node">② Tags: Adobe Target 확장 Install · Publish</div>
+      <div class="arw">↓</div>
+      <div class="node ok2">③ 앱 <code>target.server</code> = CNAME 호스트 → Delivery 전량 그 호스트로</div>
+    </div>
+    <pre><code>MobileCore.updateConfiguration([
+  "target.server": "target.회사.com"
+])
+// URL = https://target.회사.com/rest/v1/delivery/</code></pre>
+  </div>
+  <div class="note"><strong>요약</strong> — 고객 1순위 제안은 M-A(<code>edge.domain</code>, first-party 공식). M-B는 <code>target.server</code>까지 공식이나 무과금·CNAME 연계는 <b>추론+검증</b>. 권장/대안 세트는 각각 Edge 또는 Target CNAME 호스트로 맞출 것(혼용은 운영상 비권장).</div>
+  <div class="cite">
+    <span class="badge b-doc">공식·소스</span>
+    <a href="https://developer.adobe.com/client-sdks/edge/edge-network/" target="_blank">Edge Network · edge.domain</a> ·
+    <a href="https://developer.adobe.com/client-sdks/solution/adobe-target/" target="_blank">Adobe Target · target.server</a> ·
+    <a href="https://github.com/adobe/aepsdk-target-android" target="_blank">aepsdk-target-android</a> ·
+    <a href="https://github.com/adobe/aepsdk-target-ios" target="_blank">aepsdk-target-ios</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/implementation/implement-cname-support-in-target" target="_blank">Target CNAME</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/core-services/interface/data-collection/adobe-managed-cert" target="_blank">Adobe-Managed Certificate</a>
+  </div>
+  <div class="note"><strong>사내 테스트 PRD</strong> — <code>05_AEP_SDK_TARGET_TEST_PRD.md</code> 검증 범위는 <b>Edge+Optimize만</b>(클래식 Out of Scope). 운영 체크리스트(본 문서)는 M-B도 열어 둠.</div>
+
+  <div class="note"><strong>반드시 확정할 점</strong>
+    <ul class="nlist">
+      <li class="warn">경로 세트는 <b>W-A+M-A(1순위)</b> 또는 <b>W-B+M-B(대안·앱은 PoC)</b>로 맞출 것. 혼용은 Adobe 기술 차단 문서 없음 · <b>운영상</b> 비권장</li>
+      <li class="warn"><b>웹·앱 동일 간판 호스트</b>면 통신사 무과금 규칙 한 벌로 커버하기 쉬움</li>
+      <li class="warn"><b>크리에이티브 자산</b> — Adobe는 Image/Remote Offer로 외부 호스팅을 허용(1st-party 강제 아님). 다만 <b>통신사 무과금</b>이면 이미지·폰트 등도 등록 도메인(또는 별도 무과금 도메인)에서 빠져야 누락 없음 → RFP/통신사 요건</li>
+      <li class="warn">통신사 식별은 통상 <b>SNI(도메인)</b> · ECH 확산은 잠재 리스크(사전 협의) — Adobe 제품 문서가 아닌 통신 정책 이슈</li>
+      <li class="warn">앱 SDK 반영은 스토어 <b>재배포</b> 필요(경로 무관)</li>
+      <li class="warn">무과금 발동 주체는 <b>통신사</b> — Adobe/구축사는 1st-party 제공·구성까지</li>
+    </ul>
+  </div>
+  <div class="cite">
+    <span class="badge b-doc">공식</span>
+    <a href="https://experienceleague.adobe.com/en/docs/core-services/interface/data-collection/adobe-managed-cert" target="_blank">Adobe-Managed Certificate</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/collection/js/commands/configure/edgedomain" target="_blank">edgeDomain(웹)</a> ·
+    <a href="https://developer.adobe.com/client-sdks/edge/edge-network/" target="_blank">Edge Network mobile</a> ·
+    <a href="https://developer.adobe.com/client-sdks/solution/adobe-target/" target="_blank">Adobe Target mobile</a>
+  </div>
+</div>
+
+<!-- ===== APPENDIX: Tags Build / install ===== -->
+<div class="section" id="appendix-tags" style="border:2px solid var(--accent)">
+  <span class="section-id">부록</span>
+  <h2 class="sec">부록 — Adobe Tags Build · install 알고리즘</h2>
+  <p class="sec-desc">웹 구축(W-A/W-B)에서 페이지에 넣는 <b>install(embed) 한 줄</b>이 무엇을 로드하고, 그다음 Rule·SDK가 어떻게 도는지. ★ 가이드의 “Tags로 배포”의 내부 동작. (모바일 Tags property의 appId 원격설정도 같은 Publish 개념이나, 아래는 <b>웹 embed</b> 기준)</p>
+
+  <div class="keybox">
+    <div class="kt">한 줄 정의</div>
+    <p>install 코드 = Environment에 <b>Publish된 Tags 라이브러리 JS</b>를 CDN에서 받아 실행하는 <code>&lt;script&gt;</code>.  
+    “Tags에 로그인”이 아니라, <b>이미 빌드된 파일 하나</b>를 브라우저가 실행하는 것.</p>
+  </div>
+
+  <h3 class="note-h">① 아키텍처 — 누가 무엇을 갖고 있나</h3>
+  <div class="flow">
+    <div class="node"><b>Tags UI</b> — Property(확장 · Data Element · Rule) + Environment(Dev/Stage/Prod)</div>
+    <div class="arw">↓ Build / Publish</div>
+    <div class="node hl2"><b>launch-ENxxxx.min.js</b> — 규칙·확장·설정이 “구워진” 단일 라이브러리 (CDN: 보통 <code>assets.adobedtm.com</code>)</div>
+    <div class="arw">↓ 페이지 HTML의 install 한 줄</div>
+    <div class="node">브라우저가 JS 다운로드·실행 → 전역 <code>_satellite</code> (Tags 런타임)</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">이벤트(Library Loaded 등) → Rule Actions → Web SDK / at.js 등 실제 SDK 호출</div>
+  </div>
+  <pre><code>&lt;!-- Environments에서 복사하는 embed (async가 기본 권장) --&gt;
+&lt;script src="https://assets.adobedtm.com/.../launch-ENxxxx.min.js" async&gt;&lt;/script&gt;</code></pre>
+  <table>
+    <tr><th>조각</th><th>의미</th></tr>
+    <tr><td><code>launch-….min.js</code></td><td>그 Environment에 Publish된 라이브러리 파일</td></tr>
+    <tr><td><code>async</code></td><td>HTML 파싱을 막지 않고 병렬 로드 (페이지 렌더와 경쟁 가능)</td></tr>
+    <tr><td>페이지에 넣는 것</td><td>보통 <b>이 한 줄</b> (+ Target async 시 pre-hiding은 install <b>앞</b>에 하드코딩)</td></tr>
+    <tr><td>페이지에 안 넣는 것</td><td>Load Target / sendEvent 등 — <b>라이브러리 안 Rule</b>이 실행</td></tr>
+  </table>
+
+  <h3 class="note-h">② 런타임 알고리즘 (async 기준, 시간 순)</h3>
+  <div class="flow">
+    <div class="node">1) 파서가 <code>&lt;head&gt;</code>의 install을 만남 → CDN에서 JS 다운로드 시작 · HTML은 계속 파싱·렌더</div>
+    <div class="arw">↓</div>
+    <div class="node">2) JS 도착·실행 → <code>_satellite</code> 생성 · 빌드에 포함된 확장·Rule 등록</div>
+    <div class="arw">↓</div>
+    <div class="node">3) <b>Library Loaded</b> — 이 이벤트에 걸린 Rule 즉시 실행
+      <span class="tiny">W-B 예: Custom Code → Load Target → Fire page load / W-A 예: Send event</span></div>
+    <div class="arw">↓</div>
+    <div class="node">4) 이후 브라우저 이벤트에 맞춰 추가 Rule
+      <span class="tiny">순서 보장: Library Loaded → Page Bottom* → DOM Ready → Window Loaded</span></div>
+    <div class="arw">↓</div>
+    <div class="node ok2">5) Action이 SDK 호출 — W-A: alloy→Edge→Target / W-B: at.js→Target Delivery</div>
+  </div>
+  <div class="note"><strong>async일 때</strong> — 페이지에서 <code>_satellite.pageBottom()</code>을 호출하지 말 것(라이브러리 로드 전일 수 있음). Page Bottom 이벤트는 async에서 실익이 적음 → Library Loaded / DOM Ready 등을 사용.
+    <span class="cite" style="display:inline;border:none;padding:0;margin:0">
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/tags/client-side/asynchronous-deployment" target="_blank">Asynchronous deployment</a>
+    </span>
+  </div>
+
+  <h3 class="note-h">③ sync vs async</h3>
+  <table>
+    <tr><th></th><th>동기 (async 없음)</th><th>비동기 (<code>async</code>) — 현재 기본</th></tr>
+    <tr><td>파싱</td><td>JS 받을 때까지 HTML 파싱·렌더 대기</td><td>파싱·렌더 계속 ↔ JS 병렬 로드</td></tr>
+    <tr><td>embed</td><td>과거: head + body 끝 <code>pageBottom()</code></td><td>head의 install 한 줄 · <code>pageBottom()</code> 제거</td></tr>
+    <tr><td>타이밍</td><td>순서 예측 쉬움</td><td>Library Loaded가 DOM Ready보다 앞/뒤일 수 있음 → 데이터레이어 준비는 Custom/Direct Call로 맞추는 경우 많음</td></tr>
+  </table>
+
+  <h3 class="note-h">④ install 이후 — W-A vs W-B (같은 한 줄, 다른 라이브러리 내용)</h3>
+  <div class="flow">
+    <div class="node">같은 형태의 install <code>&lt;script src="launch-….js" async&gt;</code></div>
+    <div class="arw">↓ 파일 안에 구워진 확장·Rule이 다름</div>
+    <div class="node">W-A: <b>AEP Web SDK</b> 확장 (datastream · edgeDomain) · <b>Load Target 없음</b> · Action ≈ <code>sendEvent</code></div>
+    <div class="arw">또는</div>
+    <div class="node">W-B: <b>Adobe Target</b> 확장 · Rule: <code>targetGlobalSettings</code> → <b>Load Target</b> → Fire page load · Action ≈ at.js</div>
+    <div class="arw">↓</div>
+    <div class="node ok2">실제 개인화 요청 (Edge 또는 Target Delivery) → 자동 DOM 적용 또는 JSON→FE 렌더 (★ A-1/A-2 · B-1/B-2)</div>
+  </div>
+  <div class="tip"><strong>Load Target</strong>은 install이 하는 일이 아니라, Target 확장의 <b>Rule Action</b>이 at.js를 올리는 단계. Web SDK 경로에는 이 액션이 없음.
+    (<a href="#guide-wa">★ W-A</a> · <a href="#guide-wb">★ W-B</a>)</div>
+
+  <h3 class="note-h">⑤ 한 줄 정리</h3>
+  <ul class="nlist">
+    <li class="ok">install = Publish된 Tags 라이브러리 URL 로드</li>
+    <li class="ok">실행 후 <code>_satellite</code>가 Rule을 돌림</li>
+    <li class="ok">페이지 개발자가 매 페이지에 넣는 것은 보통 <b>install 한 줄</b> (+ 필요 시 pre-hiding)</li>
+    <li class="ok">“언제·무엇을 호출할지”는 Tags UI의 Rule에 있고, <b>Publish할 때마다</b> JS 내용이 갱신됨</li>
+  </ul>
+
+  <div class="cite">
+    <span class="badge b-doc">공식</span>
+    <a href="https://experienceleague.adobe.com/en/docs/platform-learn/implement-in-websites/configure-tags/add-embed-code" target="_blank">Add the embed code</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/tags/client-side/asynchronous-deployment" target="_blank">Asynchronous deployment</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/tags/extensions/client/core/overview" target="_blank">Core extension (Library Loaded 등)</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/platform-learn/implement-in-websites/implement-solutions/target" target="_blank">Tags에서 Target (Load Target)</a> ·
+    <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/install/tags" target="_blank">Tags에 Web SDK 설치</a>
+  </div>
+</div>
+
+<!-- ===== 별첨: RFP IB 요건 매핑 ===== -->
+<div class="section" id="rfp-ib" style="border:2px solid var(--insider)">
+  <span class="section-id cross">별첨</span>
+  <h2 class="sec">별첨 — RFP 디지털 IB(타겟) 요건 대응 매핑 (OSFR-0058 ~ 0088)</h2>
+  <p class="sec-desc">각 요건이 앞 배경지식에서 다뤄졌는지 매핑하고, 없으면 하단 <b>추가 내용</b>에 공식문서 기반으로 정리. 가이드 링크를 누르면 해당 위치로 이동합니다.</p>
+
+  <div class="keybox">
+    <div class="kt">읽는 법</div>
+    <ul class="nlist">
+      <li>가이드 열 = 짧은 설명 + <b>(참고. 링크)</b> — 앞 섹션·갭 표·부록에 설명 있음 → 링크 클릭</li>
+      <li><b>추가-N</b> = 이 별첨 하단 "추가 내용"(리포팅·템플릿·트리거 등) → 링크 클릭</li>
+      <li>필수여부: <b>O</b>=필수 · <b>X</b>=선택/비필수(RFP 표기 그대로)</li>
+    </ul>
+  </div>
+
+  <h3 class="note-h">① 요건 매핑표</h3>
+  <table>
+    <tr><th>요구사항ID</th><th>내용(요약)</th><th>필수여부</th><th>가이드(대응 위치)</th></tr>
+    <tr><td>OSFR-0058</td><td>채널별(PC·Mobile Web·App) MAU 측정 (닷컴 비식별/App 식별)</td><td>O</td><td class="guide">채널별 MAU·실적 대시보드 (참고. <a href="#rfp-add-1">추가-1</a>)</td></tr>
+    <tr><td>OSFR-0059</td><td>인사이더 방식 캠페인 전부 구현 (배너·툴팁·Web Push)</td><td>O</td><td class="guide">캠페인 노출 형태 목록 (참고. <a href="#c">C-4</a>) · 노출 유형·템플릿 (참고. <a href="#rfp-add-3">추가-3</a>) · Web Push (참고. <a href="#rfp-add-8">추가-8</a>)</td></tr>
+    <tr><td>OSFR-0060</td><td>운영 중 오류 당일 즉시 조치</td><td>O</td><td class="guide">노출 품질·당일 조치 (참고. <a href="#rfp-add-2">추가-2</a>)</td></tr>
+    <tr><td>OSFR-0061</td><td>AI 기반 최적 고객 여정 추천 (비식별)</td><td>X</td><td class="guide">AI·고급형·Web Push 범위 (참고. <a href="#rfp-add-8">추가-8</a>)</td></tr>
+    <tr style="background:#fff7ed"><td>OSFR-0062</td><td><b>디지털 IB 캠페인 무과금 처리</b> (기존 고정 IP)</td><td>O</td><td class="guide">구축 가이드 4경로·간판 (참고. <a href="#priority"><b>★</b></a>) · 1st-party (참고. <a href="#appendix"><b>부록</b></a>)</td></tr>
+    <tr><td>OSFR-0063</td><td>OA/CMS 선타겟팅(식별) 실시간 개인화</td><td>O</td><td class="guide">식별·CMS 연동 (참고. <a href="#rfp-add-9">추가-9</a>) · SPA 라우팅 (참고. <a href="#d">D-1</a>)</td></tr>
+    <tr><td>OSFR-0064</td><td>일관된 노출 리드타임 (팝업량 90% 이상)</td><td>X</td><td class="guide">flicker 방지 (참고. <a href="#d">D-2</a>) · 데이터 준비 타이밍 (참고. <a href="#b">B-6</a>) · 노출 품질 (참고. <a href="#rfp-add-2">추가-2</a>)</td></tr>
+    <tr><td>OSFR-0065</td><td>특정 고객 가/고번 타겟팅 + 우선순위 확인</td><td>O</td><td class="guide">공통 UID 식별 (참고. <a href="#f">F-1</a>) · 조건·빈도·우선순위 (참고. <a href="#rfp-add-6">추가-6</a>)</td></tr>
+    <tr><td>OSFR-0066</td><td>캠페인 실적 대시보드</td><td>O</td><td class="guide">실적 대시보드·리포팅 (참고. <a href="#rfp-add-1">추가-1</a>)</td></tr>
+    <tr><td>OSFR-0067</td><td>전체 캠페인(식별+비식별) 모니터링</td><td>O</td><td class="guide">전체 캠페인 모니터링 (참고. <a href="#rfp-add-1">추가-1</a>)</td></tr>
+    <tr><td>OSFR-0068</td><td>전환(성공기준) 룰 커스터마이징</td><td>X</td><td class="guide">일정·전환 룰 (참고. <a href="#rfp-add-7">추가-7</a>)</td></tr>
+    <tr><td>OSFR-0069</td><td>기본 템플릿 제공</td><td>O</td><td class="guide">기본 템플릿 (참고. <a href="#rfp-add-3">추가-3</a>)</td></tr>
+    <tr><td>OSFR-0070</td><td>커스텀 템플릿 활용</td><td>O</td><td class="guide">JSON 렌더 컴포넌트 (참고. <a href="#c">C-2</a>) · 커스텀 템플릿 (참고. <a href="#rfp-add-3">추가-3</a>)</td></tr>
+    <tr><td>OSFR-0071</td><td>고객 식별·타겟 연동 (세그먼트 생성/저장/재사용)</td><td>O</td><td class="guide">공통 UID (참고. <a href="#f">F-1</a>) · Audience (참고. <a href="#gap-6">갭#6 — Audience</a>) · 식별·CMS 연동 (참고. <a href="#rfp-add-9">추가-9</a>)</td></tr>
+    <tr><td>OSFR-0072</td><td>기본 노출 시나리오 (로그인&gt;진입&gt;노출)</td><td>O</td><td class="guide">SPA/라우팅 노출 (참고. <a href="#d">D-1</a>) · 캠페인 노출 형태 (참고. <a href="#c">C-4</a>)</td></tr>
+    <tr><td>OSFR-0073</td><td>행동 기반 트리거 (체류·스크롤·클릭·이탈 등)</td><td>O</td><td class="guide">이벤트·속성 재매핑 (참고. <a href="#b">B-2~4</a>) · 트리거·이벤트 (참고. <a href="#rfp-add-4">추가-4</a>)</td></tr>
+    <tr><td>OSFR-0074</td><td>커스텀 이벤트 기반 실행 + 속성 분기</td><td>O</td><td class="guide">커스텀 이벤트 재매핑 (참고. <a href="#b">B-2~4</a>) · 트리거·이벤트 (참고. <a href="#rfp-add-4">추가-4</a>)</td></tr>
+    <tr><td>OSFR-0075</td><td>캠페인 노출 유형 (팝업·모달·배너·툴팁·토스트·서베이·추천 등)</td><td>O</td><td class="guide">캠페인 노출 형태 목록 (참고. <a href="#c">C-4</a>) · 노출 유형·템플릿 (참고. <a href="#rfp-add-3">추가-3</a>)</td></tr>
+    <tr><td>OSFR-0076</td><td>레이아웃/템플릿 편집 (마케터, 개발 의존 최소)</td><td>O</td><td class="guide">레이아웃·템플릿 편집 (참고. <a href="#rfp-add-3">추가-3</a>)</td></tr>
+    <tr><td>OSFR-0077</td><td>개인화 콘텐츠 치환 (고객명·요금제·혜택 등 동적)</td><td>O</td><td class="guide">데이터레이어·파라미터 (참고. <a href="#b">B-1</a>) · 개인화 치환·액션 (참고. <a href="#rfp-add-5">추가-5</a>)</td></tr>
+    <tr><td>OSFR-0078</td><td>딥링크·액션 (앱 딥링크·URL·팝업닫기·이벤트 등)</td><td>O</td><td class="guide">개인화 치환·액션 (참고. <a href="#rfp-add-5">추가-5</a>) · 렌더 컴포넌트 (참고. <a href="#c">C-2</a>/<a href="#e">E-5</a>)</td></tr>
+    <tr><td>OSFR-0079</td><td>노출 조건 세분화 (OS·앱버전·유입·구매이력·시간대 등)</td><td>O</td><td class="guide">Audience 조건 (참고. <a href="#gap-6">갭#6 — Audience</a>) · 조건·빈도·우선순위 (참고. <a href="#rfp-add-6">추가-6</a>)</td></tr>
+    <tr><td>OSFR-0080</td><td>빈도 제어 (Frequency Capping)</td><td>O</td><td class="guide">Profile Script 빈도 (참고. <a href="#gap-17">갭#17 — Profile Script</a>) · 조건·빈도·우선순위 (참고. <a href="#rfp-add-6">추가-6</a>)</td></tr>
+    <tr><td>OSFR-0081</td><td>우선순위 및 충돌(동시 노출 방지) 제어</td><td>O</td><td class="guide">우선순위·충돌 제어 (참고. <a href="#rfp-add-6">추가-6</a>)</td></tr>
+    <tr><td>OSFR-0082</td><td>A/B 테스트 지원</td><td>X</td><td class="guide">Target A/B (참고. <a href="#gap-4">갭#4 — A/B</a>)</td></tr>
+    <tr><td>OSFR-0083</td><td>캠페인 일정 관리 (즉시·예약·종료·반복, 상태관리)</td><td>O</td><td class="guide">캠페인 일정 관리 (참고. <a href="#rfp-add-7">추가-7</a>)</td></tr>
+    <tr><td>OSFR-0084</td><td>캠페인 반응 이벤트 수집 (노출·클릭·닫기·전환 등)</td><td>X</td><td class="guide">반응 이벤트 리포팅 (참고. <a href="#rfp-add-1">추가-1</a>) · A4T (참고. <a href="#gap-20">갭#20 — A4T</a>)</td></tr>
+    <tr><td>OSFR-0085</td><td>서베이/응답형 캠페인</td><td>O</td><td class="guide">JSON 렌더 컴포넌트 (참고. <a href="#c">C-2</a>) · 트리거·서베이 (참고. <a href="#rfp-add-4">추가-4</a>)</td></tr>
+    <tr><td>OSFR-0086</td><td>고급 인터랙션형 (스토리·게임·룰렛·카운트다운)</td><td>X</td><td class="guide">고급 인터랙션·커스텀 렌더 (참고. <a href="#rfp-add-8">추가-8</a>)</td></tr>
+    <tr><td>OSFR-0087</td><td>추천/상품 연계 개인화</td><td>X</td><td class="guide">Recommendations 카탈로그·오퍼 (참고. <a href="#gap-5">갭#5 — Recommendations</a>)</td></tr>
+    <tr><td>OSFR-0088</td><td>운영 권한·검수(승인) 프로세스</td><td>X</td><td class="guide">운영 권한·검수 거버넌스 (참고. <a href="#rfp-add-10">추가-10</a>)</td></tr>
+  </table>
+
+  <h3 class="note-h">② 추가 내용 (기존 섹션 미포함 → 공식문서 기반 정리)</h3>
+
+  <div class="qa appq" id="rfp-add-1">
+    <div class="qno">추가-1 · 리포팅 (0058·0066·0067·0084)</div>
+    <h3>채널별 MAU·실적 대시보드·모니터링·반응 이벤트</h3>
+    <ul class="nlist">
+      <li>캠페인 성과/반응(노출·클릭·전환)은 <b>Target 리포팅</b> 또는 <b>A4T(Adobe Analytics)</b>로 측정 → 반응 이벤트를 success metric/eVar로 적재</li>
+      <li><b>채널별 MAU·닷컴/App 인입수</b>는 Target 단독이 아니라 <b>Adobe Analytics · Analysis Workspace</b> 리포팅으로 산출(채널 dimension·세그먼트)</li>
+      <li>전체 현황 모니터링 = Target <b>Activities 목록/QA</b> + Analytics 대시보드 병행</li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/integrate/a4t/a4t" target="_blank">A4T(Analytics for Target)</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/activities/activities" target="_blank">Activities</a> · (참고. <a href="#gap-20">갭#20 — A4T</a>)</div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-2">
+    <div class="qno">추가-2 · 노출 품질/운영 (0060·0064)</div>
+    <h3>노출 리드타임·팝업량·오류 즉시 조치</h3>
+    <ul class="nlist">
+      <li>노출 지연/누락 방지 = <b>flicker 방지(<a href="#d">D-2</a>)</b> + <b>데이터 준비 타이밍(<a href="#b">B-6</a>)</b> 설계 (팝업량 90% 목표는 응답 대기·pre-hiding 튜닝)</li>
+      <li>오류 당일 조치 = Target <b>활동 즉시 활성/비활성·수정</b>이 실시간 반영(재배포 불필요, 웹 기준) + <b>QA/Preview</b>로 사전 검증</li>
+      <li>단, 목표 SLA·장애 대응 R&amp;R은 <b>운영 프로세스</b>로 별도 합의 (제품 기능 아님)</li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/activities/activity-settings" target="_blank">Activity Settings(즉시/예약·활성화)</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/personalization/manage-flicker" target="_blank">Manage flicker</a></div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-3">
+    <div class="qno">추가-3 · 노출 유형·템플릿·편집 (0059·0069·0070·0075·0076)</div>
+    <h3>노출 유형 / 기본·커스텀 템플릿 / 마케터 편집</h3>
+    <ul class="nlist">
+      <li>팝업·모달·배너·툴팁·토스트·서베이 등 형태 = <b>VEC(비주얼 편집)</b> 또는 <b>JSON/HTML Offer</b>로 구성</li>
+      <li class="warn"><b>핵심</b> — "마케터가 개발 없이 편집"은 <b>VEC/폼 기반</b> 전제. 본 프로젝트 <b>헤드리스(JSON)</b>에서는 렌더를 자체 컴포넌트가 하므로, <b>편집 UI·템플릿은 자체 구축</b> 또는 VEC 병행 여부를 결정해야 함</li>
+      <li>기본 템플릿 = Target 기본 오퍼/추천 템플릿, 커스텀 = JSON offer 스키마 + 자체 컴포넌트 (참고. <a href="#c">C-2 — JSON 렌더 컴포넌트</a>)</li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/vec/visual-experience-composer" target="_blank">VEC</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/offers/create-json-offer" target="_blank">JSON Offer</a> · (참고. <a href="#gap-3">갭#3 — 오버레이 자체렌더</a>)</div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-4">
+    <div class="qno">추가-4 · 트리거·이벤트 (0073·0074·0085)</div>
+    <h3>행동 트리거 / 커스텀 이벤트 / 응답 수집</h3>
+    <ul class="nlist">
+      <li>페이지 진입 외 체류·스크롤·클릭·장바구니·이탈 등은 <b>Web/App SDK 이벤트</b>로 수집 → 조건화 (표준 지표 + <b>커스텀 파라미터/이벤트</b>)</li>
+      <li>커스텀 이벤트 속성값으로 <b>세부 분기</b> = <code>profile.*</code>/파라미터 조건</li>
+      <li>서베이 응답도 이벤트로 저장 → 후속 오디언스/분석에 활용</li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/sendevent/overview" target="_blank">Web SDK sendEvent</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Parameters</a> · (참고. <a href="#b">B-2~4 — 이벤트·속성 재매핑</a>)</div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-5">
+    <div class="qno">추가-5 · 개인화 치환·액션 (0077·0078)</div>
+    <h3>동적 콘텐츠 치환 / 딥링크·액션</h3>
+    <ul class="nlist">
+      <li>고객명·요금제·혜택 등 동적 치환 = <b>프로필 파라미터(<code>profile.*</code>)</b> + <b>Response Tokens</b>로 값 주입 후 자체 렌더에서 바인딩</li>
+      <li>딥링크·URL 이동·팝업 닫기·이벤트 적재 등 <b>액션</b>은 JSON offer 값을 받아 <b>자체 컴포넌트</b>에서 구현 (참고. <a href="#c">C-2</a>·<a href="#e">E-5 — 앱 네이티브 렌더</a>)</li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/administer/response-tokens" target="_blank">Response Tokens</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Parameters</a></div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-6">
+    <div class="qno">추가-6 · 조건·빈도·우선순위 (0065·0079·0080·0081)</div>
+    <h3>노출 조건 세분화 / 빈도 제어 / 우선순위·충돌</h3>
+    <ul class="nlist">
+      <li>OS·앱버전·유입·구매이력·시간대 등 조건 조합 = <b>Audiences</b>(프로필/파라미터 규칙)</li>
+      <li>빈도 제어(1일 1회·세션당·재노출 간격) = <b>Profile Script</b>로 노출횟수·최근노출시각 파생 후 audience 조건화</li>
+      <li>우선순위/충돌 = <b>Activity priority</b> — 동일 location·audience에 복수 활동이 걸리면 <b>가장 높은 우선순위</b> 노출(Low/Med/High 또는 <b>0~999</b>). 동시 노출 방지는 audience 상호배제 설계</li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/activities/activity-settings" target="_blank">Activity Settings(Priority 0~999)</a> ·
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Parameters</a> · (참고. <a href="#gap-6">갭#6 — Audience</a> · <a href="#gap-17">갭#17 — Profile Script</a>)</div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-7">
+    <div class="qno">추가-7 · 일정·전환 (0068·0083)</div>
+    <h3>캠페인 일정·상태 관리 / 전환 룰</h3>
+    <ul class="nlist">
+      <li>즉시·예약 실행·종료일·상태(활성/비활성/Archive)는 <b>Activity Settings</b>에서 설정 (반복은 기간 재설정/재활성화)</li>
+      <li>전환(성공기준) 룰 커스터마이징 = 활동의 <b>Goal/Success Metric</b> 정의(전환 mbox·지표)</li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/activities/activity-settings" target="_blank">Activity Settings(일정·목표)</a></div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-8">
+    <div class="qno">추가-8 · AI·고급형·Web Push (0061·0086·0059 일부)</div>
+    <h3>AI 여정 / 인터랙션형 / Web Push</h3>
+    <ul class="nlist">
+      <li>개인화 ML = Target <b>Auto-Target·Automated Personalization(AP)</b> + <b>Recommendations</b>로 커버(1:1 최적화)</li>
+      <li>스토리·게임·룰렛·카운트다운 등 <b>인터랙션 UI</b>는 Target이 "결정"만, <b>UI는 커스텀 렌더</b>로 구현 (참고. <a href="#gap-11">갭#11 — 인앱메시지(불가)</a> 유사)</li>
+      <li><b>Web Push</b> (OSFR-0059) — ① 온사이트 팝업/토스트 → Target 가능 · ② 브라우저 Push API(미접속 OS 알림) → Target 불가(전용 서비스)</li>
+      <li class="warn"><b>크로스채널 여정 최적화</b>(채널 넘나드는 시나리오)는 Target 범위 밖 → <b>이번 구축에서 다루지 않음</b></li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/activities/activities" target="_blank">Activities(Auto-Target/AP)</a> ·
+      (참고. <a href="#gap-11">갭#11 — 인앱메시지(불가)</a> · <a href="#gap-18">갭#18 — Customer AI</a>)</div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-9">
+    <div class="qno">추가-9 · 식별·CMS 연동 (0063·0071)</div>
+    <h3>OA/CMS 선타겟팅 / 식별 고객 연동</h3>
+    <ul class="nlist">
+      <li>식별 = 로그인 <b><code>mbox3rdPartyId</code></b> 전달 + <b>Audiences</b> 매칭 (<a href="#f">F-1</a>)</li>
+      <li>CMS/CRM에서 선정한 <b>선타겟 모수·속성</b>은 <b>Profile Update API(Bulk/Single)</b>로 프로필 주입 후 audience로 노출 제어 (참고. <a href="#gap-19">갭#19 — Profile Update API</a>)</li>
+      <li>세그먼트 생성·저장·재사용 = Target <b>Audiences 라이브러리</b></li>
+    </ul>
+    <div class="cite"><span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/mbox-3rdparty-id" target="_blank">mbox3rdPartyId</a> · (참고. <a href="#f">F-1 — 공통 UID</a> · <a href="#gap-6">갭#6 — Audience</a> · <a href="#gap-19">갭#19 — Profile Update API</a>)</div>
+  </div>
+
+  <div class="qa appq" id="rfp-add-10">
+    <div class="qno">추가-10 · 거버넌스 (0088)</div>
+    <h3>운영 권한·검수(승인) 프로세스</h3>
+    <ul class="nlist">
+      <li>역할별 권한 = <b>Enterprise Permissions</b>(Workspace + 공식 4역할: Observer / Editor / Approver / Publisher)로 작성/검수/게시 분리</li>
+      <li>사전 검수·승인 흐름은 Workspace·역할 권한 + 운영 프로세스(QA/미리보기)로 구성</li>
+    </ul>
+    <div class="cite">
+      <span class="badge b-doc">공식</span>
+      <a href="https://experienceleague.adobe.com/en/docs/target/using/administer/manage-users/enterprise/property-channel" target="_blank">Enterprise Permissions</a></div>
+  </div>
+</div>
+
+<div class="section" id="ref">
+  <span class="section-id cross">REF</span>
+  <h2 class="sec">공식문서 레퍼런스 인덱스</h2>
+  <p class="sec-desc">본 문서에서 인용한 주요 공식문서 모음.</p>
+  <table>
+    <tr><th>주제</th><th>공식문서</th></tr>
+    <tr><td>at.js / 배포(Tags)</td><td><a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/how-atjs-works" target="_blank">How at.js works</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/deploy-at-js/implement-target-using-adobe-launch" target="_blank">Deploy via Tags</a></td></tr>
+    <tr><td>AEP Web SDK</td><td><a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/home" target="_blank">Home</a>, <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/personalization/rendering-personalization-content" target="_blank">Rendering personalization</a>, <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/sendevent/overview" target="_blank">sendEvent</a></td></tr>
+    <tr><td>SPA / triggerView</td><td><a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-trigger-view-atjs-2" target="_blank">triggerView()</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/deploy-at-js/target-atjs-single-page-application" target="_blank">SPA 구현</a></td></tr>
+    <tr><td>Flicker 방지</td><td><a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/personalization/manage-flicker" target="_blank">Web SDK flicker</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/manage-flicker-with-atjs" target="_blank">at.js flicker</a></td></tr>
+    <tr><td>식별자 / 크로스도메인 / 동의</td><td><a href="https://experienceleague.adobe.com/en/docs/experience-platform/identity/features/ecid" target="_blank">ECID</a>, <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/mbox-3rdparty-id" target="_blank">mbox3rdPartyId</a>, <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/identity/overview" target="_blank">Web SDK Identity</a>, <a href="https://experienceleague.adobe.com/en/docs/experience-platform/web-sdk/commands/setconsent" target="_blank">setConsent</a></td></tr>
+    <tr><td>오퍼 / 렌더링</td><td><a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/form-experience-composer" target="_blank">Form-Based Composer</a>, <a href="https://experienceleague.adobe.com/en/docs/target/using/experiences/offers/create-json-offer" target="_blank">JSON Offer</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/atjs/atjs-functions/adobe-target-get-offers-atjs-2" target="_blank">getOffers()</a></td></tr>
+    <tr><td>A/B / Audience</td><td><a href="https://experienceleague.adobe.com/en/docs/target/using/activities/abtest/test-ab" target="_blank">A/B Test</a>, <a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/target-audiences" target="_blank">Audiences</a></td></tr>
+    <tr><td>Recommendations</td><td><a href="https://experienceleague.adobe.com/en/docs/target/using/recommendations/entities/feeds" target="_blank">Catalog Feeds</a>, <a href="https://experienceleague.adobe.com/en/docs/target/using/recommendations/criteria/algorithms" target="_blank">Criteria/Algorithms</a></td></tr>
+    <tr><td>Profile Scripts / Lifetime / Limits</td><td><a href="https://experienceleague.adobe.com/en/docs/target/using/audiences/visitor-profile/profile-parameters" target="_blank">Profile Parameters</a>, <a href="https://experienceleague.adobe.com/en/docs/target/using/administer/manage-profiles/visitor-profile-lifetime" target="_blank">Profile Lifetime</a>, <a href="https://experienceleague.adobe.com/en/docs/target/using/troubleshoot/target-limits" target="_blank">Target Limits</a></td></tr>
+    <tr><td>서버사이드 / Profile Update API</td><td><a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/server-side/target-server-side-overview" target="_blank">Server-side SDK</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/api/profiles-api/update-profiles/bulk-profile-update" target="_blank">Bulk Profile Update</a></td></tr>
+    <tr><td>모바일 Edge / Optimize (M-A)</td><td><a href="https://developer.adobe.com/client-sdks/edge/edge-network/" target="_blank">Edge Network · edge.domain</a>, <a href="https://developer.adobe.com/client-sdks/edge/adobe-journey-optimizer-decisioning/" target="_blank">Offer Decisioning and Target</a>, <a href="https://developer.adobe.com/client-sdks/edge/identity-for-edge-network/" target="_blank">Identity for Edge Network</a>, <a href="https://experienceleague.adobe.com/en/docs/platform-learn/migrate-target-to-mobile-sdk-decisioning/initial-setup" target="_blank">Target→Optimize 초기 설정</a></td></tr>
+    <tr><td>모바일 클래식 Target (M-B)</td><td><a href="https://developer.adobe.com/client-sdks/solution/adobe-target/" target="_blank">Adobe Target · target.server</a>, <a href="https://developer.adobe.com/client-sdks/solution/adobe-target/api-reference/" target="_blank">retrieveLocationContent</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/api/delivery-api/overview" target="_blank">Delivery API</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/mobile-apps/target-mobile-preview" target="_blank">Mobile Preview</a></td></tr>
+    <tr><td>1st-party / CNAME / 간판</td><td><a href="https://experienceleague.adobe.com/en/docs/core-services/interface/data-collection/adobe-managed-cert" target="_blank">Adobe-Managed Certificate</a>, <a href="https://experienceleague.adobe.com/en/docs/experience-platform/collection/js/commands/configure/edgedomain" target="_blank">edgeDomain</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/implementation/implement-cname-support-in-target" target="_blank">CNAME in Target</a>, <a href="https://experienceleague.adobe.com/en/docs/target-dev/developer/client-side/at-js-implementation/functions-overview/targetglobalsettings" target="_blank">targetGlobalSettings</a></td></tr>
+    <tr><td>Tags embed / Build</td><td><a href="https://experienceleague.adobe.com/en/docs/platform-learn/implement-in-websites/configure-tags/add-embed-code" target="_blank">Add the embed code</a>, <a href="https://experienceleague.adobe.com/en/docs/experience-platform/tags/client-side/asynchronous-deployment" target="_blank">Asynchronous deployment</a>, <a href="https://experienceleague.adobe.com/en/docs/experience-platform/tags/extensions/client/core/overview" target="_blank">Core extension</a>, <a href="#appendix-tags">부록 Tags 알고리즘</a></td></tr>
+    <tr><td>AI 예측 / 리포팅</td><td><a href="https://experienceleague.adobe.com/en/docs/experience-platform/intelligent-services/customer-ai/overview" target="_blank">AEP Customer AI</a>, <a href="https://experienceleague.adobe.com/en/docs/target/using/integrate/a4t/a4t" target="_blank">A4T</a></td></tr>
+  </table>
+</div>
+
+<!-- ===== 체크리스트 원문 ===== -->
+<div class="section" id="checklist">
+  <span class="section-id">체크리스트</span>
+  <h2 class="sec">체크리스트 원문 — 문항 + 후속질문 리스트</h2>
+  <p class="sec-desc">A~F 문항과 후속질문 모음. <b>문항 ID</b>를 누르면 해당 배경지식 섹션으로 이동합니다. (배경 카드의 <span class="qlink" style="margin:0">체크리스트 ↗</span> 링크를 누르면 이 표의 해당 행이 강조됩니다.)</p>
+  <table>
+    <colgroup>
+      <col class="c-qid"><col class="c-ch2"><col class="c-q"><col class="c-fu">
+    </colgroup>
+    <tr><th>문항</th><th>채널</th><th>주요 질문</th><th>후속질문</th></tr>
+    <tr id="cl-a1"><td class="cid"><a href="#a">A-1</a></td><td>웹</td><td>인사이더 공통 스크립트(ins.js) 삽입 위치·방식 (HTML head 직접 / 태그 매니저)</td><td class="ch-fu"><span class="badge b-no">필요없음</span> 컨테이너 접근 권한 (Tags 신규 전제)</td></tr>
+    <tr id="cl-a2"><td class="cid"><a href="#a">A-2~5</a></td><td>공통</td><td>소스 열람 · 연동 정의서 · 적용 범위 · 인수인계 확보</td><td class="ch-fu">자료가 어려우면 연동부 코드 발췌 / 개발자 인터뷰 / 역분석이 가능한가?</td></tr>
+    <tr id="cl-b1"><td class="cid"><a href="#b">B-1</a></td><td>웹</td><td>InsiderQueue 초기화·push 구조 → 타겟 파라미터/XDM 재설계</td><td class="ch-fu">페이지 유형별 push 데이터 목록/샘플을 받을 수 있는가?</td></tr>
+    <tr id="cl-b2"><td class="cid"><a href="#b">B-2~4</a></td><td>공통</td><td>커스텀 이벤트/함수 · 사용자 식별/속성 · 이커머스 객체</td><td class="ch-fu">이벤트 트리거 시점·파라미터 명세 / 속성 키·타입 / 상품 카탈로그(피드)·필드 정의를 받을 수 있는가?</td></tr>
+    <tr id="cl-b5"><td class="cid"><a href="#b">B-5</a></td><td>앱</td><td>RNInsider / 네이티브 이벤트 메서드(itemPurchased, visitProductDetailPage 등)</td><td class="ch-fu">앱 이벤트 호출 위치(화면/액션) 목록을 받을 수 있는가?</td></tr>
+    <tr id="cl-b6"><td class="cid"><a href="#b">B-6</a></td><td>웹</td><td>타겟 실행 시점에 개인화 데이터가 준비돼 있는가 (비동기 완료 이벤트/콜백)</td><td class="ch-fu">비동기라면 데이터 준비 후 타겟 호출을 지연시킬 훅이 있는가?</td></tr>
+    <tr id="cl-c1"><td class="cid"><a href="#c">C-1</a></td><td>공통</td><td>자동 렌더링(인사이더) vs 자체 렌더링</td><td class="ch-fu">자동 렌더 위주면 타겟 전환 시 렌더링 로직 신규 개발이 필요.</td></tr>
+    <tr id="cl-c2"><td class="cid"><a href="#c">C-2</a></td><td>공통</td><td>JSON 수신 → 렌더할 레이아웃 컴포넌트 준비도</td><td class="ch-fu">신규 개발 필요면 디자인/퍼블리싱 산출물 제공 주체는 누구인가?</td></tr>
+    <tr id="cl-c3"><td class="cid"><a href="#c">C-3</a></td><td>웹</td><td>DOM 셀렉터 안정성 &amp; 자체 앵커(mbox-loc) 대체</td><td class="ch-fu">셀렉터가 불안정하면 자체 앵커 생성 방식으로 대체 가능한가?</td></tr>
+    <tr id="cl-c4"><td class="cid"><a href="#c">C-4</a></td><td>공통</td><td>기존 캠페인 노출 위치·형태 목록(전면팝업/인라인/스티키바/추천슬롯/인앱)</td><td class="ch-fu">형태별로 타겟 재현 가능/불가를 사전 분류.</td></tr>
+    <tr id="cl-d1"><td class="cid"><a href="#d">D-1</a></td><td>웹</td><td>SPA 여부 &amp; 라우팅 — triggerView()</td><td class="ch-fu">SPA면 라우팅 전환 이벤트 훅을 제공/추가할 수 있는가?</td></tr>
+    <tr id="cl-d2"><td class="cid"><a href="#d">D-2</a></td><td>웹</td><td>Flicker(FOOC) 방지 — pre-hiding snippet을 head 최상단에 삽입 가능?</td><td class="ch-fu">삽입 제약이 있으면 비동기 로딩 시 타임아웃 정책을 협의.</td></tr>
+    <tr id="cl-d3"><td class="cid"><a href="#d">D-3</a></td><td>웹</td><td>도메인 구성(단일/멀티/서브도메인) &amp; 쿠키·크로스도메인 식별 요건</td><td class="ch-fu">멀티 도메인이면 크로스도메인 ID 공유 설정이 필요한가?</td></tr>
+    <tr id="cl-d4"><td class="cid"><a href="#d">D-4</a></td><td>웹</td><td>쿠키 동의 배너(CMP) — 동의 전 스크립트 미발화 여부 &amp; 사용 도구</td><td class="ch-fu">CMP 연동이면 동의 이후 타겟 로드 순서를 설계.</td></tr>
+    <tr id="cl-e1"><td class="cid"><a href="#e">E-1~2</a></td><td>앱</td><td>앱 개발 방식 &amp; 최소 OS / 배포 파이프라인</td><td class="ch-fu">RN/Expo면 패키지·autolink 확인 / 스토어 심사 주기가 길면 SDK 반영 시점을 조율.</td></tr>
+    <tr id="cl-e3"><td class="cid"><a href="#e">E-3</a></td><td>앱</td><td>인사이더 앱 SDK 초기화(init)·콜백(callback) 구조</td><td class="ch-fu">콜백 기반 로직이 많으면 타겟 대응 매핑 설계가 필요.</td></tr>
+    <tr id="cl-e4"><td class="cid"><a href="#e">E-4</a></td><td>앱</td><td>앱 인앱 메시지(배너/팝업/스크래치/룰렛 등) — 타겟 SDK 범위 밖</td><td class="ch-fu">사용 중이면 이번 구축 범위 제외로 확정.</td></tr>
+    <tr id="cl-e5"><td class="cid"><a href="#e">E-5</a></td><td>앱</td><td>오퍼 JSON 수신 후 렌더할 네이티브/RN 컴포넌트 준비도</td><td class="ch-fu">미준비면 컴포넌트 신규 개발 범위/주체를 확정.</td></tr>
+    <tr id="cl-f1"><td class="cid"><a href="#f">F-1</a></td><td>공통</td><td>웹·앱 공통 키(로그인 UID) 전달 — mbox3rdPartyId 매핑 &amp; 크로스디바이스</td><td class="ch-fu">공통 키가 없으면 통합 키 신규 정의·주입이 필요 / 익명 시에도 전달되는가?</td></tr>
+    <tr id="cl-f2"><td class="cid"><a href="#f">F-2</a></td><td>공통</td><td>데이터레이어 재사용 + 변환 어댑터 방식 가능성 (UID·상품·장바구니 전체)</td><td class="ch-fu">재사용 가능하면 어댑터 설계 / 불가하면 페이지·화면별 신규 계측이 필요.</td></tr>
+  </table>
+</div>
+
+</div>
+</body>
+</html>

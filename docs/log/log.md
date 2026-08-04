@@ -2,6 +2,7 @@
 
 ## Log Index
 
+33. 2026-08-04 고객사 타겟 구축 가이드 작성 (docs/sub)
 32. 2026-08-03 git history filter-repo 실값 제거 후 force-push
 31. 2026-08-03 app/.env·config.dev.json 채움 위치 주석 보강
 30. 2026-08-03 gitignore 로컬 실값 파일 복구 (.env / config.dev.json)
@@ -36,6 +37,21 @@
 1. 2026-07-22 AEP SDK Target 테스트 시스템 그린필드 구축
 
 ## Log Body
+
+33. 2026-08-04 고객사 타겟 구축 가이드 작성 (docs/sub)
+
+Purpose: 고객사 개발자용 Adobe Target(디지털 IB 태깅) 웹/앱 기반 작업 목록·단계별 출처·JSON 헤드리스 렌더 가이드 제공
+
+Changes:
+
+- S0~S8 기반 작업 목록 + 공식문서 출처
+- 흐름도·Fetch/렌더 알고리즘 + 본 레포 샘플 코드 경로
+- 구현 시 반복 이슈(클래식 Target 혼용, Publish, ECID, 이중 JSON 등) 정리
+
+Changed files:
+
+- docs/sub/고객사 타겟 구축 가이드.md
+- docs/log/log.md
 
 32. 2026-08-03 git history filter-repo 실값 제거 후 force-push
 
